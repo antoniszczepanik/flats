@@ -1,7 +1,6 @@
 import scrapy
 import pickle
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from morizon_spider.items import MorizonSpiderItem
 
 class MorizonSpider(scrapy.Spider):

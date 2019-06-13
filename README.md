@@ -1,8 +1,5 @@
-# Scraping-Spiders
+# AVM v2
 
-This repo contains webcrawslers written in scrapy. 
+This is a project which aims to build possibly best property valuation models based on webscraped data.
 
-FTP details - https://github.com/andresoviedo/google-drive-ftp-adapter
-'java -jar google-drive-ftp-adapter-jar-with-dependencies.jar' (~/Public/google-drive-ftp-adapter/build)
-'scrapy crawl morizon -o ftp://user:user@localhost:1821/Scraping_data/morizon_data.csv' (~/Repos/Scraping-Spiders/morizon_spider)
 

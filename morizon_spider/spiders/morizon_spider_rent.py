@@ -28,7 +28,7 @@ class MorizonSpiderRent(MorizonSpider):
         # Allow user defined date_range argument
         super(MorizonSpider, self).__init__(**kwargs)
         self.date_range = date_range
-        self.set_previous_date('2018-01-01', previous_scraping_date_path='morizon_spider/previous_scraping_date_rent.pkl')
+        self.set_previous_date('2019-06-13', previous_scraping_date_path='morizon_spider/previous_scraping_date_rent.pkl')
         if self.date_range == None: 
             # Check if previous scraping date is available, save current date if possible
             self.date_range = self.read_and_update_previous_scraping_date(previous_scraping_date_path='morizon_spider/previous_scraping_date_rent.pkl')

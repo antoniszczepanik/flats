@@ -40,7 +40,7 @@ class MorizonSpider(scrapy.Spider):
         # Allow user defined date_range argument
         super(MorizonSpider, self).__init__(**kwargs)
         #Warning! Use only for testing purposes!
-        #self.set_previous_date('2019-06-03')
+        #self.set_previous_date('2019-06-11')
         self.date_range = date_range
         if self.date_range == None: 
             # Check if previous scraping date is available, save current date if possible

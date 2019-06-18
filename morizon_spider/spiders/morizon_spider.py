@@ -1,7 +1,6 @@
 import scrapy
 import pickle
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from morizon_spider.items import MorizonSpiderItem
 
 class MorizonSpider(scrapy.Spider):
@@ -41,11 +40,12 @@ class MorizonSpider(scrapy.Spider):
         # Allow user defined date_range argument
         super(MorizonSpider, self).__init__(**kwargs)
         #Warning! Use only for testing purposes!
-        #self.set_previous_date('2019-06-03')
+        #self.set_previous_date('2019-06-11')
         self.date_range = date_range
         if self.date_range == None: 
             # Check if previous scraping date is available, save current date if possible
             self.date_range = self.read_and_update_previous_scraping_date()
+
         # Morizon won't display all offers if following pagination - the max n of pages is 200
         # I will introduce chunker variable and chunk all requested offers by price chunks
         # ex. first flats with prices 0-500, then 500-1000 etc 
@@ -209,8 +209,12 @@ class MorizonSpider(scrapy.Spider):
         else:
             direct = 0
 
+        #Description
+        desc = " ".join(response.xpath("//div[@class='description']//text()").getall())
         #Description len
-        desc_len = len(" ".join(response.xpath("//div[@class='description']//text()").getall()))
+        desc_len = len(desc)
+
+        image_link = response.xpath("//img[@id='imageBig']/@src").get()
 
         #Offer stats
         stats = " ".join(response.xpath("//div[@class='propertyStat']/p/text()").getall())
@@ -220,9 +224,11 @@ class MorizonSpider(scrapy.Spider):
         full_info["lon"] = lon
         full_info["url"] = response.request.url
         full_info["direct"] = direct
+        full_info["desc"] = desc
         full_info["desc_len"] = desc_len
         full_info["view_count"] = stats[0]
         full_info["promotion_counter"] = stats[1]
+        full_info["image_link"] = image_link
 
         yield full_info
 
@@ -267,9 +273,9 @@ class MorizonSpider(scrapy.Spider):
             pickle.dump(yesterday, date_handle)
             self.logger.info(f'Saved yesterday date as previous: {yesterday}')
         # Check if already scraped all offers from previous date    
-        if previous_date != None:
-            if previous_date == yesterday:
-                raise scrapy.exceptions.CloseSpider("Already scraped all offers from previous date!")
+        #if previous_date != None:
+            #if previous_date == yesterday:
+                #self.crawler.engine.close_spider(self, reason='Already scraped all offers from previous date!')
         return str(previous_date)[:10]
 
     def set_previous_date(self, date, previous_scraping_date_path='morizon_spider/previous_scraping_date.pkl'):

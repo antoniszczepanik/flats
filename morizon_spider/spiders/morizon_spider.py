@@ -209,8 +209,12 @@ class MorizonSpider(scrapy.Spider):
         else:
             direct = 0
 
+        #Description
+        desc = " ".join(response.xpath("//div[@class='description']//text()").getall())
         #Description len
-        desc_len = len(" ".join(response.xpath("//div[@class='description']//text()").getall()))
+        desc_len = len(desc)
+
+        image_link = response.xpath("//img[@id='imageBig']/@src").get()
 
         #Offer stats
         stats = " ".join(response.xpath("//div[@class='propertyStat']/p/text()").getall())
@@ -220,9 +224,11 @@ class MorizonSpider(scrapy.Spider):
         full_info["lon"] = lon
         full_info["url"] = response.request.url
         full_info["direct"] = direct
+        full_info["desc"] = desc
         full_info["desc_len"] = desc_len
         full_info["view_count"] = stats[0]
         full_info["promotion_counter"] = stats[1]
+        full_info["image_link"] = image_link
 
         yield full_info
 

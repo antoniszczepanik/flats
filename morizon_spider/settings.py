@@ -1,3 +1,4 @@
+from credentials import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 # -*- coding: utf-8 -*-
 
 # Scrapy settings for morizon_spider project
@@ -22,6 +23,9 @@ LOG_LEVEL= 'INFO'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False 
+# AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

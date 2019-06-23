@@ -1,31 +1,30 @@
 from credentials import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+
 # -*- coding: utf-8 -*-
-
 # Scrapy settings for morizon_spider project
-#
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     https://doc.scrapy.org/en/latest/topics/settings.html
-#     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
 BOT_NAME = 'morizon_spider'
-
 SPIDER_MODULES = ['morizon_spider.spiders']
 NEWSPIDER_MODULE = 'morizon_spider.spiders'
 LOG_LEVEL= 'INFO'
-#CLOSESPIDER_PAGECOUNT = 10 
-#DOWNLOADER_CLIENT_TLS_METHOD = 'TLSv1.2'
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'morizon_spider (+http://www.yourdomain.com)'
-
-# Obey robots.txt rules
-ROBOTSTXT_OBEY = False 
+# AWS S3 export settings
+# remember to add botocore to requirements.txt
+# FEED_URI = 's3://mybucket/scraping/feeds/%(name)s/%(time)s.json'
+# FEED_FORMAT = 'csv'
 # AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
 # AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
 
+# Obey robots.txt rules
+ROBOTSTXT_OBEY = False 
+
+# Configure item pipelines
+# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+ITEM_PIPELINES = {
+	'morizon_spider.pipelines.MorizonSpiderPipeline': 300,
+}
+
+# Debugging
+#CLOSESPIDER_PAGECOUNT = 10 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -68,11 +67,6 @@ ROBOTSTXT_OBEY = False
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
 
-# Configure item pipelines
-# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-	'morizon_spider.pipelines.MorizonSpiderPipeline': 300,
-}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html

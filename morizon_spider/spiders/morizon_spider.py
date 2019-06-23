@@ -1,50 +1,17 @@
 import scrapy
-import pickle
 from datetime import datetime, timedelta
 from morizon_spider.items import MorizonSpiderItem
+from morizon_spider.date_utils import read_last_scraping_date
+from morizon_spider.date_utils import update_last_scraping_date 
 
 class MorizonSpider(scrapy.Spider):
 
-    """Base for morizon spiders
-    To use go to top spider directory and use command:
-    'scrapy crawl -o csv_name.csv -a date_range='yesterday''
+    name = "morizon_sale"
 
-    'date_range' argument is optional and allows specifying:
-    -range of dates (e.g. '2001-05-05,2015-05-12' - dates in 'YYYY-MM-DD' format separetad by a comma)
-    -date from which start scraping (e.g. '2015-04-12') - spider will crawl from specified date untill yesterday
-    -'yesterday' - shortcut to scrape only previous day
-    When date_range is not specified spider will try to read the datetime from previous_scraping_date.pkl
-    If previous date is not available it will scrape whole page info.
+    def __init__(self):
 
-    """
-    name = "morizon"
-
-    def __init__(self, date_range=None, **kwargs):
-
-        # Date conversion helper dictionary
-        MONTHS_DICT = {
-        'stycznia': '1',
-        'lutego': '2',
-        'marca': '3',
-        'kwietnia': '4', 
-        'maja': '5',
-        'czerwca': '6',
-        'lipca': '7',
-        'sierpnia': '8',
-        'września': '9',
-        'października': '10',
-        'listopada': '11',
-        'grudnia': '12'
-        }
-
-        # Allow user defined date_range argument
-        super(MorizonSpider, self).__init__(**kwargs)
-        #Warning! Use only for testing purposes!
-        #self.set_previous_date('2019-06-11')
-        self.date_range = date_range
-        if self.date_range == None: 
-            # Check if previous scraping date is available, save current date if possible
-            self.date_range = self.read_and_update_previous_scraping_date()
+        self.previous_date = read_last_scraping_date(crawler_name=self.name)
+        update_last_scraping_date(crawler_name=self.name)
 
         # Morizon won't display all offers if following pagination - the max n of pages is 200
         # I will introduce chunker variable and chunk all requested offers by price chunks
@@ -53,28 +20,17 @@ class MorizonSpider(scrapy.Spider):
         self.chunker = 0
         self.max_price = 5000000
         
-        # Handling optional date_range argument
         self.today_str = datetime.now().date().strftime('%d-%m-%Y')
+        self.today = datetime.now().date()
         self.yesterday_str = (datetime.now().date() - timedelta(days=1)).strftime('%d-%m-%Y')
-        if self.date_range is not None: 
-            self.logger.info(f'Found date range_argument: {self.date_range}') 
-            if len(self.date_range.split(',')) == 2:
-                self.date_range = self.date_range.split(',')
-                self.start_date = datetime.strptime(self.date_range[0], '%Y-%m-%d')
-                self.end_date = datetime.strptime(self.date_range[1], '%Y-%m-%d')
-            elif self.date_range == 'yesterday':
-                self.start_date = datetime.strptime(self.yesterday_str, '%d-%m-%Y')
-                self.end_date = datetime.strptime(self.yesterday_str, '%d-%m-%Y')
-            else:
-                self.start_date = datetime.strptime(self.date_range, '%Y-%m-%d')
-                self.end_date  = datetime.strptime(self.yesterday_str, '%d-%m-%Y')
-        else:
-            self.start_date = datetime.strptime('2000-01-01', '%Y-%m-%d')
-            self.end_date = datetime.strptime(self.yesterday_str, '%d-%m-%Y')
-            self.logger.info('Did not find date_range argument. Will scrape all offers.') 
+        self.yesterday = datetime.now().date() - timedelta(days=1)
+        self.start_date = self.previous_date
+        self.logger.info(f'Setting start_date to {self.start_date}...')
+        self.end_date = self.yesterday
+        self.logger.info(f'Setting end_date to {self.end_date}...')
 
         # Optimize scraped space by using date filter arg
-        date_diff = (datetime.strptime(self.yesterday_str, '%d-%m-%Y') - self.start_date).days 
+        date_diff = (self.yesterday - self.start_date).days 
         possible_date_selections = [3, 7, 30, 90, 180]
         date_filter = None
         for date_selection in possible_date_selections:
@@ -87,8 +43,6 @@ class MorizonSpider(scrapy.Spider):
             self.date_filter_str = f"&ps%5Bdate_filter%5D={date_filter}"
         else:
             self.date_filter_str = ''
-        self.logger.info(f'Setting start_date to {self.start_date}...')
-        self.logger.info(f'Setting end_date to {self.end_date}...')
         self.logger.info(f'Date diff = {date_diff} days')
         self.logger.info(f'Setting date_filter string to "{self.date_filter_str}"')
         self.url_base = "https://www.morizon.pl/mieszkania"
@@ -108,7 +62,7 @@ class MorizonSpider(scrapy.Spider):
 
         # Iterate over links and dates - parse only in predefined date_range
         for link, date in zip(links_to_scrape, links_to_scrape_dates):
-            date_datetime = datetime.strptime(date, '%d-%m-%Y')
+            date_datetime = datetime.strptime(date, '%d-%m-%Y').date()
             if date_datetime >= self.start_date and date_datetime <= self.end_date:
                 yield scrapy.Request(link, callback=self.parse_offer, errback=self.errback_httpbin)
 
@@ -238,6 +192,20 @@ class MorizonSpider(scrapy.Spider):
     
     def polish_to_datetime(self, date):
         # change polish date format to datetime
+        MONTHS_DICT = {
+        'stycznia': '1',
+        'lutego': '2',
+        'marca': '3',
+        'kwietnia': '4', 
+        'maja': '5',
+        'czerwca': '6',
+        'lipca': '7',
+        'sierpnia': '8',
+        'września': '9',
+        'października': '10',
+        'listopada': '11',
+        'grudnia': '12'
+    }
         date = date.replace("<strong>", "").replace("</strong>", "")
         if date == 'dzisiaj':
             date = date.replace('dzisiaj', self.today_str)
@@ -255,34 +223,9 @@ class MorizonSpider(scrapy.Spider):
 
             date = '-'.join(date_elements)
 
-        date = datetime.strptime(date, '%d-%m-%Y')
+        date = datetime.strptime(date, '%d-%m-%Y').date()
         return date
 
-    def read_and_update_previous_scraping_date(self, previous_scraping_date_path='morizon_spider/previous_scraping_date.pkl'):
-        try:
-            self.logger.info('Trying to read previous scraping date ...')
-            with open(previous_scraping_date_path, 'rb') as date_handle:
-                previous_date = pickle.load(date_handle)
-                self.logger.info(f'Succesfuly found previous scraping date: {previous_date}')
-        except FileNotFoundError:
-            self.logger.info('Did not find previous scraping date')
-            previous_date = None
-
-        with open(previous_scraping_date_path, 'wb') as date_handle:
-            yesterday =(datetime.now().date() - timedelta(days=1)) 
-            pickle.dump(yesterday, date_handle)
-            self.logger.info(f'Saved yesterday date as previous: {yesterday}')
-        # Check if already scraped all offers from previous date    
-        #if previous_date != None:
-            #if previous_date == yesterday:
-                #self.crawler.engine.close_spider(self, reason='Already scraped all offers from previous date!')
-        return str(previous_date)[:10]
-
-    def set_previous_date(self, date, previous_scraping_date_path='morizon_spider/previous_scraping_date.pkl'):
-        with open(previous_scraping_date_path, 'wb') as date_handle:
-            date = datetime.strptime(date, '%Y-%m-%d') 
-            pickle.dump(date, date_handle)
-            self.logger.info(f'Saved custom date as previous: {date}')
            
 
 

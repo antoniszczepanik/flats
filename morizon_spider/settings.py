@@ -24,7 +24,7 @@ ITEM_PIPELINES = {
 }
 
 # Debugging
-#CLOSESPIDER_PAGECOUNT = 10 
+CLOSESPIDER_PAGECOUNT = 10 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

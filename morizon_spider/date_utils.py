@@ -1,61 +1,52 @@
+from os.path import exists
+import  logging
 import pickle
 from datetime import datetime, timedelta
 
+logger = logging.getLogger(__name__)
 
-def read_previous_scraping_date(path='morizon_spider/previous_scraping_date.pkl', crawler_name='morizon_spider'):
-	""" Try to read previous scraping date saved locally in
-	previous_scraping_date.pkl. If the file is not found
-	set the date to None. The assumed file structure is a 
-	dictionary with crawler_names and ascending list of 
-	previous scraping dates. This functions reads the last
-	(most up-to_date) datetime.
-	{
-	'morizon_spider=['01-01-2018'],
-	'morizon_spider_rent'=['01-01-2018'],
-	}
-	Returns datetime 
-	"""
-        try:
-            self.logger.info('Trying to read previous scraping date ...')
-            with open(path, 'rb') as previous_dates:
-                previous_date = pickle.load(previous_dates)[crawler_name][-1]
-                self.logger.info(f'Succesfuly found previous scraping date for {crawler_name}: {previous_date}')
-        except Exception as e:
-            self.logger.info(f'Problem occured when reading previous date: {e}. Creating prebious scraping date entry')
-	    create_previous_scraping_date_for_crawler
-	    read_previous_scraping_date
-        return previous_date
+def read_last_scraping_date(
+    path='previous_scraping_dates.pkl',
+    crawler_name='morizon_spider',
+    previous_date_if_none=datetime.strptime('2018-01-01', '%Y-%m-%d').date()
+    ):
 
-def add_date_to_previous_scraping_dates(
-	path='previous_scraping_dates.pkl',
-	crawler_name='morizon_spider',
-	# Yesterdays date as default
-	date=datetime.now().date()-timedelta(days=1)
-)
-	try:
-    	    with open(path, 'wb') as previous_dates:
-       	    	previous_dates_dict = pickle.load(previous_dates)
-		previous_dates_dict[crawler_name].append(date)
-		pickle.dump(previous_dates_dict, previous_dates)
-            	self.logger.info(f'Saved date as previous: {date}')
-	except Exception as e:
-            self.logger.info(f'Problem occured when updating previous date: {e}')
+    if exists(path):
+        logger.info('Previous scraping date found:')
+        scraping_history_dict = load_obj(path)
+    else:
+        logger.info('Previous scraping date not found. Created:')
+        scraping_history_dict = {crawler_name: [previous_date_if_none]}
+        save_obj(scraping_history_dict, path)
+        scraping_history_dict = load_obj(path)
+    if crawler_name in scraping_history_dict:
+        date =  scraping_history_dict[crawler_name][-1]   
+    else:
+        scraping_history_dict[crawler_name] = [previous_date_if_none]
+        logger.info(f'Did not find {crawler_name} previous scraping date.')
+        save_obj(scraping_history_dict, path)
+        logger.info(f'Added {crawler_name} to previous scraping date file.')
+        date = previous_date_if_none
+    logger.info(date)
+    return date 
 
-def create_previous_scraping_date_for_crawler(
-	path = 'previous_scraping_dates.pkl',
-	crawler_name = 'morizon_spider',
-	date = datetime.strptime('2018-01-01', '%Y-%m-%d')
-)
-	try:
-    	    with open(path, 'wb') as previous_dates:
-		try:
-       	    	    previous_dates_dict = pickle.load(previous_dates)
-		except FileNotFoundError:
-            	    self.logger.info(f'Did not find {path}. Creating new...')
-		    previous_dates_dict = {}    
-    		previous_dates_dict[crawler_name] = [date]
-		pickle.dump(previous_dates_dict, previous_dates)
-            	self.logger.info(f'Saved {crawler_name} previous date: {date}')
-	except Exception as e:
-		self.logger.info(f'Error occured wher creating previous date file: {e}')	
-		raise e
+def update_last_scraping_date(path='previous_scraping_dates.pkl',
+    crawler_name='morizon_spider',
+    # Yesterdays date as default 
+    date=datetime.now().date()-timedelta(days=1)
+    ):
+    
+    scraping_history_dict = load_obj(path)
+    logger.info(f'Loaded previous scraping date from {path}')
+    scraping_history_dict[crawler_name].append(date)
+    logger.info(f'Added {date} as previous scraping date')
+    save_obj(scraping_history_dict, path)
+    logger.info(f'Updated {path}')
+
+def save_obj(obj, name ):
+    with open(name, 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+def load_obj(name ):
+    with open(name, 'rb') as f:
+        return pickle.load(f)

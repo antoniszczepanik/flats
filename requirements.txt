@@ -1,4 +1,8 @@
-asn1crypto==0.24.0
+sn1crypto==0.24.0
+botocore==1.12.174
+docutils==0.14
+jmespath==0.9.4
+urllib3==1.25.3
 attrs==19.1.0
 Automat==0.7.0
 backcall==0.1.0

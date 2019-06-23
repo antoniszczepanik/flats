@@ -8,11 +8,10 @@ NEWSPIDER_MODULE = 'morizon_spider.spiders'
 LOG_LEVEL= 'INFO'
 
 # AWS S3 export settings
-# remember to add botocore to requirements.txt
-# FEED_URI = 's3://mybucket/scraping/feeds/%(name)s/%(time)s.json'
-# FEED_FORMAT = 'csv'
-# AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
-# AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+FEED_URI = 's3://morizon-data/%(name)s/%(time)s.csv'
+FEED_FORMAT = 'csv'
+AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False 
@@ -24,7 +23,7 @@ ITEM_PIPELINES = {
 }
 
 # Debugging
-CLOSESPIDER_PAGECOUNT = 10 
+CLOSESPIDER_PAGECOUNT = 100 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

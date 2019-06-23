@@ -22,7 +22,7 @@ class MorizonSpider(scrapy.Spider):
     def __init__(self, date_range=None, **kwargs):
 
         # Date conversion helper dictionary
-        self.months_dict = {
+        MONTHS_DICT = {
         'stycznia': '1',
         'lutego': '2',
         'marca': '3',
@@ -244,7 +244,7 @@ class MorizonSpider(scrapy.Spider):
         elif date == 'wczoraj':
             date = date.replace('wczoraj', self.yesterday_str)
         else:
-            for pol, num in self.months_dict.items():
+            for pol, num in MONTHS_DICT.items():
                 date = date.replace(pol, num)
             # Add trailing zeros -,-
             date_elements = date.split()

@@ -1,4 +1,4 @@
-from credentials import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from morizon_spider.credentials import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 # -*- coding: utf-8 -*-
 # Scrapy settings for morizon_spider project

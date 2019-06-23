@@ -1,5 +1,2 @@
-*.pyc
-*.pyo
-morizon_spider/__pycache__/
-morizon_spider/spiders/__pycache__/
+.gdrive
 credentials.py

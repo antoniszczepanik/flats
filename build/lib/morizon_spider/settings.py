@@ -20,7 +20,6 @@ ROBOTSTXT_OBEY = False
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
 	'morizon_spider.pipelines.MorizonSpiderPipeline': 300,
-#        'scrapy.pipelines.files.S3FilesUpload': 600
 }
 
 # Debugging

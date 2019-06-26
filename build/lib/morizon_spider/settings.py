@@ -8,8 +8,10 @@ NEWSPIDER_MODULE = 'morizon_spider.spiders'
 LOG_LEVEL= 'INFO'
 
 # AWS S3 export settings
-FEED_URI = f's3://{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}@morizon-data/%(name)s/%(time)s.csv'
+FEED_URI = 's3://morizon-data/%(name)s/%(time)s.csv'
 FEED_FORMAT = 'csv'
+AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False 
@@ -18,11 +20,10 @@ ROBOTSTXT_OBEY = False
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
 	'morizon_spider.pipelines.MorizonSpiderPipeline': 300,
-#        'scrapy.pipelines.files.S3FilesUpload': 600
 }
 
 # Debugging
-# CLOSESPIDER_PAGECOUNT = 100 
+CLOSESPIDER_PAGECOUNT = 100 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

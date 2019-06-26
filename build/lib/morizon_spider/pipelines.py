@@ -6,6 +6,7 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from datetime import datetime, timedelta
 
+
 class MorizonSpiderPipeline(object):
 
         months_dict = {

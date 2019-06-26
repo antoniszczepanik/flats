@@ -9,9 +9,8 @@ LOG_LEVEL= 'INFO'
 
 # AWS S3 export settings
 FEED_URI = 's3://morizon-data/%(name)s/%(time)s.csv'
+FEED_URI = f's3://{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}@morizon-data/%(name)s/%(time)s.csv'
 FEED_FORMAT = 'csv'
-AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False 

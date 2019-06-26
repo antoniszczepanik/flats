@@ -9,7 +9,7 @@ class MorizonSpider(scrapy.Spider):
     name = "morizon_sale"
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
+
         self.previous_date = read_last_scraping_date(crawler_name=self.name)
         update_last_scraping_date(crawler_name=self.name)
 

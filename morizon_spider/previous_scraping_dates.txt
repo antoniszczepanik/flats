@@ -1,0 +1,2 @@
+morizon_sale:01-01-2018,03-03-2019
+morizon_rent:01-01-2018

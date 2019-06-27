@@ -2,7 +2,7 @@ import scrapy
 from datetime import datetime, timedelta
 from morizon_spider.items import MorizonSpiderItem
 from morizon_spider.date_utils import read_last_scraping_date
-from morizon_spider.date_utils import update_last_scraping_date 
+from morizon_spider.date_utils import update_last_scraping_date
 
 class MorizonSpider(scrapy.Spider):
 
@@ -15,11 +15,10 @@ class MorizonSpider(scrapy.Spider):
 
         # Morizon won't display all offers if following pagination - the max n of pages is 200
         # I will introduce chunker variable and chunk all requested offers by price chunks
-        # ex. first flats with prices 0-500, then 500-1000 etc 
+        # ex. first flats with prices 0-500, then 500-1000 etc
         self.chunk_size = 20000
         self.chunker = 0
         self.max_price = 5000000
-        
         self.today_str = datetime.now().date().strftime('%d-%m-%Y')
         self.today = datetime.now().date()
         self.yesterday_str = (datetime.now().date() - timedelta(days=1)).strftime('%d-%m-%Y')
@@ -30,7 +29,7 @@ class MorizonSpider(scrapy.Spider):
         self.logger.info(f'Setting end_date to {self.end_date}...')
 
         # Optimize scraped space by using date filter arg
-        date_diff = (self.yesterday - self.start_date).days 
+        date_diff = (self.yesterday - self.start_date).days
         possible_date_selections = [3, 7, 30, 90, 180]
         date_filter = None
         for date_selection in possible_date_selections:
@@ -51,7 +50,7 @@ class MorizonSpider(scrapy.Spider):
     def parse(self, response):
 
         # Find all links and their dates on parsed page
-        links_to_scrape = [link for link in response.xpath("//a[@class='property_link']/@href").getall() if '/oferta/' in link] 
+        links_to_scrape = [link for link in response.xpath("//a[@class='property_link']/@href").getall() if '/oferta/' in link]
         links_to_scrape_dates_raw  = response.xpath("//span[@class='single-result__category single-result__category--date']//text()").getall()
 
         # Format dates
@@ -84,7 +83,7 @@ class MorizonSpider(scrapy.Spider):
             #Log current range and number of scraped items
             self.logger.info(f"Currenly scraping offers in {range_low}-{range_high} zł price range")
             self.logger.info(f"Items scraped: {self.crawler.stats.get_value('item_scraped_count')}")
-            
+
             next_page = self.url_base + f"/?ps%5Bprice_from%5D={range_low}&ps%5Bprice_to%5D={range_high}" + self.date_filter_str
             yield scrapy.Request(next_page, callback=self.parse)
 
@@ -96,7 +95,7 @@ class MorizonSpider(scrapy.Spider):
         price = response.xpath("//li[@class='paramIconPrice']/em/text()").get()
         if price:
             full_info["price"] = price.replace("\xa0", "").replace(",",".").replace(" ", "").replace("~", "")
-        else: # Not interested in offers without price 
+        else: # Not interested in offers without price
             return
 
         price_m2 = response.xpath("//li[@class='paramIconPriceM2']/em/text()").get()
@@ -114,7 +113,7 @@ class MorizonSpider(scrapy.Spider):
         # Title
         title = " ".join(response.xpath("//div[@class='col-xs-9']//span/text()").getall()).replace("\n", "")
         full_info["title"] = title
-                
+
         # Paramlist
         values = response.xpath("//section[@class='propertyParams']//tr/td").getall()
         keys = response.xpath("//section[@class='propertyParams']//tr/th").getall()
@@ -132,7 +131,7 @@ class MorizonSpider(scrapy.Spider):
                 full_info["building_year"] = value
             elif key == "Opublikowano":
                 # Further confirm if value is in specified range
-                value_dt = self.polish_to_datetime(value) 
+                value_dt = self.polish_to_datetime(value)
                 if value_dt > self.end_date or value_dt < self.start_date:
                     return
                 full_info["date_added"] = value
@@ -156,7 +155,7 @@ class MorizonSpider(scrapy.Spider):
         #GoogleInfo
         lat = response.xpath("//div[@class='GoogleMap']/@data-lat").get()
         lon = response.xpath("//div[@class='GoogleMap']/@data-lng").get()
-        
+
         #Direct?
         if response.xpath("//div[@class='agentOwnerType']/text()").get():
             direct = 1
@@ -189,14 +188,14 @@ class MorizonSpider(scrapy.Spider):
     def errback_httpbin(self, failure):
         # log all failures
         self.logger.error(repr(failure))
-    
+
     def polish_to_datetime(self, date):
         # change polish date format to datetime
         MONTHS_DICT = {
         'stycznia': '1',
         'lutego': '2',
         'marca': '3',
-        'kwietnia': '4', 
+        'kwietnia': '4',
         'maja': '5',
         'czerwca': '6',
         'lipca': '7',
@@ -226,7 +225,7 @@ class MorizonSpider(scrapy.Spider):
         date = datetime.strptime(date, '%d-%m-%Y').date()
         return date
 
-           
+
 
 
 

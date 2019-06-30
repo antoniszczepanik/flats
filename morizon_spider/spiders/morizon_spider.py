@@ -9,26 +9,26 @@ class MorizonSpider(scrapy.Spider):
     name = "morizon_sale"
 
     def __init__(self, *args, **kwargs):
-
-        self.previous_date = read_last_scraping_date(crawler_name=self.name)
-        update_last_scraping_date(crawler_name=self.name)
-
-        # Morizon won't display all offers if following pagination - the max n of pages is 200
-        # I will introduce chunker variable and chunk all requested offers by price chunks
+        # morizon won't display all offers if following pagination
+        # i will introduce chunker variable and chunk all requested offers by price
         # ex. first flats with prices 0-500, then 500-1000 etc
         self.chunk_size = 20000
         self.chunker = 0
         self.max_price = 5000000
+
+        # try to read and update last scraping date
+        self.previous_date = read_last_scraping_date(crawler_name=self.name)
+        update_last_scraping_date(crawler_name=self.name)
         self.today_str = datetime.now().date().strftime('%d-%m-%Y')
-        self.today = datetime.now().date()
         self.yesterday_str = (datetime.now().date() - timedelta(days=1)).strftime('%d-%m-%Y')
+        self.today = datetime.now().date()
         self.yesterday = datetime.now().date() - timedelta(days=1)
         self.start_date = self.previous_date
         self.logger.info(f'Setting start_date to {self.start_date}...')
         self.end_date = self.yesterday
         self.logger.info(f'Setting end_date to {self.end_date}...')
 
-        # Optimize scraped space by using date filter arg
+        # optimize scraped space by using date filter arg
         date_diff = (self.yesterday - self.start_date).days
         possible_date_selections = [3, 7, 30, 90, 180]
         date_filter = None
@@ -48,39 +48,37 @@ class MorizonSpider(scrapy.Spider):
         self.start_urls = [self.url_base + f"/?ps%5Bprice_from%5D={self.chunker}&ps%5Bprice_to%5D={self.chunk_size}" + self.date_filter_str]
 
     def parse(self, response):
-
-        # Find all links and their dates on parsed page
+        # parse a page of offers, single offer parsing in callback
+        # find all links and their dates on parsed page
         links_to_scrape = [link for link in response.xpath("//a[@class='property_link']/@href").getall() if '/oferta/' in link]
         links_to_scrape_dates_raw  = response.xpath("//span[@class='single-result__category single-result__category--date']//text()").getall()
-
-        # Format dates
+        # format dates
         links_to_scrape_dates = [ x for x in  [ x.replace('\n', '').replace(' ', '') for x in links_to_scrape_dates_raw ] if len(x)>0 ]
         links_to_scrape_dates = [ x.replace('dzisiaj', self.today_str).replace('wczoraj', self.yesterday_str) for x in links_to_scrape_dates ]
         if len(links_to_scrape) != len(links_to_scrape_dates):
             raise ValueError('Found more dates than links to scrape on a single page')
 
-        # Iterate over links and dates - parse only in predefined date_range
+        # iterate over links and dates - parse only in predefined date_range
         for link, date in zip(links_to_scrape, links_to_scrape_dates):
             date_datetime = datetime.strptime(date, '%d-%m-%Y').date()
             if date_datetime >= self.start_date and date_datetime <= self.end_date:
-                yield scrapy.Request(link, callback=self.parse_offer, errback=self.errback_httpbin)
+                yield scrapy.Request(link, callback=self.parse_offer, errback=self._errback_httpbin)
 
-        #Look for next page button
+        # look for next page button
         next_page = response.xpath("//a[@class='mz-pagination-number__btn mz-pagination-number__btn--next']/@href").get()
         if next_page:
             next_page = "https://www.morizon.pl" + next_page + self.date_filter_str
             yield scrapy.Request(next_page, callback=self.parse)
         else:
-            #If button is not available start scraping next price chunk
+            #if button is not available start scraping next price chunk
             self.chunker += self.chunk_size
             range_low = self.chunker
             range_high = self.chunker + self.chunk_size
-
-            # Stop if reached max
+            # stop if reached max
             if range_low >= self.max_price:
                 raise scrapy.exceptions.CloseSpider(f"{self.max_price} price range reached. Stopping spider")
 
-            #Log current range and number of scraped items
+            # log current range and number of scraped items
             self.logger.info(f"Currenly scraping offers in {range_low}-{range_high} zł price range")
             self.logger.info(f"Items scraped: {self.crawler.stats.get_value('item_scraped_count')}")
 
@@ -95,7 +93,7 @@ class MorizonSpider(scrapy.Spider):
         price = response.xpath("//li[@class='paramIconPrice']/em/text()").get()
         if price:
             full_info["price"] = price.replace("\xa0", "").replace(",",".").replace(" ", "").replace("~", "")
-        else: # Not interested in offers without price
+        else: # not interested in offers without price
             return
 
         price_m2 = response.xpath("//li[@class='paramIconPriceM2']/em/text()").get()
@@ -110,11 +108,11 @@ class MorizonSpider(scrapy.Spider):
         if room_n:
             full_info["room_n"] = room_n
 
-        # Title
+        # title
         title = " ".join(response.xpath("//div[@class='col-xs-9']//span/text()").getall()).replace("\n", "")
         full_info["title"] = title
 
-        # Paramlist
+        # paramlist
         values = response.xpath("//section[@class='propertyParams']//tr/td").getall()
         keys = response.xpath("//section[@class='propertyParams']//tr/th").getall()
 
@@ -130,8 +128,8 @@ class MorizonSpider(scrapy.Spider):
             elif key == "Rok budowy":
                 full_info["building_year"] = value
             elif key == "Opublikowano":
-                # Further confirm if value is in specified range
-                value_dt = self.polish_to_datetime(value)
+                # further confirm date is in specified range
+                value_dt = self._polish_to_datetime(value)
                 if value_dt > self.end_date or value_dt < self.start_date:
                     return
                 full_info["date_added"] = value
@@ -152,24 +150,23 @@ class MorizonSpider(scrapy.Spider):
             elif key == "Winda":
                 full_info["lift"] = value
 
-        #GoogleInfo
+        # googleinfo
         lat = response.xpath("//div[@class='GoogleMap']/@data-lat").get()
         lon = response.xpath("//div[@class='GoogleMap']/@data-lng").get()
 
-        #Direct?
+        # direct?
         if response.xpath("//div[@class='agentOwnerType']/text()").get():
             direct = 1
         else:
             direct = 0
 
-        #Description
+        # description
         desc = " ".join(response.xpath("//div[@class='description']//text()").getall())
-        #Description len
         desc_len = len(desc)
 
         image_link = response.xpath("//img[@id='imageBig']/@src").get()
 
-        #Offer stats
+        # offer stats
         stats = " ".join(response.xpath("//div[@class='propertyStat']/p/text()").getall())
         stats = [int(s) for s in stats.split() if s.isdigit()]
 
@@ -185,11 +182,11 @@ class MorizonSpider(scrapy.Spider):
 
         yield full_info
 
-    def errback_httpbin(self, failure):
+    def _errback_httpbin(self, failure):
         # log all failures
         self.logger.error(repr(failure))
 
-    def polish_to_datetime(self, date):
+    def _polish_to_datetime(self, date):
         # change polish date format to datetime
         MONTHS_DICT = {
         'stycznia': '1',

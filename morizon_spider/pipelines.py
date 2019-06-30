@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -12,7 +11,7 @@ class MorizonSpiderPipeline(object):
         'stycznia': '1',
         'lutego': '2',
         'marca': '3',
-        'kwietnia': '4', 
+        'kwietnia': '4',
         'maja': '5',
         'czerwca': '6',
         'lipca': '7',

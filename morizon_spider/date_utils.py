@@ -22,6 +22,7 @@ def read_last_scraping_date(
     if crawler_name in scraping_history_dict:
         date =  scraping_history_dict[crawler_name][-1]
     else:
+        # create new entry
         scraping_history_dict[crawler_name] = [previous_date_if_none]
         logger.info('Did not find previous scraping date for %s', crawler_name)
         save_obj(scraping_history_dict, path)
@@ -39,10 +40,13 @@ def update_last_scraping_date(path='previous_scraping_dates.txt',
     date = str(date)
     scraping_history_dict = load_obj(path)
     logger.info('Loaded previous scraping date from %s', path)
-    scraping_history_dict[crawler_name].append(date)
-    logger.info('Added %s as new previous scraping date', date)
+    if scraping_history_dict[-1] == date:
+        logger.info('Previous scraping date is up to date. Not updating.')
+    else:
+        scraping_history_dict[crawler_name].append(date)
+        logger.info('Added %s as new previous scraping date', date)
+        logger.info('Updated %s', path)
     save_obj(scraping_history_dict, path)
-    logger.info('Updated %s', path)
 
 
 def save_obj(obj, name):

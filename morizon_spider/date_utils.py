@@ -29,7 +29,7 @@ def read_last_scraping_date(
                     'Initialized new date:', crawler_name)
         date = previous_date_if_none
     logger.info(date)
-    return datetime.strptime(date, '%d-%m-%Y').date()
+    return datetime.strptime(date, '%Y-%m-%d').date()
 
 def update_last_scraping_date(path='previous_scraping_dates.txt',
     crawler_name='morizon_spider',
@@ -40,13 +40,13 @@ def update_last_scraping_date(path='previous_scraping_dates.txt',
     scraping_history_dict = load_obj(path)
     logger.info('Loaded previous scraping date from %s', path)
     scraping_history_dict[crawler_name].append(date)
-    logger.info('Added %s as previous scraping date', date)
+    logger.info('Added %s as new previous scraping date', date)
     save_obj(scraping_history_dict, path)
     logger.info('Updated %s', path)
 
 
 def save_obj(obj, name):
-    with open(name, 'wb') as f:
+    with open(name, 'w+') as f:
         for spider_name, dates_list in obj.items():
             dates_string = ','.join(dates_list)
             full_string = '{}:{}\n'.format(spider_name, dates_string)
@@ -54,7 +54,7 @@ def save_obj(obj, name):
 
 def load_obj(name):
     result_dict = {}
-    with open(name, 'rb') as f:
+    with open(name, 'r') as f:
         for line in f.read().split('\n')[:-1]:
             spider_name, dates_string = line.split(':')[0], line.split(':')[1]
             result_dict[spider_name] = dates_string.split(',')

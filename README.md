@@ -1,7 +1,7 @@
-# AVM v2
-This repo contains webcrawslers written in scrapy. 
+# Morizon WebScraper
+In this repo production ready spiders scraping www.morizon.com are scraped. 
 
-To run on a ec2 instance ssh to instance and:
+To run scraper on ec2 instance ssh into instance and:
 
 1.Install requirements
 
@@ -92,4 +92,11 @@ scrapyd-deploy aws-target -p morizon_spider
 
 0 2 * * * curl http://localhost:6800/schedule.json -d project=morizon_spider -d spider=morizon_sale 
 
-0 3 * * * curl http://localhost:6800/schedule.json -d project=morizon_spider -d spider=morizon_rent j
+0 3 * * * curl http://localhost:6800/schedule.json -d project=morizon_spider -d spider=morizon_rent
+
+
+DEPLOY A SPIDER
+scrapyd-deploy aws-target -p morizon_spider
+
+RUN SALE SPIDER
+curl http://ec2-18-196-145-189.eu-central-1.compute.amazonaws.com:6800/schedule.json -d project=morizon_spider -d spider=morizon_sale

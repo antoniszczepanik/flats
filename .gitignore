@@ -1,7 +1,7 @@
 credentials.py
 /logs
 /.cache
-/build*
+/build
 /dbs/
 /eggs
 /*.pyc

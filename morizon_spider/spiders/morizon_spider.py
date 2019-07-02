@@ -1,4 +1,5 @@
 import scrapy
+import logging
 from datetime import datetime, timedelta
 from morizon_spider.items import MorizonSpiderItem
 from morizon_spider.date_utils import read_last_scraping_date
@@ -12,6 +13,10 @@ class MorizonSpider(scrapy.Spider):
         # do not display aws keys from feedexport in logs
         feed_logger = logging.getLogger('scrapy.extensions.feedexport')
         feed_logger.setLevel(logging.WARNING)
+        # do not display aws keys from crawler in logs
+        crawler_logger = logging.getLogger('scrapy.crawler')
+        crawler_logger.setLevel(logging.WARNING)
+        
         # morizon won't display all offers if following pagination
         # introduce chunker variable and chunk all requested offers by price
         # ie first fileter flats with prices 0-500, then 500-1000 etc

@@ -9,9 +9,12 @@ class MorizonSpider(scrapy.Spider):
     name = "morizon_sale"
 
     def __init__(self, *args, **kwargs):
+        # do not display aws keys from feedexport in logs
+        feed_logger = logging.getLogger('scrapy.extensions.feedexport')
+        feed_logger.setLevel(logging.WARNING)
         # morizon won't display all offers if following pagination
         # introduce chunker variable and chunk all requested offers by price
-        # ex. first fileter flats with prices 0-500, then 500-1000 etc
+        # ie first fileter flats with prices 0-500, then 500-1000 etc
         self.chunk_size = 20000
         self.chunker = 0
         self.max_price = 5000000

@@ -1,7 +1,7 @@
-# AVM v2
-This repo contains webcrawslers written in scrapy. 
+# Morizon WebScraper
+In this repo production ready spiders scraping www.morizon.com are scraped. 
 
-To run on a ec2 instance ssh to instance and:
+To run scraper on ec2 instance ssh into instance and:
 
 1.Install requirements
 

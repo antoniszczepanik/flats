@@ -11,7 +11,7 @@ class S3Bucket(object):
         self.s3_dir_path = s3_dir_path
         self.local_downloads_dir = local_downloads_dir
         self.data_bucket = session.resource('s3').Bucket(self.bucket_name)
-        log.info('Initialized S3 bucket - {self.bucket_name}')
+        log.info(f'Initialized S3 bucket - {self.bucket_name}')
 
     # download all files in s3_dir_path
     def download_files(self):
@@ -32,8 +32,8 @@ class S3Bucket(object):
     # download file to self.local_downloads_dir
     def download_file(self, s3_path):
         file_name = s3_path.split('/')[-1]
-        log.info(f'Downloading {s3_path} from {self.bucket_name}/{self.s3_dir_path} as {file_name} ...')
-        if local_downloads_dir:
+        log.info(f'Downloading {s3_path} ...')
+        if self.local_downloads_dir:
             download_path = f'{self.local_downloads_dir}/{file_name}'
         else:
             download_path = filename

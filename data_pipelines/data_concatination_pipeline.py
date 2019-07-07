@@ -4,14 +4,12 @@ deduplicate all csv's scraped from morizon.
 It concats data from each folder - sale and rent
 and saves them on s3 in 'morizon-data/raw' folder.
 """
-
 from datetime import datetime
 import tempfile
 import logging as log
-
 import pandas as pd
-
 from s3_bucket import S3Bucket
+from utils import concat_csvs
 
 FOLDERS_TO_CONCAT = ['morizon_sale', 'morizon_rent']
 BUCKET_NAME = 'morizon-data'
@@ -22,21 +20,9 @@ S3_PROFLE = 's3-private'
 #datetime = datetime.now().strptime()
 #log.basicConfig(filename='{s3_folder_name}_cleaning_{datetime}.log',
                     #format='%(name)s - %(levelname)s - %(message)s')
-
-
-def concat_csvs(csv_paths):
-    # concat all df's and drop duplicates
-    dfs = []
-    total_rows_n = 0
-    for path in csv_paths:
-        df = pd.read_csv(path)
-        total_rows_n += len(df)
-        dfs.append(df)
-    concatinated_df = pd.concat(dfs).drop_duplicates()
-
-    log.info(f'Concatinated {len(dfs)} csv files.')
-    log.info(f'Droppend {total_rows_n - len(concatinated_df)} duplicates.')
-    return concatinated_df
+# log = logging.getLogger(__name__)
+log.basicConfig(level=log.INFO, format='%(asctime)s %(message)s',
+                datefmt='%m-%d-%Y %I:%M:%S')
 
 
 if __name__ == '__main__':
@@ -50,11 +36,12 @@ if __name__ == '__main__':
                               profile=S3_PROFLE)
             bucket.download_files()
             s3_paths = bucket.list_paths()
-            local_paths = ['{tmpdir}/{path.split('/')[-1]}' for path in s3_paths]
+            local_paths = [f'{tmpdir}/{path.split("/")[-1]}' for path in s3_paths]
             concatinated_df = concat_csvs(local_paths)
 
             current_datetime_str = datetime.now().strftime('%Y_%m_%dT%H_%M_%S')
             full_filename = f'{s3_folder}_full_{current_datetime_str}.csv'
             concatinated_df.to_csv(f'{tmpdir}/{full_filename}', index=False)
-            bucket.upload_file(f'{tmpdir}/{full_filename}', f'{s3_folder}{_concated}/{full_filename})
+            bucket.upload_file(f'{tmpdir}/{full_filename}', f'{s3_folder}_concated/{full_filename}')
+            log.info('Succesfully uploaded full file')
     log.info('Finished data_concatination pipeline.')

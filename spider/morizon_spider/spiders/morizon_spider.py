@@ -156,6 +156,23 @@ class MorizonSpider(scrapy.Spider):
                 full_info["taras"] = value
             elif key == "Winda":
                 full_info["lift"] = value
+            elif key == "Forma własności":
+                full_info["ownership_type"]: value
+            elif key == "Typ kuchni":
+                full_info["kitchen_type"]: value
+            elif key == "Łazienka i WC":
+                full_info["bthrm_wc_together"]: value
+            elif key == "Wysokość pomieszczeń (cm)":
+                full_info["celling_height"]: value
+            elif key == "Zapotrzebowanie energetyczne (kWh/m²/rok)":
+                full_info["energy_cons_est"]: value
+            elif key == "Ogrzewanie":
+                full_info["heating"]: value
+            elif key == "Miejsce parkingowe":
+                full_info["parking"]: value
+
+        heating = response.xpath("//h3[text()='Ogrzewanie']/following-sibling::p/text()").get().replace('\n', '')
+        convinience = response.xpath("//h3[text()='Udogodnienia']/following-sibling::p/text()").get().replace('\n', '')
 
         lat = response.xpath("//div[@class='GoogleMap']/@data-lat").get()
         lon = response.xpath("//div[@class='GoogleMap']/@data-lng").get()
@@ -184,6 +201,8 @@ class MorizonSpider(scrapy.Spider):
         full_info["view_count"] = stats[0]
         full_info["promotion_counter"] = stats[1]
         full_info["image_link"] = image_link
+        full_info["heating"] = heating
+        full_info["convinience"] = convinience
 
         yield full_info
 

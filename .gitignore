@@ -1,3 +1,7 @@
-.gdrive
 credentials.py
 /logs
+/.cache
+/build
+/dbs/
+/eggs
+/*.pyc

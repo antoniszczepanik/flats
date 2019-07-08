@@ -1,7 +1,6 @@
 credentials.py
-/logs
-/.cache
-/build
-/dbs/
-/eggs
+spider/build/
+spider/dbs/
+spider/eggs/
+spider/logs/
 /*.pyc

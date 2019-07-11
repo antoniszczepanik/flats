@@ -8,7 +8,7 @@ NEWSPIDER_MODULE = 'morizon_spider.spiders'
 LOG_LEVEL= 'INFO'
 
 # AWS S3 export settings
-FEED_URI = f's3://{ACCESS_KEY_ID}:{SECRET_ACCESS_KEY}@morizon-data/%(name)s_raw/%(time)s.csv'
+FEED_URI = f's3://{ACCESS_KEY_ID}:{SECRET_ACCESS_KEY}@morizon-data/%(name)s/raw/raw_%(name)s_%(time)s.csv'
 FEED_FORMAT = 'csv'
 
 # Obey robots.txt rules

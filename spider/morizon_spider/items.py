@@ -36,3 +36,7 @@ class MorizonSpiderItem(scrapy.Item):
         promotion_counter = scrapy.Field()
         desc = scrapy.Field()
         image_link = scrapy.Field()
+        heating = scrapy.Field()
+        conviniences = scrapy.Field()
+        media = scrapy.Field()
+        equipment = scrapy.Field()

@@ -27,9 +27,11 @@ class S3Bucket(object):
         return s3_filepaths
 
     # list filepaths given in s3_dir_path
-    def list_paths(self, allowed_extension='.csv'):
+    def list_paths(self, allowed_extension='.csv', directory=None):
+        if directory == None:
+            directory = self.s3_dir_path
         try:
-            files = self.data_bucket.objects.filter(Prefix=self.s3_dir_path)
+            files = self.data_bucket.objects.filter(Prefix=directory)
         except Exception as e:
             log.warning(e)
         filepaths = [f.key for f in files if f.key.lower().endswith(allowed_extension)]
@@ -54,7 +56,7 @@ class S3Bucket(object):
             target_path = f'{self.s3_target_dir_path}/{target_name}'
         else:
             target_path = target_name
-        log.info(f'Uploading {local_file} to {target_path}')
+        log.info(f'Uploading to {target_path}')
         with open(local_file, 'rb') as f:
             try:
                 self.data_bucket.put_object(Key=target_path, Body=f)

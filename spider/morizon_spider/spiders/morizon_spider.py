@@ -12,11 +12,11 @@ class MorizonSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
 
         # do not display aws keys from feedexport in logs
-#        feed_logger = logging.getLogger('scrapy.extensions.feedexport')
-#        feed_logger.setLevel(logging.WARNING)
+        feed_logger = logging.getLogger('scrapy.extensions.feedexport')
+        feed_logger.setLevel(logging.WARNING)
         # do not display aws keys from crawler in logs
-#        crawler_logger = logging.getLogger('scrapy.crawler')
-#        crawler_logger.setLevel(logging.WARNING)
+        crawler_logger = logging.getLogger('scrapy.crawler')
+        crawler_logger.setLevel(logging.WARNING)
 
         # morizon won't display all offers if following pagination
         # introduce chunker variable and chunk all requested offers by price

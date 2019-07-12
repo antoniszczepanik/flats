@@ -28,8 +28,13 @@ def concat_dfs(paths):
     concatinated_df = concatinated_df.dropna(axis="columns", how="all")
     columns_end = concatinated_df.columns
     # return descriptions in a different df - to large to handle
-    descriptions = concatinated_df[["desc", "offer_id"]].dropna(axis="rows", how="all")
-    concatinated_df = concatinated_df.drop("desc", axis=1)
+    try:
+        descriptions = concatinated_df[["desc", "offer_id"]].dropna(
+            axis="rows", how="all"
+        )
+        concatinated_df = concatinated_df.drop("desc", axis=1)
+    except KeyError:
+        descriptions = None
 
     log.info(f"Removed empty columns {set(columns_start)-set(columns_end)}")
     log.info(f"Concatinated {len(dfs)} files.")

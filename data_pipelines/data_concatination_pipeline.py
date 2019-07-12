@@ -22,7 +22,6 @@ S3_PROFILE = "default"
 log.basicConfig(
     level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
 )
-
 if __name__ == "__main__":
 
     log.info("Starting data concatination pipeline")
@@ -44,6 +43,8 @@ if __name__ == "__main__":
 
             # Find paths different than in concated_files_list
             s3_paths = bucket.list_paths()
+            # skip downloading desc files
+            s3_paths = [f for f in s3_paths if "desc" not in f]
             try:
                 already_concated = utils.read_txt_list(concated_files_list_path)
             except FileNotFoundError:
@@ -64,6 +65,8 @@ if __name__ == "__main__":
             concated_files = bucket.list_paths(
                 directory=s3_target_dir, allowed_extension=".parquet"
             )
+            # skip downloading desc files
+            concated_files = [f for f in concated_files if "desc" not in f]
             previous_concated = utils.select_most_up_to_date_file(concated_files)
             if len(previous_concated) > 0:
                 log.info(
@@ -87,10 +90,14 @@ if __name__ == "__main__":
             full_filename = f'{s3_folder.split("/")[0]}_full_{current_dt}.parquet'
             full_filename_desc = f'{s3_folder.split("/")[0]}_desc_{current_dt}.parquet'
             concatinated_df.to_parquet(f"{tmpdir}/{full_filename}", index=False)
-            concatinated_desc.to_parquet(f"{tmpdir}/{full_filename_desc}", index=False)
+            if concatinated_desc:
+                concatinated_desc.to_parquet(
+                    f"{tmpdir}/{full_filename_desc}", index=False
+                )
+                bucket.upload_file(
+                    f"{tmpdir}/{full_filename_desc}", f"desc/{full_filename_desc}"
+                )
+
             bucket.upload_file(f"{tmpdir}/{full_filename}", full_filename)
-            bucket.upload_file(
-                f"{tmpdir}/{full_filename_desc}", f"desc/{full_filename_desc}"
-            )
             log.info("Succesfully uploaded full file.")
     log.info("Finished data_concatination pipeline.")

@@ -22,7 +22,7 @@ when needed, else run them maybe weekly?
 - run a pipeline to scrape all images from links in concatinated files - untill
 its possible!
 
-""""
+"""
 
-#datetime = datetime.now().strptime()
-#log.basicConfig(filename='cleaning{datetime}.log', format='%(name)s - %(levelname)s - %(message)s')
+# datetime = datetime.now().strptime()
+# log.basicConfig(filename='cleaning{datetime}.log', format='%(name)s - %(levelname)s - %(message)s')

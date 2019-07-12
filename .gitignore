@@ -1,7 +1,12 @@
 credentials.py
-/logs
-/.cache
-/build
-/dbs/
-/eggs
+spider/build/
+spider/dbs/
+spider/eggs/
+spider/logs/
+spider/SpiderKeeper.db
+spider/project.egg-info/
+spider/previous_scraping_dates.txt
 /*.pyc
+.cache/
+__pycache__/
+

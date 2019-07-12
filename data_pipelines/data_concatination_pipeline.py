@@ -60,10 +60,10 @@ if __name__ == "__main__":
 
             for path in paths_to_concat:
                 bucket.download_file(path)
+
             concated_files = bucket.list_paths(
                 directory=s3_target_dir, allowed_extension=".parquet"
             )
-
             previous_concated = utils.select_most_up_to_date_file(concated_files)
             if len(previous_concated) > 0:
                 log.info(
@@ -79,11 +79,18 @@ if __name__ == "__main__":
             ]
             local_concated_path = f"{tmpdir}/{utils.name_from_path(previous_concated)}"
 
-            concatinated_df = utils.concat_dfs(local_paths + [local_concated_path])
+            concatinated_df, concatinated_desc = utils.concat_dfs(
+                local_paths + [local_concated_path]
+            )
 
             current_dt = datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
             full_filename = f'{s3_folder.split("/")[0]}_full_{current_dt}.parquet'
+            full_filename_desc = f'{s3_folder.split("/")[0]}_desc_{current_dt}.parquet'
             concatinated_df.to_parquet(f"{tmpdir}/{full_filename}", index=False)
+            concatinated_desc.to_parquet(f"{tmpdir}/{full_filename_desc}", index=False)
             bucket.upload_file(f"{tmpdir}/{full_filename}", full_filename)
-            log.info("Succesfully uploaded full file")
+            bucket.upload_file(
+                f"{tmpdir}/{full_filename_desc}", f"desc/{full_filename_desc}"
+            )
+            log.info("Succesfully uploaded full file.")
     log.info("Finished data_concatination pipeline.")

@@ -4,10 +4,17 @@ import pandas as pd
 
 
 def concat_dfs(paths):
-    # concat all df's and drop duplicates
+    """
+    Concat all files by paths and drop all duplicates.
+    Retrun 2 dataframes - full dataframe and descriptions
+    separately.
+    Handles .csv files and .parquet files.
+    Treats .parquet file as main source of data (base for logging)
+    """
     dfs = []
     total_rows_n = 0
     parquet_rows_n = 0
+
     for path in paths:
         if path.endswith(".csv"):
             df = pd.read_csv(path)
@@ -20,13 +27,18 @@ def concat_dfs(paths):
     columns_start = concatinated_df.columns
     concatinated_df = concatinated_df.dropna(axis="columns", how="all")
     columns_end = concatinated_df.columns
+    # return descriptions in a different df - to large to handle
+    descriptions = concatinated_df[["desc", "offer_id"]].dropna(axis="rows", how="all")
+    concatinated_df = concatinated_df.drop("desc", axis=1)
+
     log.info(f"Removed empty columns {set(columns_start)-set(columns_end)}")
     log.info(f"Concatinated {len(dfs)} files.")
     log.info(f"Dropped {total_rows_n - len(concatinated_df)} duplicates.")
     log.info(f"Previous concatinated file had {parquet_rows_n}")
     log.info(f"Concatinated csv has {len(concatinated_df)} rows.")
     log.info(f"Added {len(concatinated_df)-parquet_rows_n} new rows")
-    return concatinated_df
+
+    return concatinated_df, descriptions
 
 
 def update_txt_list(path_list, path):

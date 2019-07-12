@@ -22,7 +22,7 @@ ITEM_PIPELINES = {
 }
 
 # Debugging
-# CLOSESPIDER_PAGECOUNT = 100
+#CLOSESPIDER_PAGECOUNT = 100
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -61,10 +61,10 @@ ITEM_PIPELINES = {
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-# }
-
+EXTENSIONS = {
+    'scrapy_fieldstats.fieldstats.FieldStatsExtension': 10,
+}
+FIELDSTATS_ENABLED = True
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html

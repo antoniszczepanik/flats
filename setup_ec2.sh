@@ -18,8 +18,6 @@ set -xe \
     && apt-get install -y libtiff5 \
                           libtiff5-dev \
                           libfreetype6-dev \
-                          libjpeg62-turbo \
-                          libjpeg62-turbo-dev \
                           liblcms2-2 \
                           liblcms2-dev \
                           libwebp6 \
@@ -45,7 +43,6 @@ set -xe \
                                       python3-dev \
     && apt-get purge -y --auto-remove libtiff5-dev \
                                       libfreetype6-dev \
-                                      libjpeg62-turbo-dev \
                                       liblcms2-dev \
                                       libwebp-dev \
                                       zlib1g-dev \

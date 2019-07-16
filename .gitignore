@@ -9,4 +9,5 @@ spider/previous_scraping_dates.txt
 /*.pyc
 .cache/
 __pycache__/
+scrapy.pem
 

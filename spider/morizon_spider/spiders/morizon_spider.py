@@ -103,6 +103,7 @@ class MorizonSpider(scrapy.Spider):
             "//a[@class='mz-pagination-number__btn mz-pagination-number__btn--next']/@href"
         ).get()
         if next_page:
+            self.crawler.stats.inc_value('paginations_followed')
             next_page = "https://www.morizon.pl" + next_page + self.date_filter_str
             yield scrapy.Request(next_page, callback=self.parse)
         else:
@@ -133,6 +134,8 @@ class MorizonSpider(scrapy.Spider):
     def parse_offer(self, response):
         full_info = MorizonSpiderItem()
 
+        self.crawler.stats.inc_value('offers_followed')
+
         price = response.xpath("//li[@class='paramIconPrice']/em/text()").get()
         if price:
             full_info["price"] = (
@@ -142,6 +145,7 @@ class MorizonSpider(scrapy.Spider):
                 .replace("~", "")
             )
         else:  # not interested in offers without price
+            self.crawler.stats.inc_value('offers_no_price_followed')
             return
 
         price_m2 = response.xpath("//li[@class='paramIconPriceM2']/em/text()").get()

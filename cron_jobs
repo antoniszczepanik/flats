@@ -1,0 +1,5 @@
+# Sale scraper everyday at 0:15
+15 0 * * * curl http://localhost:6800/schedule.json -d project=morizon_spider -d spider=morizon_sale >/dev/null 2>&1 
+# Rent scraper everyday at 0:30
+30 0 * * * curl http://localhost:6800/schedule.json -d project=morizon_spider -d spider=morizon_rent >/dev/null 2>&1 
+

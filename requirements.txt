@@ -22,7 +22,6 @@ httplib2==0.9.2
 hyperlink==19.0.0
 idna==2.8
 incremental==17.5.0
-Jinja2==2.10
 jmespath==0.9.4
 jsonpatch==1.16
 jsonpointer==1.10
@@ -42,7 +41,6 @@ pyarrow==0.14.0
 pyasn1==0.4.5
 pyasn1-modules==0.2.5
 pycparser==2.19
-pycrypto==2.6.1
 PyDispatcher==2.0.5
 pygobject==3.26.1
 PyHamcrest==1.9.0
@@ -53,7 +51,6 @@ python-apt==1.6.4
 python-dateutil==2.8.0
 python-debian==0.1.32
 pytz==2019.1
-pyxdg==0.25
 PyYAML==3.12
 queuelib==1.5.0
 requests==2.22.0

@@ -1,0 +1,17 @@
+chmod +x setup_ec2.sh
+sudo apt-get update 
+sudo apt-get install build-essential python3-dev
+sudo apt-get install python3-pip
+pip3 install scrapy
+pip3 install scrapyd
+pip3 install scrapy-fieldstats
+git pull https://github.com/kabuboy/morizon-spider.git
+cd morizon-spider/spider
+nohup scrapyd >/dev/null 2>&1 &
+# kill %1 (kill only running process)
+
+
+tcp rules for inbound and outbound:
+http://neuralfoundry.com/installing-scrapy-and-scrapyd-on-amazon-ec2/
+
+scrapyd-deploy aws-target -p morizon_spider

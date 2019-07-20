@@ -1,9 +1,7 @@
-* 
 
 
-Project contains of 3 components:
-- morizon webcrawler, written in scrapy (running live on an ec2 instance,
-checkout logs here)
-- data pipelines which are responsible for cleaning scraped data (also running
-live, you can check out logs here:)
-- flat valuation models
+* Project contains 3 components:
+- webcrawler which scrapes Polish flats rent and sale offers daily.
+- property valuation model, responsible for detecting underpriced offers in both categories.
+- static html file generator used to prepare results of the model 
+and statistcal overview of Polish real-estate market.

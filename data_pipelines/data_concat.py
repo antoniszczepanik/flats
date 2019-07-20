@@ -90,7 +90,7 @@ if __name__ == "__main__":
             full_filename = f'{s3_folder.split("/")[0]}_full_{current_dt}.parquet'
             full_filename_desc = f'{s3_folder.split("/")[0]}_desc_{current_dt}.parquet'
             concatinated_df.to_parquet(f"{tmpdir}/{full_filename}", index=False)
-            if concatinated_desc:
+            if not concatinated_desc.empty:
                 concatinated_desc.to_parquet(
                     f"{tmpdir}/{full_filename_desc}", index=False
                 )

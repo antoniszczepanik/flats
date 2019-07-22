@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 import unidecode
 
 # columns required for performing the cleaning
@@ -41,17 +42,17 @@ class MorizonCleaner(object):
         self.required_columns = REQUIRED_COLUMNS
         
         # verify columns match
-        for column in list(self.df.columns):
-            if column not in self.required_columns:
-                raise InvalidColumnsError
+        for column in self.required_columns:
+            if column not in self.df.columns:
+                raise InvalidColumnsError(f'{column} not found in required columns.')
         self.df = self.df.fillna('no_info')
         
-        # a dictionary with dictionary mappings, and None's where
+        # a dictionary with dictionary mapping functions and None's where
         # no mapping is neccessery
         self.cleaning_map = {
             'balcony': 
             {
-                'no_info': 0,
+                'no_info': 'no_info',
                 'Nie': 0,
                 'Tak': 1,
             },
@@ -60,13 +61,13 @@ class MorizonCleaner(object):
             'building_type': self.building_type,
             'building_year': None,
             'conviniences': self.conviniences,
-#             'date_added': custom,
-#             'date_refreshed': custom,
+            'date_added': self.date_to_int, 
+            'date_refreshed': self.date_to_int,
             'desc_len': None,
             'direct': None,
-#             'equipment': custom,
-#             'flat_state': custom,
-#             'floor': custom,
+            'equipment': self.equipment,
+            'flat_state': self.flat_state,
+            'floor': self.floor,
 #             'heating': custom,
             'image_link': 'remove',
             'lat': None,
@@ -85,7 +86,7 @@ class MorizonCleaner(object):
             'size': None,
             'taras': 
             {
-                'no_info': 0,
+                'no_info': 'no_info',
                 'Tak': 1,
                 'Nie': 0,
             },
@@ -166,20 +167,140 @@ class MorizonCleaner(object):
         self.df[column_name] = self.df[column_name].apply(mapping)
         
     def conviniences(self, column_name):
-        # lift case
-        df['lift'] = df[column_name].apply(create_lift)
-        df['basement'] = df[column_name].apply(create_basement)
-        df['parking'] = df[column_name].apply(create_parking)
-        df['road_access'] = df[column_name].apply(create_road_access)
+        def check_if_not(pol_word, string):
+            # Verify if parameter is negated
+            string = string.lower()
+            if f'{pol_word} (nie)' in string or f'{pol_word} (brak)' in string:
+                return 0
+            elif pol_word in string:
+                return 1
+            else:
+                return 'no_info'
+        
+        def create_lift(value):
+            value = value.lower()
+            if 'brak windy' in value:
+                return 0
+            elif 'winda' in value:
+                return 1
+            else:
+                return 'no_info'
+            
+        def create_parking(value):
+            value = value.lower()
+            pol_park = 'miejsce parkingowe'
+            if pol_park in value:
+                # find value in parenthesis following polpark
+                try:
+                    parens = value.split(pol_park + ' (')[1].split(')')[0]
+                except IndexError:
+                    return 1
+                try:
+                    parking_n = int(parens)
+                except ValueError:
+                    try:
+                        parking_n = int(parens.split(',')[0])
+                    except ValueError:
+                        parking_n = 1
+                return parking_n
+            else:
+                return 'no_info'
+        
+        self.df['lift'] = self.df[column_name].apply(create_lift)
+        self.df['basement'] = self.df[column_name].apply(
+            lambda v: check_if_not('piwnica', v))
+        self.df['telecom'] = self.df[column_name].apply(
+            lambda v: check_if_not('domofon', v))
+        self.df['driveway'] = self.df[column_name].apply(
+            lambda v: check_if_not('podjazd', v))
+        self.df['fence'] = self.df[column_name].apply(
+            lambda v: check_if_not('ogrodzenie', v))
+        self.df['parking_spot'] = self.df[column_name].apply(create_parking)
+        self.df = self.df.drop(column_name, axis=1)
+        
+    def date_to_int(self, column_name):
+        dt_2018 = datetime(2018, 1, 1)
+        self.df[f'{column_name}_days_from_2018'] = self.df[column_name].apply(
+            lambda x: (datetime.strptime(x, "%Y-%m-%d") - dt_2018).days)
+        self.df = self.df.drop(column_name, axis=1)
+        
+    def equipment(self, column_name):
+        def furniture(value):
+            value = value.lower()
+            if 'meble (nie)' in value:
+                return 0
+            elif 'meble' in value:
+                return 1
+            else:
+                return 'no_info'
+            
+        def kitchen_furniture(value):
+            value = value.lower()
+            if 'kuchnia umeblowana' in value:
+                return 1
+            else:
+                return 'no_info'
+            
+        self.df['furniture'] = self.df[column_name].apply(furniture)
+        self.df['kitchen_furniture'] = self.df[column_name].apply(
+            kitchen_furniture)
+        self.df = self.df.drop(column_name, axis=1)
+        
+    def flat_state(self, column_name):
+        very_good = ['bardzo', 'wysoki', 'po remon', 'podwyzszony',
+                     'ideal', 'komfort', 'po gener']
+        good = ['dobry', 'normalny', 'do wprowa', 'po czescio', 'czesciowo po',
+               'zamieszkania', 'wykon']
+        raw = ['dewel', 'devel', 'wykonczenia', 'odswiezenia', 'do czescio',
+               'sred', 'do adaptacji', 'drobnego', 'surowy zamkniety', 'surowy']
+        to_renovation = ['remontu', 'odnowienia']
+        
+        def mapping(value):
+            value = unidecode.unidecode(str(value)).lower()
+            for vg in very_good:
+                if vg in value:
+                    return 4
+            for g in good:
+                if g in value:
+                    return 3
+            for r in raw:
+                if r in value:
+                    return 2
+            for tr in to_renovation:
+                if tr in value:
+                    return 1
+            return 3
+        self.df[column_name] = self.df[column_name].apply(mapping)
+        
+    def floor(self, column_name):
+        
+        def floor_n(value):
+            value = value.split(' / ')
+            if len(value) in (1, 2):
+                if value[0] == 'parter':
+                    return 0
+                elif value[0] == 'no_info':
+                    return 'no_info'
+                else:
+                    return int(value[0])
+            else:
+                raise ValueError(f'"{value}" value is not expected in this column')
+                
+        def max_floor_n(value):
+            value = value.split(' / ')
+            if len(value) == 2:
+                return int(value[1])
+            else:
+                return 'no_info'
+            
+        self.df['foor_n'] = self.df[column_name].apply(max_floor_n)
+        self.df[column_name] = self.df[column_name].apply(floor_n)
         
         
-        def check_if_not(word, string):
-            """
-            Verify if given word followed by '(nie)'
-            """
-            if f'{word} (nie)' in string:
-                return f'no_{word}'
-    
+
+
+        
+        
 
         
         
@@ -189,6 +310,7 @@ class InvalidCleaningMapError(Exception):
 
 class InvalidColumnsError(Exception):
     pass
+
 
 
 # import pandas as pd

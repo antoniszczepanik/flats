@@ -1,5 +1,7 @@
-import pandas as pd
 from datetime import datetime
+
+import pandas as pd
+import numpy as np
 import unidecode
 
 # columns required for performing the cleaning
@@ -35,6 +37,8 @@ REQUIRED_COLUMNS =[
     'view_count',
 ]
 
+FILL_NA_WITH_ZERO = ('parking_spot')
+
 class MorizonCleaner(object):
     
     def __init__(self, df):
@@ -68,7 +72,7 @@ class MorizonCleaner(object):
             'equipment': self.equipment,
             'flat_state': self.flat_state,
             'floor': self.floor,
-#             'heating': custom,
+            'heating': self.heating,
             'image_link': 'remove',
             'lat': None,
             'lon': None,
@@ -77,7 +81,7 @@ class MorizonCleaner(object):
                 'wtórny': 1,
                 'pierwotny': 0,
             },
-#             'media': custom,
+            'media': self.media,
             'offer_id': None,
             'price': None,
             'price_m2': None,
@@ -110,14 +114,21 @@ class MorizonCleaner(object):
             elif cleaning_func == 'remove':
                 self.df = self.df.drop(column, axis=1)
             elif cleaning_func is None:
-                pass
+                continue
             else:
                 # temoporary, remove later
                 pass
                 log.error('Cleaning map has values other than expected.')
                 raise InvalidCleaningMapError
                 
+        # creating new binary columns and remove 'no_info' values
+        self.df = self.one_hot_encode_no_info(self.df)
+        # replace 'no_info' with mode in given column
+        self.df = self.replace_no_info_with_mode(self.df)
+        # one hot encode remaining categorical columns
+        self.df = self.one_hot_encode_categorical(self.df)
         return self.df
+        
     
     def fillna_mode(self, column_name):
         mode = self.df[column_name].mode()
@@ -296,15 +307,119 @@ class MorizonCleaner(object):
         self.df['foor_n'] = self.df[column_name].apply(max_floor_n)
         self.df[column_name] = self.df[column_name].apply(floor_n)
         
+    def heating(self, column_name):
         
+        def heating_type(value):
+            if value == 'no_info':
+                return 'no_info'
+            elif 'Ogrzewanie (brak)' in value:
+                return 'no_heating'
+            elif 'miejsk' in value:
+                return 'urban'
+            elif value == 'Ogrzewanie':
+                return 'urban'
+            elif 'elektry' in value:
+                return 'electric'
+            elif 'gaz' in value:
+                return 'gas'
+            elif 'piec'  in value or 'węgl' in value:
+                return 'coal'
+            elif 'komin' in value:
+                return 'fireplace'
+            elif 'Ogrzewanie' in value:
+                return 'other'
+            else:
+                return 'no_info'
+            
+        self.df[column_name] = self.df[column_name].apply(heating_type)
+        
+    def media(self, column_name):
+        
+        def internet(value):
+            value = value.lower()
+            if 'internet (brak' in value:
+                return 0
+            elif 'internet' in value:
+                return 1
+            else:
+                return 'no_info'
+            
+        def water(value):
+            value = value.lower()
+            if 'woda' in value:
+                return 1
+            else:
+                return 0
+            
+        def gas(value):
+            value = value.lower()
+            if 'gaz (brak' in value:
+                return 0
+            elif 'gaz' in value:
+                return 1
+            else:
+                return 'no_info'
+            
+        def electricity(value):
+            value = value.lower()
+            if 'prąd' in value:
+                return 1
+            else:
+                return 0
+            
+        def sewers(value):
+            value = value.lower()
+            if 'kanalizacja' in value:
+                return 1
+            else:
+                return 0
+            
+        self.df['internet'] = self.df[column_name].apply(internet)
+        self.df['water'] = self.df[column_name].apply(water)
+        self.df['gas'] = self.df[column_name].apply(gas)
+        self.df['electricity'] = self.df[column_name].apply(electricity)
+        self.df['sewers'] = self.df[column_name].apply(sewers)
+        self.df = self.df.drop(column_name, axis=1)
+        
+    def one_hot_encode_no_info(self, df):
+        for col in df.columns:
+            if 'no_info' in list(df[col].values):
+                df[col + '_no_info'] = df[col].apply(
+                    lambda x: 1 if x == 'no_info' else 0
+                )
+        return df
+            
+    def replace_no_info_with_mode(self, df):
+        # replace with 0 if binary (no info == lack of feature)
+        # else with mode value
+        for col in df.columns:
+            cols_to_replace = []
+            if 'no_info' in list(df[col].values):
+                cols_to_replace.append(col)
+            df[cols_to_replace] = df[cols_to_replace].replace({'no_info':np.nan})
+            for col in cols_to_replace:
+                vc = self.value_counts(df, col)
+                if vc in (1, 2) or col in FILL_NA_WITH_ZERO:
+                    df[col] = df[col].fillna(0)
+                else:
+                    mode = df[col].mode()[0]
+                    df[col] = df[col].fillna(mode)
+        return df
+    
+    def value_counts(self, df, col):
+        return len(df[col].value_counts())
+    
+    def one_hot_encode_categorical(self, df):
+        for col in df.columns:
+            if self.value_counts(df, col) < 10 and df[col].dtype == 'object':
+                df = pd.concat(
+                    [df, pd.get_dummies(df[col], prefix=col)], axis=1
+                )
+        return df
+                
 
-
         
-        
-
-        
-        
-
+    
 class InvalidCleaningMapError(Exception):
     pass
 

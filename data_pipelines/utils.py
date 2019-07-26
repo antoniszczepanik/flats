@@ -2,6 +2,40 @@ import logging as log
 from datetime import datetime
 import pandas as pd
 
+# expected columns 
+REQUIRED_COLUMNS =[
+    'balcony',
+    'building_height',
+    'building_material',
+    'building_type',
+    'building_year',
+    'conviniences',
+    'date_added',
+    'date_refreshed',
+    'desc_len',
+    'direct',
+    'equipment',
+    'flat_state',
+    'floor',
+    'heating',
+    'image_link',
+    'lat',
+    'lon',
+    'market_type',
+    'media',
+    'offer_id',
+    'price',
+    'price_m2',
+    'promotion_counter',
+    'room_n',
+    'size',
+    'taras',
+    'title',
+    'url',
+    'view_count',
+]
+
+
 
 def concat_dfs(paths):
     """
@@ -16,34 +50,22 @@ def concat_dfs(paths):
     parquet_rows_n = 0
 
     for path in paths:
-        if path.endswith(".csv"):
+        if path.endswith(".csv", columns=REQUIRED_COLUMNS):
             df = pd.read_csv(path)
         elif path.endswith(".parquet"):
-            df = pd.read_parquet(path)
+            df = pd.read_parquet(path, columns=REQUIRED_COLUMNS)
             parquet_rows_n += len(df)
         total_rows_n += len(df)
         dfs.append(df)
     concatinated_df = pd.concat(dfs, sort=True).drop_duplicates(keep="last")
-    columns_start = concatinated_df.columns
-    concatinated_df = concatinated_df.dropna(axis="columns", how="all")
-    columns_end = concatinated_df.columns
-    # return descriptions in a different df - to large to handle
-    try:
-        descriptions = concatinated_df[["desc", "offer_id"]].dropna(
-            axis="rows", how="all"
-        )
-        concatinated_df = concatinated_df.drop("desc", axis=1)
-    except KeyError:
-        descriptions = None
 
-    log.info(f"Removed empty columns {set(columns_start)-set(columns_end)}")
     log.info(f"Concatinated {len(dfs)} files.")
     log.info(f"Dropped {total_rows_n - len(concatinated_df)} duplicates.")
     log.info(f"Previous concatinated file had {parquet_rows_n}")
     log.info(f"Concatinated csv has {len(concatinated_df)} rows.")
-    log.info(f"Added {len(concatinated_df)-parquet_rows_n} new rows")
+    log.info(f"Added {len(concatinated_df)-parquet_rows_n} new rows.")
 
-    return concatinated_df, descriptions
+    return concatinated_df
 
 
 def update_txt_list(path_list, path):
@@ -63,7 +85,7 @@ def read_txt_list(path):
 def select_most_up_to_date_file(file_paths):
     # select file with most current datetime in name
     if len(file_paths) == 0:
-        return []
+        return None
     dt_strings = []
     for path in file_paths:
         dt_strings.append("".join([x for x in path if x.isdigit()]))

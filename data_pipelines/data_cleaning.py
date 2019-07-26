@@ -4,68 +4,37 @@ import pandas as pd
 import numpy as np
 import unidecode
 
+from utils import REQUIRED_COLUMNS
 # columns required for performing the cleaning
-REQUIRED_COLUMNS =[
-    'balcony',
-    'building_height', 
-    'building_material', 
-    'building_type',
-    'building_year',
-    'conviniences',
-    'date_added',
-    'date_refreshed',
-    'desc_len',
-    'direct',
-    'equipment',
-    'flat_state',
-    'floor',
-    'heating',
-    'image_link',
-    'lat',
-    'lon',
-    'market_type',
-    'media',
-    'offer_id',
-    'price',
-    'price_m2',
-    'promotion_counter',
-    'room_n',
-    'size',
-    'taras',
-    'title',
-    'url',
-    'view_count',
-]
-
 FILL_NA_WITH_ZERO = ('parking_spot')
 
 class MorizonCleaner(object):
-    
+
     def __init__(self, df):
         self.df = df
         self.required_columns = REQUIRED_COLUMNS
-        
+
         # verify columns match
         for column in self.required_columns:
             if column not in self.df.columns:
                 raise InvalidColumnsError(f'{column} not found in required columns.')
         self.df = self.df.fillna('no_info')
-        
+
         # a dictionary with dictionary mapping functions and None's where
         # no mapping is neccessery
         self.cleaning_map = {
-            'balcony': 
+            'balcony':
             {
                 'no_info': 'no_info',
                 'Nie': 0,
                 'Tak': 1,
             },
             'building_height': None,
-            'building_material': self.building_material, 
+            'building_material': self.building_material,
             'building_type': self.building_type,
             'building_year': None,
             'conviniences': self.conviniences,
-            'date_added': self.date_to_int, 
+            'date_added': self.date_to_int,
             'date_refreshed': self.date_to_int,
             'desc_len': None,
             'direct': None,
@@ -76,7 +45,7 @@ class MorizonCleaner(object):
             'image_link': 'remove',
             'lat': None,
             'lon': None,
-            'market_type': 
+            'market_type':
             {
                 'wtórny': 1,
                 'pierwotny': 0,
@@ -88,7 +57,7 @@ class MorizonCleaner(object):
             'promotion_counter': None,
             'room_n': self.fillna_mode,
             'size': None,
-            'taras': 
+            'taras':
             {
                 'no_info': 'no_info',
                 'Tak': 1,
@@ -106,7 +75,7 @@ class MorizonCleaner(object):
                 cleaning_func = self.cleaning_map[column]
             except KeyError:
                 continue
-                
+
             if callable(cleaning_func):
                 cleaning_func(column)
             elif type(cleaning_func) == dict:
@@ -120,7 +89,7 @@ class MorizonCleaner(object):
                 pass
                 log.error('Cleaning map has values other than expected.')
                 raise InvalidCleaningMapError
-                
+
         # creating new binary columns and remove 'no_info' values
         self.df = self.one_hot_encode_no_info(self.df)
         # replace 'no_info' with mode in given column
@@ -128,16 +97,16 @@ class MorizonCleaner(object):
         # one hot encode remaining categorical columns
         self.df = self.one_hot_encode_categorical(self.df)
         return self.df
-        
-    
+
+
     def fillna_mode(self, column_name):
         mode = self.df[column_name].mode()
         self.df[column_name] = self.df[column_name].fillna(mode)
-        
+
     def building_material(self, column_name):
         brick = ['cegla', 'cegła']
         concrete_slab = ['plyta', 'płyta']
-        
+
         def mapping(value):
             value = value.lower()
             if value == 'no_info':

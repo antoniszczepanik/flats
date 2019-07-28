@@ -1,11 +1,22 @@
+"""
+Set of rules for cleaning data scraped with morizon_spider.
+See spider directory for more info.
+How to map to numeric, which columns should be one-hot encoded
+or how to deal with datetime features is decided here.
+A lot of hardcoded column specific values are present in code below,
+but that comes from well thought decision as about how to store
+maps to parse these values.
+"""
 from datetime import datetime
 
 import pandas as pd
 import numpy as np
 import unidecode
 
-from utils import REQUIRED_COLUMNS
 # columns required for performing the cleaning
+from utils import REQUIRED_COLUMNS
+
+# for which columns fill lacks with 0
 FILL_NA_WITH_ZERO = ('parking_spot')
 
 class MorizonCleaner(object):
@@ -13,13 +24,11 @@ class MorizonCleaner(object):
     def __init__(self, df):
         self.df = df
         self.required_columns = REQUIRED_COLUMNS
-
         # verify columns match
         for column in self.required_columns:
             if column not in self.df.columns:
-                raise InvalidColumnsError(f'{column} not found in required columns.')
+                raise InvalidColumnsError(f'Required column "{column}" not found.')
         self.df = self.df.fillna('no_info')
-
         # a dictionary with dictionary mapping functions and None's where
         # no mapping is neccessery
         self.cleaning_map = {
@@ -32,7 +41,7 @@ class MorizonCleaner(object):
             'building_height': None,
             'building_material': self.building_material,
             'building_type': self.building_type,
-            'building_year': None,
+            'building_year': self.building_year,
             'conviniences': self.conviniences,
             'date_added': self.date_to_int,
             'date_refreshed': self.date_to_int,
@@ -68,14 +77,10 @@ class MorizonCleaner(object):
             'view_count': None,
         }
 
-
-    def clean_df(self):
-        for column in REQUIRED_COLUMNS:
-            try:
-                cleaning_func = self.cleaning_map[column]
-            except KeyError:
-                continue
-
+    def clean(self):
+        for column in REQUIRED_COLUMNS:                    
+            cleaning_func = self.cleaning_map[column]
+                                          
             if callable(cleaning_func):
                 cleaning_func(column)
             elif type(cleaning_func) == dict:
@@ -85,17 +90,17 @@ class MorizonCleaner(object):
             elif cleaning_func is None:
                 continue
             else:
-                # temoporary, remove later
-                pass
-                log.error('Cleaning map has values other than expected.')
                 raise InvalidCleaningMapError
-
+                
         # creating new binary columns and remove 'no_info' values
         self.df = self.one_hot_encode_no_info(self.df)
         # replace 'no_info' with mode in given column
         self.df = self.replace_no_info_with_mode(self.df)
         # one hot encode remaining categorical columns
         self.df = self.one_hot_encode_categorical(self.df)
+        # map remaining categorical features to numeric
+        self.df = self.map_categorical_features(self.df)
+        
         return self.df
 
 
@@ -104,8 +109,8 @@ class MorizonCleaner(object):
         self.df[column_name] = self.df[column_name].fillna(mode)
 
     def building_material(self, column_name):
-        brick = ['cegla', 'cegła']
-        concrete_slab = ['plyta', 'płyta']
+        brick = ['cegla', 'cegła',]
+        concrete_slab = ['plyta', 'płyta',]
 
         def mapping(value):
             value = value.lower()
@@ -123,11 +128,11 @@ class MorizonCleaner(object):
         
     def building_type(self, column_name):
         block = ['blo', 'wiez', 'szer','seg', 'mieszk',
-                'woln', 'inn', 'komp', 'bud', 'plo', 'lat']
+                'woln', 'inn', 'komp', 'bud', 'plo', 'lat',]
         hist = ['kamien', 'will', 'zabyt', 'histo',
-                     'styl', 'rezy', 'vil', 'socre', 'pal']
-        apart = ['apart', 'nowe budo', 'loft', 'hot','wys', 'biur']
-        house = ['do', 'niski', 'wielo', 'bliz']
+                     'styl', 'rezy', 'vil', 'socre', 'pal',]
+        apart = ['apart', 'nowe budo', 'loft', 'hot','wys', 'biur',]
+        house = ['do', 'niski', 'wielo', 'bliz',]
         
         def mapping(value):
             value = unidecode.unidecode(str(value)).lower()
@@ -145,6 +150,12 @@ class MorizonCleaner(object):
                     return 'house'
             return 'other'
         self.df[column_name] = self.df[column_name].apply(mapping)
+        
+    def building_year(self, column_name):
+        current_year = int(datetime.now().year)
+        self.df[column_name] =  self.df[column_name].apply(
+            lambda x: current_year - x if type(x) in (float, int) else 'no_info'
+        )
         
     def conviniences(self, column_name):
         def check_if_not(pol_word, string):
@@ -228,12 +239,12 @@ class MorizonCleaner(object):
         
     def flat_state(self, column_name):
         very_good = ['bardzo', 'wysoki', 'po remon', 'podwyzszony',
-                     'ideal', 'komfort', 'po gener']
+                     'ideal', 'komfort', 'po gener',]
         good = ['dobry', 'normalny', 'do wprowa', 'po czescio', 'czesciowo po',
                'zamieszkania', 'wykon']
         raw = ['dewel', 'devel', 'wykonczenia', 'odswiezenia', 'do czescio',
-               'sred', 'do adaptacji', 'drobnego', 'surowy zamkniety', 'surowy']
-        to_renovation = ['remontu', 'odnowienia']
+               'sred', 'do adaptacji', 'drobnego', 'surowy zamkniety', 'surowy',]
+        to_renovation = ['remontu', 'odnowienia',]
         
         def mapping(value):
             value = unidecode.unidecode(str(value)).lower()
@@ -384,6 +395,45 @@ class MorizonCleaner(object):
                 df = pd.concat(
                     [df, pd.get_dummies(df[col], prefix=col)], axis=1
                 )
+        return df
+                                          
+    def map_categorical_features(self, df):
+        """
+        Arbitrary mapping of remaing categorical features.
+        Why not? :)
+        """     
+        # confirm remaining categorical feats are as expected
+        remaining_categorical = ('building_material',
+                                 'building_type',
+                                 'heating',
+                                 'offer_id',)
+        for c in df.columns:
+            if df[c].dtype == 'object':
+                assert c in remaining_categorical
+                
+        df['building_material'] = df['building_material'].map(
+        {
+          'brick': 3,
+          'other': 2,
+          'concrete_slab': 1,
+        })
+        df['building_type'] = df['building_type'].map(
+        {
+          'hist': 3,
+          'apart': 3,
+          'house': 2,
+          'block': 1,
+          'other': 2,
+        })                                  
+        df['heating'] = df['heating'].map(
+        {
+          'fireplace': 4,
+          'urban': 3,
+          'gas': 2,
+          'electric': 2,
+          'coal': 1,
+          'other': 3,
+        })
         return df
                 
         

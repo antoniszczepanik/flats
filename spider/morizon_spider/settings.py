@@ -1,5 +1,3 @@
-from morizon_spider.credentials import ACCESS_KEY_ID, SECRET_ACCESS_KEY
-
 # -*- coding: utf-8 -*-
 # Scrapy settings for morizon_spider project
 BOT_NAME = "morizon_spider"
@@ -8,7 +6,7 @@ NEWSPIDER_MODULE = "morizon_spider.spiders"
 LOG_LEVEL = "INFO"
 
 # AWS S3 export settings
-FEED_URI = f"s3://{ACCESS_KEY_ID}:{SECRET_ACCESS_KEY}@morizon-data/%(name)s/raw/raw_%(name)s_%(time)s.csv"
+FEED_URI = f"~/morizon-data/%(name)s/raw/raw_%(name)s_%(time)s.csv"
 FEED_FORMAT = "csv"
 
 # Obey robots.txt rules
@@ -18,7 +16,6 @@ ROBOTSTXT_OBEY = False
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "morizon_spider.pipelines.MorizonSpiderPipeline": 300,
-    #        'scrapy.pipelines.files.S3FilesUpload': 600
 }
 
 # Debugging

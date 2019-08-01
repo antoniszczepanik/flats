@@ -51,7 +51,6 @@ class MorizonCleaner(object):
             'flat_state': self.flat_state,
             'floor': self.floor,
             'heating': self.heating,
-            'image_link': 'remove',
             'lat': None,
             'lon': None,
             'market_type':

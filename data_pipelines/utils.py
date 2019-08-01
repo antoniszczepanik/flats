@@ -2,6 +2,7 @@ import logging as log
 from datetime import datetime
 import pandas as pd
 
+
 # expected columns 
 REQUIRED_COLUMNS =[
     'balcony',
@@ -18,7 +19,6 @@ REQUIRED_COLUMNS =[
     'flat_state',
     'floor',
     'heating',
-    'image_link',
     'lat',
     'lon',
     'market_type',
@@ -34,8 +34,7 @@ REQUIRED_COLUMNS =[
     'url',
     'view_count',
 ]
-
-
+COLUMNS_TO_SKIP = {'image_link','desc'}
 
 def concat_dfs(paths):
     """
@@ -50,10 +49,14 @@ def concat_dfs(paths):
     parquet_rows_n = 0
 
     for path in paths:
-        if path.endswith(".csv", columns=REQUIRED_COLUMNS):
-            df = pd.read_csv(path)
+        if path.endswith(".csv"):
+            # don't read columns unused later
+            columns = list(set(pd.read_csv(path, nrows=1).columns) - (COLUMNS_TO_SKIP))
+            df = pd.read_csv(path, usecols=columns, low_memory=True)
         elif path.endswith(".parquet"):
-            df = pd.read_parquet(path, columns=REQUIRED_COLUMNS)
+            # don't read columns unused later
+            columns = list(set(pd.read_csv(path, nrows=1).columns) - (COLUMNS_TO_SKIP))
+            df = pd.read_parquet(path, usecols=columns, low_memory=True)
             parquet_rows_n += len(df)
         total_rows_n += len(df)
         dfs.append(df)
@@ -87,11 +90,16 @@ def select_most_up_to_date_file(file_paths):
     if len(file_paths) == 0:
         return None
     dt_strings = []
+
     for path in file_paths:
-        dt_strings.append("".join([x for x in path if x.isdigit()]))
+        date_numbers = "".join([x for x in path if x.isdigit()])
+        # assure only files with datetimes are considered
+        if len(date_numbers)== 14:
+            dt_strings.append(date_numbers)
 
     datetimes = [datetime.strptime(x, "%Y%m%d%H%M%S") for x in dt_strings]
     max_pos = datetimes.index(max(datetimes))
+
     return file_paths[max_pos]
 
 

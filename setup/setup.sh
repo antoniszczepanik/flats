@@ -26,5 +26,5 @@ apt-get install s3fs
 echo "Mounting s3 in ~/morizon-data"
 mkdir ~/morizon-data
 chmod 600 ~/.aws/credentials
-s3fs morizon-data ~/morizon-data -o passwd_file=~/.aws/credentials -o use_cache=/tmp
+s3fs morizon-data ~/morizon-data -o passwd_file=/home/ubuntu/.aws/credentials -o use_cache=/tmp -o allow_other -o mp_umask=002
 

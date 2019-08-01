@@ -1,5 +1,8 @@
 # FIRST ADD ~/.aws/credentials file!!!
 
+# make sure in the right directory
+cd ~/morizon-spider/setup
+
 # install requirements
 apt-get update
 apt-get -y install build-essential python3-dev python3-pip s3fs
@@ -11,8 +14,6 @@ export PATH=$PATH:~/.local/bin
 nohup scrapyd >/dev/null 2>&1 & 
 echo "Scrapyd server is up and running!"
 
-# make sure in the right directory
-cd ~/morizon-spider/setup
 # deploy spider
 cd ../spider
 scrapyd-deploy local-target -p morizon_spider

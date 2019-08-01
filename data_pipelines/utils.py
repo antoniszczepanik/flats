@@ -36,6 +36,12 @@ REQUIRED_COLUMNS =[
 ]
 COLUMNS_TO_SKIP = {'image_link','desc'}
 
+
+log.basicConfig(
+    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
+)
+
+
 def concat_dfs(paths):
     """
     Concat all files by paths and drop all duplicates.
@@ -49,17 +55,19 @@ def concat_dfs(paths):
     parquet_rows_n = 0
 
     for path in paths:
+        log.info(f'Reading {path}')
         if path.endswith(".csv"):
             # don't read columns unused later
-            columns = list(set(pd.read_csv(path, nrows=1).columns) - (COLUMNS_TO_SKIP))
-            df = pd.read_csv(path, usecols=columns, low_memory=True)
+            columns = pd.read_csv(path, nrows=1).columns
+            columns_to_use = list(set(columns) - COLUMNS_TO_SKIP)
+            df = pd.read_csv(path, usecols=columns_to_use, low_memory=True)
         elif path.endswith(".parquet"):
             # don't read columns unused later
-            columns = list(set(pd.read_csv(path, nrows=1).columns) - (COLUMNS_TO_SKIP))
-            df = pd.read_parquet(path, usecols=columns, low_memory=True)
+            df = pd.read_parquet(path)
             parquet_rows_n += len(df)
         total_rows_n += len(df)
         dfs.append(df)
+
     concatinated_df = pd.concat(dfs, sort=True).drop_duplicates(keep="last")
 
     log.info(f"Concatinated {len(dfs)} files.")

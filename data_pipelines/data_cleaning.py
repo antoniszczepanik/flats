@@ -77,6 +77,7 @@ class MorizonCleaner(object):
         }
 
     def clean(self):
+        self.df = self.df.dropna(how='all', axis=1)
         for column in REQUIRED_COLUMNS:                    
             cleaning_func = self.cleaning_map[column]
                                           

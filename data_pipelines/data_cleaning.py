@@ -8,6 +8,7 @@ but that comes from well thought decision as about how to store
 maps to parse these values.
 """
 from datetime import datetime
+import logging as log
 
 import pandas as pd
 import numpy as np
@@ -18,6 +19,11 @@ from utils import REQUIRED_COLUMNS
 
 # for which columns fill lacks with 0
 FILL_NA_WITH_ZERO = ('parking_spot')
+
+log.basicConfig(
+    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
+)
+
 
 class MorizonCleaner(object):
 
@@ -370,19 +376,28 @@ class MorizonCleaner(object):
         return df
             
     def replace_no_info_with_mode(self, df):
-        # replace with 0 if binary (no info == lack of feature)
-        # else with mode value
+        """
+        Replace with 0 if binary (no info == lack of feature)
+        else with mode value.
+        """
+        # find columns with lacks   
+        cols_to_replace = []
         for col in df.columns:
-            cols_to_replace = []
             if 'no_info' in list(df[col].values):
                 cols_to_replace.append(col)
-            df[cols_to_replace] = df[cols_to_replace].replace({'no_info':np.nan})
-            for col in cols_to_replace:
-                vc = self.value_counts(df, col)
-                if vc in (1, 2) or col in FILL_NA_WITH_ZERO:
-                    df[col] = df[col].fillna(0)
-                else:
+        df[cols_to_replace] = df[cols_to_replace].replace({'no_info':np.nan})
+
+        for col in cols_to_replace:
+            vc = self.value_counts(df, col)
+            # columns with 1 or 2 values or specified
+            if vc in (1, 2) or col in FILL_NA_WITH_ZERO:
+                df[col] = df[col].fillna(0)
+            else:
+                try:
                     mode = df[col].mode()[0]
+                except IndexError:
+                    log.info(f'Ignoring empty column: {col}')
+                else:
                     df[col] = df[col].fillna(mode)
         return df
     

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3 
 """"
-Pipeline to cleanes all concated data in parquet format.
+Pipeline to clean concated data in parquet format.
 It loads concated data and outputs clean parquets to clean/
-directory.
+directory. It converts each column to numerical, without
+dropping any rows.
 """
 from datetime import datetime
 import os
@@ -36,7 +37,7 @@ def clean_morizon_data(in_path, out_path, spider_name):
     current_dt = datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
     out_filepath = f'{HOME_PATH}{out_path}/{spider_name}_clean_{current_dt}.parquet'
     log.info(f"Saving cleaned dataframe to {out_filepath}")
-    full_df.to_parquet(out_filepath, index=False)
+    clean_df.to_parquet(out_filepath, index=False)
 
 
 if __name__ == "__main__":
@@ -45,5 +46,5 @@ if __name__ == "__main__":
         in_path =  PATHS[spider_type][0]
         out_path = PATHS[spider_type][1]
         clean_morizon_data(in_path, out_path, spider_type)
-        log.info(f"Successfully cleaned data for {spider_type}")
+        log.info(f"Successfully cleaned data for {spider_type}.")
     log.info("Finished data cleaning pipeline.")

@@ -27,6 +27,7 @@ def concat_csvs_to_parquet(in_path, out_path, spider_name):
     """
     # filter desc files
     in_path_content = os.listdir(f'{HOME_PATH}{in_path}')
+    log.info(f'Found {len(in_path_content)} files to concat.')
     paths_to_concat = [f for f in in_path_content if "desc" not in f]
     paths_to_concat = [f'{HOME_PATH}{in_path}/{f}' for f in paths_to_concat]
 

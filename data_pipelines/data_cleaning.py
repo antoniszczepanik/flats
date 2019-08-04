@@ -106,6 +106,8 @@ class MorizonCleaner(object):
         self.df = self.one_hot_encode_categorical(self.df)
         # map remaining categorical features to numeric
         self.df = self.map_categorical_features(self.df)
+        # drop empty and single value columns
+        self.df = self.drop_empty_cols(self.df)
         
         return self.df
 
@@ -450,8 +452,13 @@ class MorizonCleaner(object):
           'other': 3,
         })
         return df
-                
-        
+
+    def drop_empty_cols(self, df):
+        for c in df.columns:
+            if len(df[c].value_counts()) == 1:
+                df = df.drop(c, axis=j1)
+
+
 class InvalidCleaningMapError(Exception):
     pass
 

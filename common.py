@@ -36,14 +36,15 @@ log.basicConfig(
     level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
 )
 
-PATHS = {'rent': {'raw': "/morizon-data/morizon_sale/raw",
-                  'concated': "/morizon-data/morizon_sale/concated",
-                  'clean': "/morizon-data/morizon_sale/clean"},
-         'sale': {'raw': "/morizon-data/morizon_rent/concated",
-                  'concated': "/morizon-data/morizon_rent/concated",
-                  'clean': "/morizon-data/morizon_rent/clean"}}
-
 HOME_PATH = '/home/ubuntu'
+
+PATHS = {'sale': {'raw': f"{HOME_PATH}/morizon-data/morizon_sale/raw",
+                  'concated': f"{HOME_PATH}/morizon-data/morizon_sale/concated",
+                  'clean': f"{HOME_PATH}/morizon-data/morizon_sale/clean"},
+         'rent': {'raw': f"{HOME_PATH}/morizon-data/morizon_rent/raw",
+                  'concated': f"{HOME_PATH}/morizon-data/morizon_rent/concated",
+                  'clean': f"{HOME_PATH}/morizon-data/morizon_rent/clean"}}
+
 
 
 def select_most_up_to_date_file(file_paths):

@@ -29,7 +29,7 @@ class MorizonCleaner(object):
 
     def __init__(self, df):
         self.df = df
-        self.required_columns = REQUIRED_COLUMNS
+        self.required_columns = CLEANING_REQUIRED_COLUMNS
         # verify columns match
         for column in self.required_columns:
             if column not in self.df.columns:
@@ -84,7 +84,7 @@ class MorizonCleaner(object):
 
     def clean(self):
         self.df = self.df.dropna(how='all', axis=1)
-        for column in REQUIRED_COLUMNS:                    
+        for column in CLEANING_REQUIRED_COLUMNS:                    
             cleaning_func = self.cleaning_map[column]
                                           
             if callable(cleaning_func):

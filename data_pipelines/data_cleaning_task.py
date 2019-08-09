@@ -11,12 +11,8 @@ import logging as log
 
 import pandas as pd
 
-from utils import select_most_up_to_date_file
+from common import select_most_up_to_date_file, HOME_PATH, PATHS
 from data_cleaning import MorizonCleaner
-
-PATHS = {'rent': ("/morizon-data/morizon_sale/concated", "/morizon-data/morizon_sale/clean"),
-         'sale': ("/morizon-data/morizon_rent/concated", "/morizon-data/morizon_rent/clean"),}
-HOME_PATH = '/home/ubuntu'
 
 log.basicConfig(
     level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
@@ -40,11 +36,10 @@ def clean_morizon_data(in_path, out_path, spider_name):
     clean_df.to_parquet(out_filepath, index=False)
 
 
-if __name__ == "__main__":
-    log.info("Starting data cleaning pipeline...")
-    for spider_type in PATHS:
-        in_path =  PATHS[spider_type][0]
-        out_path = PATHS[spider_type][1]
-        clean_morizon_data(in_path, out_path, spider_type)
-        log.info(f"Successfully cleaned data for {spider_type}.")
-    log.info("Finished data cleaning pipeline.")
+log.info("Starting data cleaning pipeline...")
+for spider_type in PATHS:
+    in_path =  PATHS[spider_type]['concated']
+    out_path = PATHS[spider_type]['clean']
+    clean_morizon_data(in_path, out_path, spider_type)
+    log.info(f"Successfully cleaned data for {spider_type}.")
+log.info("Finished data cleaning pipeline.")

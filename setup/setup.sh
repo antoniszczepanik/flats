@@ -7,8 +7,11 @@ cd ~/flats/setup
 apt-get update
 apt-get -y install build-essential python3-dev python3-pip s3fs
 pip3 install -r requirements.txt
+
 # add scrapyd etc to path
 export PATH=$PATH:~/.local/bin
+# add flats to path
+export PYTHONPATH="{PYTHONPATH}:/home/ubuntu/flats"
 
 # run scrapyd server in background
 nohup scrapyd >/dev/null 2>&1 & 
@@ -29,4 +32,5 @@ echo "Mounting s3 in ~/morizon-data"
 mkdir ~/morizon-data
 chmod 600 ~/.aws/credentials
 s3fs morizon-data ~/morizon-data -o nonempty -o passwd_file=/home/ubuntu/.aws/credentials -o use_cache=/tmp -o allow_other -o mp_umask=077 -o uid=1000 -o gid=1000
+
 

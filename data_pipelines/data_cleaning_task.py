@@ -23,8 +23,8 @@ def clean_morizon_data(in_path, out_path, spider_name):
     Clean most current file from /concated directory
     for each spider. Save the output to /clean directory.
     """
-    in_path_content = os.listdir(f'{HOME_PATH}{in_path}')
-    paths_to_clean = [f'{HOME_PATH}{in_path}/{f}' for f in in_path_content]
+    in_path_content = os.listdir(f'{in_path}')
+    paths_to_clean = [f'{in_path}/{f}' for f in in_path_content]
 
     most_current_file = select_most_up_to_date_file(paths_to_clean)
     log.info(f"Found most up-to-date file: {most_current_file}")

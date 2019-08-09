@@ -1,3 +1,4 @@
+import os
 import logging
 from datetime import datetime, timedelta
 
@@ -28,6 +29,9 @@ class MorizonSpider(scrapy.Spider):
         self.today = datetime.now().date()
         self.yesterday = datetime.now().date() - timedelta(days=1)
         self.start_date = self.previous_date
+        # go back one day (to scrape yesterdays offers)
+        if self.start_date == self.today:
+            self.start_date = self.yesterday
         self.logger.info(f"Setting start_date to {self.start_date}...")
         self.end_date = self.yesterday
         self.logger.info(f"Setting end_date to {self.end_date}...")

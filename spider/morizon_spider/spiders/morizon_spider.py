@@ -1,23 +1,16 @@
-import scrapy
 import logging
 from datetime import datetime, timedelta
-from morizon_spider.items import MorizonSpiderItem
-from morizon_spider.date_utils import read_last_scraping_date
-from morizon_spider.date_utils import update_last_scraping_date
 
+import scrapy
+
+from morizon_spider.items import MorizonSpiderItem
+from common import PATHS, select_most_up_to_date_date
 
 class MorizonSpider(scrapy.Spider):
 
     name = "morizon_sale"
 
     def __init__(self, *args, **kwargs):
-
-        # do not display aws keys from feedexport in logs
-        feed_logger = logging.getLogger("scrapy.extensions.feedexport")
-        feed_logger.setLevel(logging.WARNING)
-        # do not display aws keys from crawler in logs
-        crawler_logger = logging.getLogger("scrapy.crawler")
-        crawler_logger.setLevel(logging.WARNING)
 
         # morizon won't display all offers if following pagination
         # introduce chunker variable and chunk all requested offers by price
@@ -27,8 +20,7 @@ class MorizonSpider(scrapy.Spider):
         self.max_price = 5000000
 
         # handle previous date args
-        self.previous_date = read_last_scraping_date(crawler_name=self.name)
-        update_last_scraping_date(crawler_name=self.name)
+        self.previous_date = self._read_last_scraping_date().date()
         self.today_str = datetime.now().date().strftime("%d-%m-%Y")
         self.yesterday_str = (datetime.now().date() - timedelta(days=1)).strftime(
             "%d-%m-%Y"
@@ -49,7 +41,7 @@ class MorizonSpider(scrapy.Spider):
                 date_filter = date_selection
                 break
 
-        # Formating start_urls
+        # format start_urls
         if date_filter is not None:
             self.date_filter_str = f"&ps%5Bdate_filter%5D={date_filter}"
         else:
@@ -64,8 +56,10 @@ class MorizonSpider(scrapy.Spider):
         ]
 
     def parse(self, response):
-        # parse one page of offers, single offers are parsed via callback
-        # find all links and their dates on parsed page
+        """
+        Parse one page of offers, single offers are parsed via callback.
+        Find all links and their dates on parsed page.
+        """
         links_to_scrape = [
             link
             for link in response.xpath("//a[@class='property_link']/@href").getall()
@@ -289,3 +283,15 @@ class MorizonSpider(scrapy.Spider):
 
         date = datetime.strptime(date, "%d-%m-%Y").date()
         return date
+
+    def _read_last_scraping_date(self):
+        # 'rent', 'sale, ...
+        spider_type = self.name.split('_')[-1]
+        raw_path = PATHS[spider_type]['raw']
+        previously_scraped = os.listdir(raw_path)
+        return select_most_up_to_date_date(previously_scraped)
+
+
+
+
+

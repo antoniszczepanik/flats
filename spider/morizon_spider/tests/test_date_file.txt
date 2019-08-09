@@ -1,2 +1,0 @@
-morizon_rent:25-05-1999
-morizon_sale:21-02-2019,25-02-2019

@@ -1,7 +1,7 @@
 # FIRST ADD ~/.aws/credentials file!!!
 
 # make sure in the right directory
-cd ~/morizon-spider/setup
+cd ~/flats/setup
 
 # install requirements
 apt-get update

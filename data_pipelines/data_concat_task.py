@@ -11,10 +11,7 @@ import logging as log
 import pandas as pd
 
 import utils
-
-PATHS = {'rent': ("/morizon-data/morizon_sale/raw", "/morizon-data/morizon_sale/concated"),
-         'sale': ("/morizon-data/morizon_rent/raw", "/morizon-data/morizon_rent/concated"),}
-HOME_PATH = '/home/ubuntu'
+from common import PATHS, HOME_PATH
 
 log.basicConfig(
     level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
@@ -42,8 +39,8 @@ if __name__ == "__main__":
 
     log.info("Starting data concatination pipeline...")
     for spider_type in PATHS:
-        in_path =  PATHS[spider_type][0]
-        out_path = PATHS[spider_type][1]
+        in_path =  PATHS[spider_type]['raw']
+        out_path = PATHS[spider_type]['concated']
         log.info(f"Starting concating files for {spider_type}.")
         concat_csvs_to_parquet(in_path, out_path, spider_type)
         log.info(f"Successfully concated files for {spider_type}")

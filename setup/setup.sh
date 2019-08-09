@@ -12,6 +12,8 @@ pip3 install -r requirements.txt
 export PATH=$PATH:~/.local/bin
 # add flats to path
 export PYTHONPATH="{PYTHONPATH}:/home/ubuntu/flats"
+echo 'PYTHONPATH="$PYTHONPATH:/home/ubuntu/flats"' >> /etc/environment
+source /etc/environment
 
 # run scrapyd server in background
 nohup scrapyd >/dev/null 2>&1 & 

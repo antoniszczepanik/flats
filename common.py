@@ -37,6 +37,7 @@ log.basicConfig(
 )
 
 HOME_PATH = '/home/ubuntu'
+LOG_PATH = f'{HOME_PATH}/flats/setup/logs'
 
 PATHS = {'sale': {'raw': f"{HOME_PATH}/morizon-data/morizon_sale/raw",
                   'concated': f"{HOME_PATH}/morizon-data/morizon_sale/concated",

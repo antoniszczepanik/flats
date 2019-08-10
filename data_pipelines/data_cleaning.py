@@ -28,6 +28,7 @@ log.basicConfig(
 class MorizonCleaner(object):
 
     def __init__(self, df):
+        log.info("Initialized MorizonCleaner ...")
         self.df = df
         self.required_columns = CLEANING_REQUIRED_COLUMNS
         # verify columns match
@@ -88,26 +89,37 @@ class MorizonCleaner(object):
             cleaning_func = self.cleaning_map[column]
                                           
             if callable(cleaning_func):
+                log.info(f"Cleaning {column} with '{cleaning_func.__name__}' funciton...")
                 cleaning_func(column)
             elif type(cleaning_func) == dict:
+                log.info(f"Remmaping {column} ...")
                 self.df[column] = self.df[column].map(cleaning_func)
             elif cleaning_func == 'remove':
+                log.info(f"Removing {column} ...")
                 self.df = self.df.drop(column, axis=1)
             elif cleaning_func is None:
+                log.info(f"Skipping {column} ...")
                 continue
             else:
                 raise InvalidCleaningMapError
                 
+        log.info("Doing additional clean-up...")
         # creating new binary columns and remove 'no_info' values
+        log.info("One-hot-encoding missing values...")
         self.df = self.one_hot_encode_no_info(self.df)
         # replace 'no_info' with mode in given column
+        log.info("Replacing missing values with mode...")
         self.df = self.replace_no_info_with_mode(self.df)
         # one hot encode remaining categorical columns
+        log.info("One-hot-encoding categorical columns...")
         self.df = self.one_hot_encode_categorical(self.df)
         # map remaining categorical features to numeric
+        log.info("Remapping remaining categorical features...")
         self.df = self.map_categorical_features(self.df)
         # drop empty and single value columns
+        log.info("Dropping empty columns...")
         self.df = self.drop_empty_cols(self.df)
+        log.info("Cleaning finished successfully")
         
         return self.df
 
@@ -371,10 +383,8 @@ class MorizonCleaner(object):
         
     def one_hot_encode_no_info(self, df):
         for col in df.columns:
-            if 'no_info' in list(df[col].values):
-                df[col + '_no_info'] = df[col].apply(
-                    lambda x: 1 if x == 'no_info' else 0
-                )
+            if 'no_info' in df[col]:
+                df[col + '_no_info'] = np.where(df[col]=='no_info', 1, 0) 
         return df
             
     def replace_no_info_with_mode(self, df):
@@ -385,12 +395,13 @@ class MorizonCleaner(object):
         # find columns with lacks   
         cols_to_replace = []
         for col in df.columns:
-            if 'no_info' in list(df[col].values):
+            if 'no_info' in df[col]:
                 cols_to_replace.append(col)
+
         df[cols_to_replace] = df[cols_to_replace].replace({'no_info':np.nan})
 
         for col in cols_to_replace:
-            vc = self.value_counts(df, col)
+            vc = self.count_distinct_values(df, col)
             # columns with 1 or 2 values or specified
             if vc in (1, 2) or col in FILL_NA_WITH_ZERO:
                 df[col] = df[col].fillna(0)
@@ -403,12 +414,12 @@ class MorizonCleaner(object):
                     df[col] = df[col].fillna(mode)
         return df
     
-    def value_counts(self, df, col):
+    def count_distinct_values(self, df, col):
         return len(df[col].value_counts())
     
     def one_hot_encode_categorical(self, df):
         for col in df.columns:
-            if self.value_counts(df, col) < 10 and df[col].dtype == 'object':
+            if self.count_distinct_values(df, col) < 10 and df[col].dtype == 'object':
                 df = pd.concat(
                     [df, pd.get_dummies(df[col], prefix=col)], axis=1
                 )

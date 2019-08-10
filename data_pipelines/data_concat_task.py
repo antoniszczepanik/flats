@@ -12,9 +12,10 @@ import pandas as pd
 
 import utils
 from common import PATHS, HOME_PATH
-
+filename = '/home/ubuntu/flats/setup/logs/data_pipelines/data_pipelines'
 log.basicConfig(
-    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
+    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S",
+    filname=filename
 )
 
 def concat_csvs_to_parquet(in_path, out_path, spider_type):

@@ -25,15 +25,19 @@ def clean_morizon_data(in_path, out_path, spider_name):
     """
     in_path_content = os.listdir(f'{in_path}')
     paths_to_clean = [f'{in_path}/{f}' for f in in_path_content]
-
     most_current_file = select_most_up_to_date_file(paths_to_clean)
     log.info(f"Found most up-to-date file: {most_current_file}")
+
     most_current_df = pd.read_parquet(most_current_file)
+    log.info(f'Finished reading {most_current_file}')
+
     clean_df = MorizonCleaner(most_current_df).clean()
     current_dt = datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
+
     out_filepath = f'{HOME_PATH}{out_path}/{spider_name}_clean_{current_dt}.parquet'
-    log.info(f"Saving cleaned dataframe to {out_filepath}")
+    log.info(f"Writing cleaned dataframe to {out_filepath}")
     clean_df.to_parquet(out_filepath, index=False)
+    log.info(f"Files writing finished succesfully.")
 
 
 log.info("Starting data cleaning pipeline...")

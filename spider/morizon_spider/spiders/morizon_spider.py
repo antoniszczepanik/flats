@@ -294,8 +294,3 @@ class MorizonSpider(scrapy.Spider):
         raw_path = PATHS[spider_type]['raw']
         previously_scraped = os.listdir(raw_path)
         return select_most_up_to_date_date(previously_scraped)
-
-
-
-
-

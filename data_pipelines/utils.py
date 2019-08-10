@@ -31,7 +31,7 @@ def concat_dfs(paths):
         elif path.endswith(".parquet"):
             # don't read columns unused later
             df = pd.read_parquet(path)
-            parquet_rows_n += len(df)
+
         total_rows_n += len(df)
         dfs.append(df)
 
@@ -39,9 +39,7 @@ def concat_dfs(paths):
 
     log.info(f"Concatinated {len(dfs)} files.")
     log.info(f"Dropped {total_rows_n - len(concatinated_df)} duplicates.")
-    log.info(f"Previous concatinated file had {parquet_rows_n}")
-    log.info(f"Concatinated csv has {len(concatinated_df)} rows.")
-    log.info(f"Added {len(concatinated_df)-parquet_rows_n} new rows.")
+    log.info(f"Concatinated parquet has {len(concatinated_df)} rows.")
 
     return concatinated_df
 

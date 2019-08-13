@@ -113,6 +113,9 @@ class MorizonCleaner(object):
         # one hot encode remaining categorical columns
         log.info("One-hot-encoding categorical columns...")
         self.df = self.one_hot_encode_categorical(self.df)
+        # remove duplicate columns  
+        log.info("Removing duplicate columns")
+        self.df = self.remove_duplicate_columns(self.df)
         # map remaining categorical features to numeric
         log.info("Remapping remaining categorical features...")
         self.df = self.map_categorical_features(self.df)
@@ -120,6 +123,7 @@ class MorizonCleaner(object):
         log.info("Dropping empty columns...")
         self.df = self.drop_empty_cols(self.df)
         log.info("Cleaning finished successfully")
+        log.info(f"Shape of output df: {self.df.shape}")
         
         return self.df
 
@@ -418,12 +422,16 @@ class MorizonCleaner(object):
         return len(df[col].value_counts())
     
     def one_hot_encode_categorical(self, df):
+        cols_to_transform = []
         for col in df.columns:
-            if self.count_distinct_values(df, col) < 10 and df[col].dtype == 'object':
-                df = pd.concat(
-                    [df, pd.get_dummies(df[col], prefix=col)], axis=1
-                )
+            if  df[col].dtype == 'object' and self.count_distinct_values(df, col) < 10:
+                cols_to_transform.append(col)
+        df_dummies = pd.get_dummies(df, prefix=col, columns=cols_to_transform)
+        df = pd.concat([df_dummies, df[cols_to_transform]], axis=1)
         return df
+    
+    def remove_duplicate_columns(self, df):
+        return df.loc[:, ~df.columns.duplicated()]
                                           
     def map_categorical_features(self, df):
         """
@@ -435,9 +443,10 @@ class MorizonCleaner(object):
                                  'building_type',
                                  'heating',
                                  'offer_id',)
-        for c in df.columns:
-            if df[c].dtype == 'object':
-                assert c in remaining_categorical
+
+        for c in df.select_dtypes(include=['object']).columns:
+            if 'no_info' in df[c]:
+                assert c in remaining_categorical 
                 
         df['building_material'] = df['building_material'].map(
         {
@@ -467,7 +476,7 @@ class MorizonCleaner(object):
     def drop_empty_cols(self, df):
         for c in df.columns:
             if len(df[c].value_counts()) == 1:
-                df = df.drop(c, axis=j1)
+                df = df.drop(c, axis=1)
 
 
 class InvalidCleaningMapError(Exception):

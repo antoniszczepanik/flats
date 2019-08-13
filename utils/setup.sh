@@ -13,10 +13,6 @@ export PATH=$PATH:~/.local/bin
 # add flats to path
 export PYTHONPATH="{PYTHONPATH}:/home/ubuntu/flats"
 
-echo 'export PYTHONPATH="$PYTHONPATH:/home/ubuntu/flats"' >> /etc/environment
-chmod +x /etc/environment
-. /etc/environment
-
 # run scrapyd server in background
 nohup scrapyd >/dev/null 2>&1 & 
 echo "Scrapyd server is up and running!"

@@ -20,7 +20,7 @@ echo "Scrapyd server is up and running!"
 # deploy spider
 cd ../spider
 scrapyd-deploy local-target -p morizon_spider
-cd ../setup
+cd -
 
 # setup cron jobs
 crontab cron_jobs

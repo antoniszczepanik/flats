@@ -89,7 +89,7 @@ class MorizonCleaner(object):
             cleaning_func = self.cleaning_map[column]
                                           
             if callable(cleaning_func):
-                log.info(f"Cleaning {column} with '{cleaning_func.__name__}' funciton...")
+                log.info(f"Cleaning {column} with '{cleaning_func.__name__}' function...")
                 cleaning_func(column)
             elif type(cleaning_func) == dict:
                 log.info(f"Remmaping {column} ...")
@@ -106,13 +106,16 @@ class MorizonCleaner(object):
         log.info("Doing additional clean-up...")
         # creating new binary columns and remove 'no_info' values
         log.info("One-hot-encoding missing values...")
-        self.df = self.one_hot_encode_no_info(self.df)
+        self.one_hot_encode_no_info()
         # replace 'no_info' with mode in given column
         log.info("Replacing missing values with mode...")
-        self.df = self.replace_no_info_with_mode(self.df)
+        self.replace_no_info_with_mode()
         # one hot encode remaining categorical columns
         log.info("One-hot-encoding categorical columns...")
         self.df = self.one_hot_encode_categorical(self.df)
+        # remove duplicate columns  
+        log.info("Removing duplicate columns")
+        self.df = self.remove_duplicate_columns(self.df)
         # map remaining categorical features to numeric
         log.info("Remapping remaining categorical features...")
         self.df = self.map_categorical_features(self.df)
@@ -120,6 +123,7 @@ class MorizonCleaner(object):
         log.info("Dropping empty columns...")
         self.df = self.drop_empty_cols(self.df)
         log.info("Cleaning finished successfully")
+        log.info(f"Shape of output df: {self.df.shape}")
         
         return self.df
 
@@ -381,49 +385,56 @@ class MorizonCleaner(object):
         self.df['sewers'] = self.df[column_name].apply(sewers)
         self.df = self.df.drop(column_name, axis=1)
         
-    def one_hot_encode_no_info(self, df):
-        for col in df.columns:
-            if 'no_info' in df[col]:
-                df[col + '_no_info'] = np.where(df[col]=='no_info', 1, 0) 
-        return df
+    def one_hot_encode_no_info(self):
+        cols_with_no_info = self.find_cols_with_no_info()
+        for col in cols_with_no_info:
+            self.df[col + '_no_info'] = np.where(self.df[col].isin(['no_info']), 1, 0) 
             
-    def replace_no_info_with_mode(self, df):
+    def replace_no_info_with_mode(self):
         """
         Replace with 0 if binary (no info == lack of feature)
         else with mode value.
         """
-        # find columns with lacks   
-        cols_to_replace = []
-        for col in df.columns:
-            if 'no_info' in df[col]:
-                cols_to_replace.append(col)
-
-        df[cols_to_replace] = df[cols_to_replace].replace({'no_info':np.nan})
-
-        for col in cols_to_replace:
-            vc = self.count_distinct_values(df, col)
+        cols_with_no_info = self.find_cols_with_no_info()
+        self.df[cols_with_no_info] = self.df[cols_with_no_info].replace({'no_info':np.nan})
+        for col in cols_with_no_info:
+            vc = self.count_distinct_values(self.df, col)
             # columns with 1 or 2 values or specified
             if vc in (1, 2) or col in FILL_NA_WITH_ZERO:
-                df[col] = df[col].fillna(0)
+                self.df[col] = self.df[col].fillna(0)
+                log.info(f'Replace no_info with binary for {col}')
             else:
                 try:
-                    mode = df[col].mode()[0]
+                    mode = self.df[col].mode()[0]
                 except IndexError:
-                    log.info(f'Ignoring empty column: {col}')
+                    log.info(f'Ignoring empty column (IE): {col}')
                 else:
-                    df[col] = df[col].fillna(mode)
-        return df
-    
+                    log.info(f'Replace no_info with mode for {col}')
+                    self.df[col] = self.df[col].fillna(mode)
+
+    def find_cols_with_no_info(self):
+        no_info_cols = []
+        for col in self.df.columns:
+            if self.df[col].isin(['no_info']).any():
+                no_info_cols.append(col)
+        log.info(f'Found {len(no_info_cols)} with no_info value')
+        return no_info_cols
+
+
     def count_distinct_values(self, df, col):
         return len(df[col].value_counts())
     
-    def one_hot_encode_categorical(self, df):
+    def one_hot_encode_categorical(self):
+        cols_to_transform = []
         for col in df.columns:
-            if self.count_distinct_values(df, col) < 10 and df[col].dtype == 'object':
-                df = pd.concat(
-                    [df, pd.get_dummies(df[col], prefix=col)], axis=1
-                )
+            if  self.df[col].dtype == 'object' and self.count_distinct_values(self.df, col) < 10:
+                cols_to_transform.append(col)
+        df_dummies = pd.get_dummies(self.df, prefix=col, columns=cols_to_transform)
+        self.df = pd.concat([df_dummies, self.df], axis=1)
         return df
+    
+    def remove_duplicate_columns(self, df):
+        return df.loc[:, ~df.columns.duplicated()]
                                           
     def map_categorical_features(self, df):
         """
@@ -435,9 +446,9 @@ class MorizonCleaner(object):
                                  'building_type',
                                  'heating',
                                  'offer_id',)
-        for c in df.columns:
-            if df[c].dtype == 'object':
-                assert c in remaining_categorical
+
+        for c in df.select_dtypes(include=['object']).columns:
+            assert c in remaining_categorical 
                 
         df['building_material'] = df['building_material'].map(
         {
@@ -466,8 +477,9 @@ class MorizonCleaner(object):
 
     def drop_empty_cols(self, df):
         for c in df.columns:
-            if len(df[c].value_counts()) == 1:
-                df = df.drop(c, axis=j1)
+            if self.count_distinct_values(df, c) == 1:
+                df = df.drop(c, axis=1)
+        return df
 
 
 class InvalidCleaningMapError(Exception):

@@ -5,6 +5,7 @@ spider/eggs/
 spider/logs/
 spider/project.egg-info/
 spider/previous_scraping_dates.txt
+utils/twistd.pid
 /*.pyc
 .cache/
 __pycache__/

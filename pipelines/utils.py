@@ -25,12 +25,18 @@ def concat_dfs(paths):
         log.info(f'Reading {path}')
         if path.endswith(".csv"):
             # don't read columns unused later
-            columns = pd.read_csv(path, nrows=1).columns
-            columns_to_use = list(set(columns) - COLUMNS_TO_SKIP)
-            df = pd.read_csv(path, usecols=columns_to_use, low_memory=True)
+            try:
+                columns = pd.read_csv(path, nrows=1).columns
+            except pd.errors.EmptyDataError:
+                log.warning(f'Failed to parse dataframe with no columns: {path}')
+            else:
+                columns_to_use = list(set(columns) - COLUMNS_TO_SKIP)
+                df = pd.read_csv(path, usecols=columns_to_use, low_memory=True)
         elif path.endswith(".parquet"):
             # don't read columns unused later
             df = pd.read_parquet(path)
+        else:
+            log.warning(f'Skipped reading file: {path}')
 
         total_rows_n += len(df)
         dfs.append(df)

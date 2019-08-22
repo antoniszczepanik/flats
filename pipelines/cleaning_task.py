@@ -11,7 +11,7 @@ import logging as log
 
 import pandas as pd
 
-from common import select_most_up_to_date_file, HOME_PATH, PATHS
+from common import select_most_up_to_date_file, PATHS
 from data_cleaning import MorizonCleaner
 
 log.basicConfig(
@@ -34,7 +34,7 @@ def clean_morizon_data(in_path, out_path, spider_name):
     clean_df = MorizonCleaner(most_current_df).clean()
     current_dt = datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
 
-    out_filepath = f'{HOME_PATH}{out_path}/{spider_name}_clean_{current_dt}.parquet'
+    out_filepath = f'{out_path}/{spider_name}_clean_{current_dt}.parquet'
     log.info(f"Writing cleaned dataframe to {out_filepath}")
     clean_df.to_parquet(out_filepath, index=False)
     log.info(f"Files writing finished succesfully.")

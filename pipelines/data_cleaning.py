@@ -106,16 +106,17 @@ class MorizonCleaner(object):
             else:
                 raise InvalidCleaningMapError
                 
-        self.df = (self.df.pipe(self.one_hot_encode_no_info)
-                          .pipe(self.replace_no_info_with_mode)
-                          .pipe(self.one_hot_encode_categorical)
-                          .pipe(self.remove_duplicate_columns)
-                          .pipe(self.map_categorical_features)
-                          .pipe(self.drop_empty_cols)
-                          )
         
-        return self.df
-
+        
+        return (self.df.pipe(self.one_hot_encode_no_info)
+                       .pipe(self.replace_no_info_with_mode)
+                       .pipe(self.one_hot_encode_categorical)
+                       .pipe(self.remove_duplicate_columns)
+                       .pipe(self.map_categorical_features)
+                       .pipe(self.drop_empty_cols)
+                       .pipe(self.replace_nans_with_mode)
+                       )
+        
 
     def fillna_mode(self, column_name):
         mode = self.df[column_name].mode()
@@ -421,10 +422,9 @@ class MorizonCleaner(object):
                 ['object']).apply(lambda x: x.astype('category'))
         for col in df.select_dtypes(['category']).columns:
             if df[col].nunique() < 6:
-                log.info(f'Getting dummies for {col}')
+                log.info(f'Getting dummies for {col}... ')
                 df = pd.concat(
-                    [df, pd.get_dummies(df[col], prefix = col, sparse=True)], axis=1)
-                log.info(f'After getting data for {col}: {df.info()}')
+                    [df, pd.get_dummies(df[col], prefix = col)], axis=1)
         return df
     
     def remove_duplicate_columns(self, df):
@@ -472,12 +472,25 @@ class MorizonCleaner(object):
         return df
 
     def drop_empty_cols(self, df):
-        log.info('Dropping empty columns ...')
-        for c in df.columns:
-            if df[c].nunique() == 1:
-                df = df.drop(c, axis=1)
+        for col in df.columns:
+            if (df[col].isna().sum()/len(df)) == 1:
+                log.info(f'Dropping empty {col}')
+                df = df.drop(col, axis=1)
         return df
 
+    def replace_nans_with_mode(self, df):
+        log.info('Replacing remaining NaNs with mode...')
+        for col in df.columns:
+            if (df[col].isna().sum()/len(df)) != 0:
+                try:
+                    mode = df.loc[:, col].mode()[0]
+                except IndexError:
+                    log.info(f'Ignoring empty column (IE): {col}')
+                else:
+                    log.info(f'Replaced no_info with mode for {col}')
+                    df.loc[:, col] = df.loc[:, col].fillna(mode)
+        return df
+    
 
 class InvalidCleaningMapError(Exception):
     pass

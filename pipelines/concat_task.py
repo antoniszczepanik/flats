@@ -30,6 +30,7 @@ def concat_csvs_to_parquet(in_path, out_path, spider_type):
     paths_to_concat = [f'{in_path}/{f}' for f in paths_to_concat]
 
     full_df = utils.concat_dfs(paths_to_concat)
+    full_df = full_df.drop_duplicates('offer_id', keep='last')
 
     current_dt = datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
     out_filepath = f'{out_path}/{spider_type}_concated_{current_dt}.parquet'

@@ -1,6 +1,5 @@
-# FIRST ADD ~/.aws/credentials file!!!
+# MAKE SURE TO FIRST ADD ~/.aws/credentials file
 
-# make sure in the right directory
 cd /home/ubuntu/flats/setup
 
 # install requirements

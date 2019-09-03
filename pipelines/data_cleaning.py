@@ -88,9 +88,9 @@ class MorizonCleaner(object):
 
     def clean(self):
         self.df = self.df.dropna(how='all', axis=1)
-        for column in CLEANING_REQUIRED_COLUMNS:                    
+        for column in CLEANING_REQUIRED_COLUMNS:
             cleaning_func = self.cleaning_map[column]
-                                          
+
             if callable(cleaning_func):
                 log.info(f"Cleaning {column} with '{cleaning_func.__name__}' function...")
                 cleaning_func(column)
@@ -105,18 +105,16 @@ class MorizonCleaner(object):
                 continue
             else:
                 raise InvalidCleaningMapError
-                
-        
-        
-        return (self.df.pipe(self.one_hot_encode_no_info)
+
+        return (
+                self.df.pipe(self.one_hot_encode_no_info)
                        .pipe(self.replace_no_info_with_mode)
                        .pipe(self.one_hot_encode_categorical)
                        .pipe(self.remove_duplicate_columns)
                        .pipe(self.map_categorical_features)
                        .pipe(self.drop_empty_cols)
                        .pipe(self.replace_nans_with_mode)
-                       )
-        
+        )
 
     def fillna_mode(self, column_name):
         mode = self.df[column_name].mode()
@@ -138,8 +136,8 @@ class MorizonCleaner(object):
                     return 'concrete_slab'
             return 'other'
         self.df[column_name] = self.df[column_name].apply(mapping)
-        
-        
+
+
     def building_type(self, column_name):
         block = ['blo', 'wiez', 'szer','seg', 'mieszk',
                 'woln', 'inn', 'komp', 'bud', 'plo', 'lat',]
@@ -147,7 +145,7 @@ class MorizonCleaner(object):
                      'styl', 'rezy', 'vil', 'socre', 'pal',]
         apart = ['apart', 'nowe budo', 'loft', 'hot','wys', 'biur',]
         house = ['do', 'niski', 'wielo', 'bliz',]
-        
+
         def mapping(value):
             value = unidecode.unidecode(str(value)).lower()
             for b in block:
@@ -164,13 +162,13 @@ class MorizonCleaner(object):
                     return 'house'
             return 'other'
         self.df[column_name] = self.df[column_name].apply(mapping)
-        
+
     def building_year(self, column_name):
         current_year = int(datetime.now().year)
         self.df[column_name] =  self.df[column_name].apply(
             lambda x: current_year - x if type(x) in (float, int) else 'no_info'
         )
-        
+
     def conviniences(self, column_name):
         def check_if_not(pol_word, string):
             # Verify if parameter is negated
@@ -181,7 +179,7 @@ class MorizonCleaner(object):
                 return 1
             else:
                 return 'no_info'
-        
+
         def create_lift(value):
             value = value.lower()
             if 'brak windy' in value:
@@ -190,7 +188,7 @@ class MorizonCleaner(object):
                 return 1
             else:
                 return 'no_info'
-            
+
         def create_parking(value):
             value = value.lower()
             pol_park = 'miejsce parkingowe'
@@ -210,7 +208,7 @@ class MorizonCleaner(object):
                 return parking_n
             else:
                 return 'no_info'
-        
+
         self.df['lift'] = self.df[column_name].apply(create_lift)
         self.df['basement'] = self.df[column_name].apply(
             lambda v: check_if_not('piwnica', v))
@@ -222,13 +220,13 @@ class MorizonCleaner(object):
             lambda v: check_if_not('ogrodzenie', v))
         self.df['parking_spot'] = self.df[column_name].apply(create_parking)
         self.df = self.df.drop(column_name, axis=1)
-        
+
     def date_to_int(self, column_name):
         dt_2018 = datetime(2018, 1, 1)
         self.df[f'{column_name}_days_from_2018'] = self.df[column_name].apply(
             lambda x: (datetime.strptime(x, "%Y-%m-%d") - dt_2018).days)
         self.df = self.df.drop(column_name, axis=1)
-        
+
     def equipment(self, column_name):
         def furniture(value):
             value = value.lower()
@@ -238,19 +236,19 @@ class MorizonCleaner(object):
                 return 1
             else:
                 return 'no_info'
-            
+
         def kitchen_furniture(value):
             value = value.lower()
             if 'kuchnia umeblowana' in value:
                 return 1
             else:
                 return 'no_info'
-            
+
         self.df['furniture'] = self.df[column_name].apply(furniture)
         self.df['kitchen_furniture'] = self.df[column_name].apply(
             kitchen_furniture)
         self.df = self.df.drop(column_name, axis=1)
-        
+
     def flat_state(self, column_name):
         very_good = ['bardzo', 'wysoki', 'po remon', 'podwyzszony',
                      'ideal', 'komfort', 'po gener',]
@@ -259,7 +257,7 @@ class MorizonCleaner(object):
         raw = ['dewel', 'devel', 'wykonczenia', 'odswiezenia', 'do czescio',
                'sred', 'do adaptacji', 'drobnego', 'surowy zamkniety', 'surowy',]
         to_renovation = ['remontu', 'odnowienia',]
-        
+
         def mapping(value):
             value = unidecode.unidecode(str(value)).lower()
             for vg in very_good:
@@ -276,9 +274,9 @@ class MorizonCleaner(object):
                     return 1
             return 3
         self.df[column_name] = self.df[column_name].apply(mapping)
-        
+
     def floor(self, column_name):
-        
+
         def floor_n(value):
             value = value.split(' / ')
             if len(value) in (1, 2):
@@ -290,19 +288,19 @@ class MorizonCleaner(object):
                     return int(value[0])
             else:
                 raise ValueError(f'"{value}" value is not expected in this column')
-                
+
         def max_floor_n(value):
             value = value.split(' / ')
             if len(value) == 2:
                 return int(value[1])
             else:
                 return 'no_info'
-            
+
         self.df['foor_n'] = self.df[column_name].apply(max_floor_n)
         self.df[column_name] = self.df[column_name].apply(floor_n)
-        
+
     def heating(self, column_name):
-        
+
         def heating_type(value):
             if value == 'no_info':
                 return 'no_info'
@@ -324,11 +322,11 @@ class MorizonCleaner(object):
                 return 'other'
             else:
                 return 'no_info'
-            
+
         self.df[column_name] = self.df[column_name].apply(heating_type)
-        
+
     def media(self, column_name):
-        
+
         def internet(value):
             value = value.lower()
             if 'internet (brak' in value:
@@ -337,14 +335,14 @@ class MorizonCleaner(object):
                 return 1
             else:
                 return 'no_info'
-            
+
         def water(value):
             value = value.lower()
             if 'woda' in value:
                 return 1
             else:
                 return 0
-            
+
         def gas(value):
             value = value.lower()
             if 'gaz (brak' in value:
@@ -353,28 +351,28 @@ class MorizonCleaner(object):
                 return 1
             else:
                 return 'no_info'
-            
+
         def electricity(value):
             value = value.lower()
             if 'prąd' in value:
                 return 1
             else:
                 return 0
-            
+
         def sewers(value):
             value = value.lower()
             if 'kanalizacja' in value:
                 return 1
             else:
                 return 0
-            
+
         self.df['internet'] = self.df[column_name].apply(internet)
         self.df['water'] = self.df[column_name].apply(water)
         self.df['gas'] = self.df[column_name].apply(gas)
         self.df['electricity'] = self.df[column_name].apply(electricity)
         self.df['sewers'] = self.df[column_name].apply(sewers)
         self.df = self.df.drop(column_name, axis=1)
-        
+
     def one_hot_encode_no_info(self, df):
         log.info('One-hot encoding no info values...')
         cols_with_no_info = self.find_cols_with_no_info()
@@ -382,7 +380,7 @@ class MorizonCleaner(object):
             log.info(f'One-hot encoding no info values for {col}...')
             df[col + '_no_info'] = np.where(df[col].isin(['no_info']), 1, 0) 
         return df
-            
+
     def replace_no_info_with_mode(self, df):
         """
         Replace with 0 if binary (no info == lack of feature)
@@ -415,7 +413,7 @@ class MorizonCleaner(object):
                 no_info_cols.append(col)
         log.info(f'Found {len(no_info_cols)} with no_info value')
         return no_info_cols
-    
+
     def one_hot_encode_categorical(self, df):
         log.info('One hot encoding categorical values ...')
         df[df.select_dtypes(['object']).columns] = df.select_dtypes(
@@ -426,16 +424,16 @@ class MorizonCleaner(object):
                 df = pd.concat(
                     [df, pd.get_dummies(df[col], prefix = col)], axis=1)
         return df
-    
+
     def remove_duplicate_columns(self, df):
         log.info('Removing duplicated columns')
         return df.loc[:, ~df.columns.duplicated()]
-                                          
+
     def map_categorical_features(self, df):
         """
         Arbitrary mapping of remaing categorical features.
         Why not? :)
-        """     
+        """
         log.info('Mapping remaining categorical columns ... ')
         # confirm remaining categorical feats are as expected
         remaining_categorical = ('building_material',
@@ -444,8 +442,8 @@ class MorizonCleaner(object):
                                  'offer_id',)
 
         for c in df.select_dtypes(include=['object']).columns:
-            assert c in remaining_categorical 
-                
+            assert c in remaining_categorical
+
         df['building_material'] = df['building_material'].map(
         {
           'brick': 3,
@@ -459,7 +457,7 @@ class MorizonCleaner(object):
           'house': 2,
           'block': 1,
           'other': 2,
-        })                                  
+        })
         df['heating'] = df['heating'].map(
         {
           'fireplace': 4,
@@ -490,7 +488,7 @@ class MorizonCleaner(object):
                     log.info(f'Replaced no_info with mode for {col}')
                     df.loc[:, col] = df.loc[:, col].fillna(mode)
         return df
-    
+
 
 class InvalidCleaningMapError(Exception):
     pass

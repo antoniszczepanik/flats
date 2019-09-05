@@ -29,7 +29,6 @@ cat cron_jobs
 # mount s3 in morizon-data
 echo "Mounting s3 in ~/morizon-data"
 mkdir ~/morizon-data
-chmod 600 ~/.aws/credentials
-s3fs morizon-data ~/morizon-data -o nonempty -o passwd_file=/home/ubuntu/.aws/credentials -o use_cache=/tmp -o allow_other -o mp_umask=077 -o uid=1000 -o gid=1000
+s3fs morizon-data ~/morizon-data -o nonempty -o iam_role='S3_permission_for_ec2' -o use_cache=/tmp -o allow_other -o mp_umask=077 -o uid=1000 -o gid=1000
 
 

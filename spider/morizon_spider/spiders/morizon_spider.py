@@ -66,7 +66,7 @@ class MorizonSpider(scrapy.Spider):
         """
         links_to_scrape = [
             link
-            for link in response.xpath("//a[@class='property_link']/@href").getall()
+            for link in response.xpath("//a[@class='property_link property-url']/@href").getall()
             if "/oferta/" in link
         ]
         links_to_scrape_dates_raw = response.xpath(

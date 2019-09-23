@@ -13,7 +13,6 @@ configobj==5.0.6
 constantly==15.1.0
 cryptography==2.6.1
 cssselect==1.0.3
-distro-info===0.18ubuntu0.18.04.1
 docutils==0.14
 hibagent==1.0.1
 httplib2==0.9.2

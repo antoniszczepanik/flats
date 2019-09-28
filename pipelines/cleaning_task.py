@@ -1,9 +1,8 @@
 #!/usr/bin/env python3 
+
 """"
-Pipeline to clean concated data in parquet format.
-It loads concated data and outputs clean parquets to clean/
-directory. It converts each column to numerical, without
-dropping any rows.
+Load concated data and output clean parquets (categorical variables mapped to
+numerical format). Does not drop any rows.
 """
 from datetime import datetime
 import os
@@ -20,8 +19,8 @@ log.basicConfig(
 
 def clean_morizon_data(in_path, out_path, spider_name):
     """
-    Clean most current file from /concated directory
-    for each spider. Save the output to /clean directory.
+    Clean most current file from in_path directory
+    for each spider. Save the output to out_path directory.
     """
     in_path_content = os.listdir(f'{in_path}')
     paths_to_clean = [f'{in_path}/{f}' for f in in_path_content]

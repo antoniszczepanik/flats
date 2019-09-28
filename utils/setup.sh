@@ -1,5 +1,3 @@
-# MAKE SURE TO FIRST ADD ~/.aws/credentials file
-
 cd /home/ubuntu/flats/setup
 
 # install requirements
@@ -9,8 +7,6 @@ pip3 install -r requirements.txt
 
 # add scrapyd etc to path
 export PATH=$PATH:~/.local/bin
-# add flats to path
-export PYTHONPATH="{PYTHONPATH}:/home/ubuntu/flats"
 
 # run scrapyd server in background
 nohup scrapyd >/dev/null 2>&1 & 

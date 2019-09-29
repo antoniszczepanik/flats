@@ -4,18 +4,17 @@
 Load concated data and output clean parquets (categorical variables mapped to
 numerical format). Does not drop any rows.
 """
-from datetime import datetime
 import os
 import logging as log
 
 import pandas as pd
 
-from common import select_most_up_to_date_file, PATHS
+from common import select_most_up_to_date_file, PATHS, get_current_dt
 from data_cleaning import MorizonCleaner
 
-log.basicConfig(
-    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
-)
+log.basicConfig(level=log.INFO,
+                format="%(asctime)s %(message)s",
+                datefmt="%m-%d-%Y %I:%M:%S")
 
 def clean_morizon_data(in_path, out_path, spider_name):
     """
@@ -31,7 +30,7 @@ def clean_morizon_data(in_path, out_path, spider_name):
     log.info(f'Finished reading {most_current_file}')
 
     clean_df = MorizonCleaner(most_current_df).clean()
-    current_dt = datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
+    current_dt = get_current_dt()
 
     out_filepath = f'{out_path}/{spider_name}_clean_{current_dt}.parquet'
     log.info(f"Writing cleaned dataframe to {out_filepath}")

@@ -4,10 +4,9 @@ import pandas as pd
 
 COLUMNS_TO_SKIP = {'image_link','desc'}
 
-log.basicConfig(
-    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
-)
-
+log.basicConfig(level=log.INFO,
+                format="%(asctime)s %(message)s",
+                datefmt="%m-%d-%Y %I:%M:%S")
 
 def concat_dfs(paths):
     """

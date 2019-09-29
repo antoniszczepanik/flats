@@ -20,9 +20,9 @@ from common import CLEANING_REQUIRED_COLUMNS
 # for which columns fill lacks with 0
 FILL_NA_WITH_ZERO = ('parking_spot')
 
-log.basicConfig(
-    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
-)
+log.basicConfig(level=log.INFO,
+                format="%(asctime)s %(message)s",
+                datefmt="%m-%d-%Y %I:%M:%S")
 
 
 class MorizonCleaner(object):

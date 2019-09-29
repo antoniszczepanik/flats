@@ -4,19 +4,17 @@ Pipeline to concatinate and dedup all scraping outputs
 It concats data from each folder - sale and rent
 and saves them on s3 in 'morizon-data/spider-name/concated' folder.
 """
-from datetime import datetime
 import os
 import logging as log
 
 import pandas as pd
 
 import utils
-from common import PATHS, HOME_PATH
-filename = '/home/ubuntu/flats/setup/logs/data_pipelines/data_pipelines'
-log.basicConfig(
-    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S",
-    filname=filename
-)
+from common import PATHS, HOME_PATH, get_current_dt
+
+log.basicConfig(level=log.INFO,
+                format="%(asctime)s %(message)s",
+                datefmt="%m-%d-%Y %I:%M:%S")
 
 def concat_csvs_to_parquet(in_path, out_path, spider_type):
     """
@@ -32,7 +30,7 @@ def concat_csvs_to_parquet(in_path, out_path, spider_type):
     full_df = utils.concat_dfs(paths_to_concat)
     full_df = full_df.drop_duplicates('offer_id', keep='last')
 
-    current_dt = datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
+    current_dt = get_current_dt()
     out_filepath = f'{out_path}/{spider_type}_concated_{current_dt}.parquet'
     log.info(f'Writing {out_filepath} ...')
     full_df.to_parquet(out_filepath, index=False)

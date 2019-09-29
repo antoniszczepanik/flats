@@ -17,7 +17,7 @@ from geopy.distance import great_circle
 from shapely.geometry import MultiPoint
 from scipy.spatial.distance import cdist
 
-from common import upload_file_to_s3
+from common import upload_file_to_s3, logs_conf
 
 # bucket to store repr points
 S3_BUCKET = 'flats'
@@ -27,9 +27,7 @@ EPSILON = 1
 MIN_SAMPLES = 1
 KMS_PER_RADIAN = 6371.0088
 
-log.basicConfig(level=log.INFO,
-                format="%(asctime)s %(message)s",
-                datefmt="%m-%d-%Y %I:%M:%S")
+log.basicConfig(**logs_conf)
 
 def get_repr_points(lon_lat_df):
     """

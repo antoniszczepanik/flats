@@ -15,14 +15,12 @@ import numpy as np
 import unidecode
 
 # columns required for performing the cleaning
-from common import CLEANING_REQUIRED_COLUMNS
+from common import CLEANING_REQUIRED_COLUMNS, logs_conf
 
 # for which columns fill lacks with 0
 FILL_NA_WITH_ZERO = ('parking_spot')
 
-log.basicConfig(level=log.INFO,
-                format="%(asctime)s %(message)s",
-                datefmt="%m-%d-%Y %I:%M:%S")
+log.basicConfig(**logs_conf)
 
 
 class MorizonCleaner(object):

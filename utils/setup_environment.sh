@@ -1,1 +1,1 @@
-export PYTHONPATH="$PYTHONPATH:/home/ubuntu/flats"
+export PYTHONPATH="$PYTHONPAHT:.."

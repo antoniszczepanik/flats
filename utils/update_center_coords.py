@@ -2,8 +2,8 @@
 
 """
 Get most representative coordinates out of a dataframe and store them in S3.
-Creates a dataframe of lat/lon values which enables encoding coordinates
-to categorical variables later.
+Creates a dataframe of lat/lon values with mean prices which enables encoding
+coordinates to categorical and interesting feature engineering at later steps.
 """
 
 import pandas as pd
@@ -15,14 +15,15 @@ import tempfile
 from sklearn.cluster import DBSCAN
 from geopy.distance import great_circle
 from shapely.geometry import MultiPoint
-from scipy.spatial.distance import cdist
 
-from common import upload_file_to_s3, logs_conf
+from common import (upload_file_to_s3, logs_conf, get_current_dt, PATHS,
+                    closest_point)
 
 # bucket to store repr points
-S3_BUCKET = 'flats'
+S3_BUCKET = 'flats-models'
+S3_DIR = 'coords_encoding'
 # max distance (in km) between coordinates to get "clustered"
-EPSILON = 1
+EPSILON = 2
 # min samples per cluster
 MIN_SAMPLES = 1
 KMS_PER_RADIAN = 6371.0088
@@ -35,15 +36,11 @@ def get_repr_points(lon_lat_df):
     values. For details see:
     https://geoffboeing.com/2014/08/clustering-to-reduce-spatial-data-set-size/
     """
-    try:
-        coords = df[['lat', 'lon']].to_numpy()
-    except Exception as e:
-        log.error('Failed to access lat and lon columns.')
-        raise e
+    coords = df[['lat', 'lon']].to_numpy()
 
     epsilon = EPSILON / KMS_PER_RADIAN
 
-    log.info('Startind DBScan alhorithm ...')
+    log.info('Starting DBScan alghorithm ...')
     db = DBSCAN(eps=epsilon,
                 min_samples=MIN_SAMPLES,
                 algorithm='ball_tree',
@@ -55,7 +52,7 @@ def get_repr_points(lon_lat_df):
     centermost_points = list(clusters.map(get_centermost_point))
     log.info(f'DBScan algoritm found {num_clusters} clusters.')
 
-    return centermost_points
+    return pd.DataFrame(centermost_points, columns=['lat', 'lon'])
 
 def get_centermost_point(cluster):
     """
@@ -65,30 +62,65 @@ def get_centermost_point(cluster):
     centermost_point = min(cluster, key=lambda point: great_circle(point, centroid).m)
     return tuple(centermost_point)
 
-def send_repr_coords_to_s3(repr_coords_df, offer_type):
+def send_coords_encoding_map_to_s3(coords_encoding_map, offer_type):
     with tempfile.TemporaryDirectory() as tmpdir:
         current_dt = get_current_dt()
-        repr_coords.to_parquet(f'{current_dt}.parquet')
-        upload_file_to_s3(f'{offer_type}/central_coords/{current_dt}',
-                          BUCKET_NAME)
-    return None
+        filepath = f'{tmpdir}/{current_dt}.parquet'
+        coords_encoding_map.to_parquet(filepath)
+        response = upload_file_to_s3(filepath,
+                                     S3_BUCKET,
+                                     f'{offer_type}/{S3_DIR}/{current_dt}.parquet')
+    if response:
+        return True
+    return False
+
+
+def create_zipped_coords_series(df):
+    """ Zips lon and lat columns to create a series of coords tuples. """
+    return [(x, y) for x,y in zip(df['lat'], df['lon'])]
+
 
 if __name__ == "__main__":
 
     if len(sys.argv) != 3:
-        log.error('You should specify source data_frame path and offer_type'
+        log.error('You should specify source dataframe path and offer type '
                   '(sale or rent) as an argument.')
     else:
+        offer_type = sys.argv[2]
+        # verify if offer type is in supported types
+        assert offer_type in PATHS.keys()
 
         path = sys.argv[1]
-        offer_type = sys.argv[2]
         try:
             df = pd.read_parquet(path)
         except OSError as e:
             log.error(f'Did not find "{path}" parquet file. Aborting.')
             raise e
 
+        assert 'lon' in df.columns
+        assert 'lat' in df.columns
+
         repr_coords_df = get_repr_points(df)
-        send_repr_coords_to_s3(repr_coords_df, offer_type)
+
+        df['coords_tuple'] = create_zipped_coords_series(df)
+        repr_coords_df['coords_tuple'] = create_zipped_coords_series(repr_coords_df)
+
+        # assign a closest point 
+        df['coords_closest_tuple'] = [
+                closest_point(x, repr_coords_df['coords_tuple']) for x in list(df['coords_tuple'])
+                ]
+
+        coords_encoding_map = (df.loc[:,['coords_closest_tuple','price_m2']]
+                                    .groupby('coords_closest_tuple', as_index=False)
+                                    .mean()
+                                    .sort_values(by='price_m2')
+                                    .reset_index(drop=True)
+                                    .rename(columns={'price_m2': 'coords_mean_price_m2'})
+                                )
+        coords_encoding_map['coords_category'] = coords_encoding_map.index + 1
+
+        response = send_coords_encoding_map_to_s3(coords_encoding_map, offer_type)
+        if response:
+            log.info('Succesfully uploaded file to S3.')
 
 

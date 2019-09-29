@@ -3,6 +3,7 @@ import logging as log
 
 import boto3
 from botocore.exceptions import ClientError
+from scipy.spatial.distance import cdist
 
 CLEANING_REQUIRED_COLUMNS =[
     'balcony',
@@ -37,8 +38,8 @@ CLEANING_REQUIRED_COLUMNS =[
 
 logs_conf = {
         'level': log.INFO,
-        'format': "%(asctime)s %(message)s",
-        'datefmt': "%m-%d-%Y %I:%M:%S",
+        'format': "%(filename)-23s %(asctime)s %(levelname)s: %(message)s",
+        'datefmt': "%H:%M:%S",
 }
 
 log.basicConfig(**logs_conf)
@@ -104,7 +105,7 @@ def upload_file_to_s3(file_name, bucket, object_name=None):
 
     # Upload the file
     s3_client = boto3.client('s3')
-    log.info(f'Sending "{object_name}" to S3 bucket "{bucket}"...')
+    log.info(f'Sending {object_name} to {bucket} bucket...')
     try:
         response = s3_client.upload_file(file_name, bucket, object_name)
     except ClientError as e:
@@ -112,4 +113,7 @@ def upload_file_to_s3(file_name, bucket, object_name=None):
         return False
     return True
 
+def closest_point(point, points):
+    """ Find closest point from a of list tuples with coordinates. """
+    return points[cdist([point], points).argmin()]
 

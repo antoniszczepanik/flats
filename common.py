@@ -35,9 +35,13 @@ CLEANING_REQUIRED_COLUMNS =[
     'view_count',
 ]
 
-log.basicConfig(
-    level=log.INFO, format="%(asctime)s %(message)s", datefmt="%m-%d-%Y %I:%M:%S"
-)
+logs_conf = {
+        'level': log.INFO,
+        'format': "%(asctime)s %(message)s",
+        'datefmt': "%m-%d-%Y %I:%M:%S",
+}
+
+log.basicConfig(**logs_conf)
 
 HOME_PATH = '/home/ubuntu'
 LOG_PATH = f'{HOME_PATH}/flats/setup/logs'

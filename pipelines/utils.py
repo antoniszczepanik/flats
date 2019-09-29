@@ -2,11 +2,11 @@ import logging as log
 from datetime import datetime
 import pandas as pd
 
+from common import logs_conf
+
 COLUMNS_TO_SKIP = {'image_link','desc'}
 
-log.basicConfig(level=log.INFO,
-                format="%(asctime)s %(message)s",
-                datefmt="%m-%d-%Y %I:%M:%S")
+log.basicConfig(**logs_conf)
 
 def concat_dfs(paths):
     """

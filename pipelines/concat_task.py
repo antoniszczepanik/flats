@@ -10,11 +10,9 @@ import logging as log
 import pandas as pd
 
 import utils
-from common import PATHS, HOME_PATH, get_current_dt
+from common import PATHS, HOME_PATH, get_current_dt, logs_conf
 
-log.basicConfig(level=log.INFO,
-                format="%(asctime)s %(message)s",
-                datefmt="%m-%d-%Y %I:%M:%S")
+log.basicConfig(**logs_conf)
 
 def concat_csvs_to_parquet(in_path, out_path, spider_type):
     """

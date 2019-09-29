@@ -9,12 +9,11 @@ import logging as log
 
 import pandas as pd
 
-from common import select_most_up_to_date_file, PATHS, get_current_dt
+from common import select_most_up_to_date_file, PATHS, get_current_dt,
+                   logs_conf
 from data_cleaning import MorizonCleaner
 
-log.basicConfig(level=log.INFO,
-                format="%(asctime)s %(message)s",
-                datefmt="%m-%d-%Y %I:%M:%S")
+log.basicConfig(**logs_conf)
 
 def clean_morizon_data(in_path, out_path, spider_name):
     """

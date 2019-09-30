@@ -23,7 +23,7 @@ from common import (upload_file_to_s3, logs_conf, get_current_dt, PATHS,
 S3_BUCKET = 'flats-models'
 S3_DIR = 'coords_encoding'
 # max distance (in km) between coordinates to get "clustered"
-EPSILON = 2
+EPSILON = 3
 # min samples per cluster
 MIN_SAMPLES = 1
 KMS_PER_RADIAN = 6371.0088
@@ -79,6 +79,12 @@ def create_zipped_coords_series(df):
     """ Zips lon and lat columns to create a series of coords tuples. """
     return [(x, y) for x,y in zip(df['lat'], df['lon'])]
 
+def unzip_coord_series_to_lon_and_lat(df, zipped_colname):
+    df['lat'] = df[zipped_colname].apply(lambda x: x[0])
+    df['lon'] = df[zipped_colname].apply(lambda x: x[1])
+    df = df.drop(zipped_colname , axis=1)
+    return df
+
 
 if __name__ == "__main__":
 
@@ -107,7 +113,7 @@ if __name__ == "__main__":
 
         # assign a closest point 
         df['coords_closest_tuple'] = [
-                closest_point(x, repr_coords_df['coords_tuple']) for x in list(df['coords_tuple'])
+                closest_point(x, list(repr_coords_df['coords_tuple'])) for x in df['coords_tuple']
                 ]
 
         coords_encoding_map = (df.loc[:,['coords_closest_tuple','price_m2']]
@@ -116,6 +122,7 @@ if __name__ == "__main__":
                                     .sort_values(by='price_m2')
                                     .reset_index(drop=True)
                                     .rename(columns={'price_m2': 'coords_mean_price_m2'})
+                                    .pipe(unzip_coord_series_to_lon_and_lat, 'coords_closest_tuple')
                                 )
         coords_encoding_map['coords_category'] = coords_encoding_map.index + 1
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3 
 
-""""
+"""
 Load concated data and output clean parquets (categorical variables mapped to
 numerical format). Does not drop any rows.
 """
@@ -11,7 +11,7 @@ import pandas as pd
 
 from common import select_most_up_to_date_file, PATHS, get_current_dt,
                    logs_conf
-from data_cleaning import MorizonCleaner
+from cleaning import MorizonCleaner
 
 log.basicConfig(**logs_conf)
 

@@ -2,7 +2,7 @@
   <img src="/docs/prices_m2_warsaw.png" width="450">
 </p>
 <p align="center">
-  Prices/m2 on map based on scraped data.
+  Prices/m2 on map of Warsaw.
 </p>
 
 ### Currently the project consists of 2 elements:

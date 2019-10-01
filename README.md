@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/img/prices_m2_warsaw.png" width="450">
+  <img src="/docs/prices_m2_warsaw.png" width="450">
 </p>
 <p align="center">
   Prices/m2 on map based on scraped data.

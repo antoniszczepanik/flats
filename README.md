@@ -1,3 +1,4 @@
+# Flats
 <p align="center">
   <img src="/docs/prices_m2_warsaw.png" width="450">
 </p>

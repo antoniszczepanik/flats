@@ -1,8 +1,9 @@
+# Flats
 <p align="center">
-  <img src="/img/prices_m2_warsaw.png" width="450">
+  <img src="/docs/prices_m2_warsaw.png" width="450">
 </p>
 <p align="center">
-  Prices/m2 on map based on scraped data.
+  Prices/m2 on map of Warsaw.
 </p>
 
 ### Currently the project consists of 2 elements:
@@ -27,18 +28,13 @@ Our baseline is std(y) which is equal to rmse when predictions are made with mea
 
 Out of all models tested (linear(also on onehotencoded bitmap), rf, xgboost) the best performance is achieved by RandomForests.
 
-**Random Forest** {'n_estimators': 1200, 'min_samples_split': 2, 'min_samples_leaf': 1, 'max_depth': 150, 'bootstrap': True}
-
-On validation set:
+Best results on validation set:
 
 **RMSE = 1533**  
 **RMSE/mean(y) = .141**
 
 <p align="center">
   <img src="/docs/RF_pred_vs_actual.png" width="450">
-</p>
-<p align="center">
-  <img src="/docs/RF_pred_actual_dist.png" width="400">
 </p>
 
 A future, long term goal is detection of undervalued properties and automating alerts when such are added to the scraped offer site. 

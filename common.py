@@ -113,6 +113,3 @@ def upload_file_to_s3(file_name, bucket, object_name=None):
         return False
     return True
 
-def closest_point(point, points):
-    """ Find closest point from a of list tuples with coordinates. """
-    return points[cdist([point], points).argmin()]

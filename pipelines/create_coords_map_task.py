@@ -16,12 +16,13 @@ from sklearn.cluster import DBSCAN
 from geopy.distance import great_circle
 from shapely.geometry import MultiPoint
 
-from common import (upload_file_to_s3, logs_conf, get_current_dt, PATHS,
-                    closest_point)
+from common import upload_file_to_s3, logs_conf, get_current_dt, PATHS,
+from utils import closest_point
 
 # bucket to store repr points
 S3_BUCKET = 'flats-models'
 S3_DIR = 'coords_encoding'
+
 # max distance (in km) between coordinates to get "clustered"
 EPSILON = 3
 # min samples per cluster

@@ -64,3 +64,18 @@ def read_txt_list(path):
 
 def name_from_path(filename):
     return filename.split("/")[-1]
+
+def closest_point(point, points):
+    """ Find closest point from a of list tuples with coordinates. """
+    return points[cdist([point], points).argmin()]
+
+def unzip_coord_series_to_lon_and_lat(df, zipped_colname):
+    df['lat'] = df[zipped_colname].apply(lambda x: x[0])
+    df['lon'] = df[zipped_colname].apply(lambda x: x[1])
+    df = df.drop(zipped_colname , axis=1)
+    return df
+
+def create_zipped_coords_series(df):
+    """ Zips lon and lat columns to create a series of coords tuples. """
+    return [(x, y) for x,y in zip(df['lat'], df['lon'])]
+

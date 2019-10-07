@@ -42,17 +42,25 @@ logs_conf = {
         'datefmt': "%H:%M:%S",
 }
 
-log.basicConfig(**logs_conf)
-
 HOME_PATH = '/home/ubuntu'
 LOG_PATH = f'{HOME_PATH}/flats/setup/logs'
 
+# paths to save parquet files (s3, but local since using s3fs)
 PATHS = {'sale': {'raw': f"{HOME_PATH}/morizon-data/morizon_sale/raw",
                   'concated': f"{HOME_PATH}/morizon-data/morizon_sale/concated",
-                  'clean': f"{HOME_PATH}/morizon-data/morizon_sale/clean"},
+                  'clean': f"{HOME_PATH}/morizon-data/morizon_sale/clean",
+                  'final': f"{HOME_PATH}/morizon-data/morizon_sale/final"},
          'rent': {'raw': f"{HOME_PATH}/morizon-data/morizon_rent/raw",
                   'concated': f"{HOME_PATH}/morizon-data/morizon_rent/concated",
-                  'clean': f"{HOME_PATH}/morizon-data/morizon_rent/clean"}}
+                  'clean': f"{HOME_PATH}/morizon-data/morizon_rent/clean",
+                  'final': f"{HOME_PATH}/morizon-data/morizon_sale/final"}}
+
+# bucket to store coords encoding map 
+S3_MODELS_BUCKET = 'flats-models'
+S3_MODELS_CLEANING_MAP_DIR = 'coords_encoding'
+
+log.basicConfig(**logs_conf)
+
 
 def select_most_up_to_date_file(file_paths):
     # select file with most current datetime in name
@@ -112,4 +120,30 @@ def upload_file_to_s3(file_name, bucket, object_name=None):
         log.error(e)
         return False
     return True
+
+def download_file_from_s3(file_name, bucket, object_name=None):
+    """Download a file to an S3 bucket
+    :param bucket: Bucket to download from
+    :param object_name: S3 object name. If not specified then file_name is used
+    :param file_name: Path to download a file
+    :return: True if file was downloaded, else False
+    """
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = file_name
+
+    # Download the file
+    s3_client = boto3.client('s3')
+    log.info(f'Downloading {object_name} ...')
+    try:
+        response = s3_client.download_file(bucket, object_name, file_name)
+    except ClientError as e:
+        log.error(e)
+        return False
+    return True
+
+def list_s3_dir(bucket, path):
+     """List given path in S3 bucket. Returns a list of filenames"""
+     s3_client = boto3.client('s3')
+     return s3_client.list_objects_v2(Bucket=bucket, Prefix=path)
 

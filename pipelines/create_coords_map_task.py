@@ -5,7 +5,6 @@ Get most representative coordinates out of a dataframe and store them in S3.
 Creates a dataframe of lat/lon values with mean prices which enables encoding
 coordinates to categorical and interesting feature engineering at later steps.
 """
-
 import pandas as pd
 import numpy as np
 import logging as log
@@ -16,12 +15,15 @@ from sklearn.cluster import DBSCAN
 from geopy.distance import great_circle
 from shapely.geometry import MultiPoint
 
-from common import upload_file_to_s3, logs_conf, get_current_dt, PATHS,
-from utils import closest_point
-
-# bucket to store repr points
-S3_BUCKET = 'flats-models'
-S3_DIR = 'coords_encoding'
+from common import (upload_file_to_s3,
+                    logs_conf,
+                    get_current_dt,
+                    PATHS,
+                    S3_MODELS_BUCKET,
+                    S3_MODELS_CLEANING_MAP_DIR,)
+from utils import (closest_point,
+                   unzip_coord_series_to_lon_and_lat,
+                   create_zipped_coords_series,)
 
 # max distance (in km) between coordinates to get "clustered"
 EPSILON = 3
@@ -68,23 +70,14 @@ def send_coords_encoding_map_to_s3(coords_encoding_map, offer_type):
         current_dt = get_current_dt()
         filepath = f'{tmpdir}/{current_dt}.parquet'
         coords_encoding_map.to_parquet(filepath)
+        s3_path = f'{offer_type}/{S3_MODELS_CLEANING_MAP_DIR}/{current_dt}.parquet'
         response = upload_file_to_s3(filepath,
-                                     S3_BUCKET,
-                                     f'{offer_type}/{S3_DIR}/{current_dt}.parquet')
+                                     S3_MODELS_BUCKET,
+                                     s3_path)
     if response:
         return True
     return False
 
-
-def create_zipped_coords_series(df):
-    """ Zips lon and lat columns to create a series of coords tuples. """
-    return [(x, y) for x,y in zip(df['lat'], df['lon'])]
-
-def unzip_coord_series_to_lon_and_lat(df, zipped_colname):
-    df['lat'] = df[zipped_colname].apply(lambda x: x[0])
-    df['lon'] = df[zipped_colname].apply(lambda x: x[1])
-    df = df.drop(zipped_colname , axis=1)
-    return df
 
 
 if __name__ == "__main__":

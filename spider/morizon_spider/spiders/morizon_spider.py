@@ -7,6 +7,7 @@ import scrapy
 from morizon_spider.items import MorizonSpiderItem
 from common import PATHS, select_most_up_to_date_date
 
+
 class MorizonSpider(scrapy.Spider):
 
     name = "morizon_sale"
@@ -66,7 +67,9 @@ class MorizonSpider(scrapy.Spider):
         """
         links_to_scrape = [
             link
-            for link in response.xpath("//a[@class='property_link property-url']/@href").getall()
+            for link in response.xpath(
+                "//a[@class='property_link property-url']/@href"
+            ).getall()
             if "/oferta/" in link
         ]
         links_to_scrape_dates_raw = response.xpath(
@@ -101,7 +104,7 @@ class MorizonSpider(scrapy.Spider):
             "//a[@class='mz-pagination-number__btn mz-pagination-number__btn--next']/@href"
         ).get()
         if next_page:
-            self.crawler.stats.inc_value('paginations_followed')
+            self.crawler.stats.inc_value("paginations_followed")
             next_page = "https://www.morizon.pl" + next_page + self.date_filter_str
             yield scrapy.Request(next_page, callback=self.parse)
         else:
@@ -132,7 +135,7 @@ class MorizonSpider(scrapy.Spider):
     def parse_offer(self, response):
         full_info = MorizonSpiderItem()
 
-        self.crawler.stats.inc_value('offers_followed')
+        self.crawler.stats.inc_value("offers_followed")
 
         price = response.xpath("//li[@class='paramIconPrice']/em/text()").get()
         if price:
@@ -143,7 +146,7 @@ class MorizonSpider(scrapy.Spider):
                 .replace("~", "")
             )
         else:  # not interested in offers without price
-            self.crawler.stats.inc_value('offers_no_price_followed')
+            self.crawler.stats.inc_value("offers_no_price_followed")
             return
 
         price_m2 = response.xpath("//li[@class='paramIconPriceM2']/em/text()").get()
@@ -290,7 +293,7 @@ class MorizonSpider(scrapy.Spider):
 
     def _read_last_scraping_date(self):
         # 'rent', 'sale, ...
-        spider_type = self.name.split('_')[-1]
-        raw_path = PATHS[spider_type]['raw']
+        spider_type = self.name.split("_")[-1]
+        raw_path = PATHS[spider_type]["raw"]
         previously_scraped = os.listdir(raw_path)
         return select_most_up_to_date_date(previously_scraped)

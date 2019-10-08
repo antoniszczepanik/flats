@@ -14,12 +14,10 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    "morizon_spider.pipelines.MorizonSpiderPipeline": 300,
-}
+ITEM_PIPELINES = {"morizon_spider.pipelines.MorizonSpiderPipeline": 300}
 
 # Debugging
-#CLOSESPIDER_PAGECOUNT = 100
+# CLOSESPIDER_PAGECOUNT = 100
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -58,9 +56,7 @@ ITEM_PIPELINES = {
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
-EXTENSIONS = {
-    'scrapy_fieldstats.fieldstats.FieldStatsExtension': 10,
-}
+EXTENSIONS = {"scrapy_fieldstats.fieldstats.FieldStatsExtension": 10}
 FIELDSTATS_ENABLED = True
 
 # Enable and configure the AutoThrottle extension (disabled by default)

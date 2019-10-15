@@ -6,6 +6,7 @@ spider/logs/
 spider/project.egg-info/
 spider/previous_scraping_dates.txt
 utils/twistd.pid
+utils/aws_keys.yml
 /*.pyc
 .ipynb_checkpoints
 .cache/

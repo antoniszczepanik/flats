@@ -1,0 +1,16 @@
+---
+- hosts: local
+  connection: local
+  gather_facts: False
+  vars:
+    instance_type: t2.small
+    group: scrapyd-server
+    image: ami-0cc0a36f626a4fdf5
+    key_name: scrapy
+    count: 1
+    wait: yes
+    instance_profile_name: S3_permission_for_ec2
+    assign_public_ip: yes
+  vars_files:
+    - aws_keys.yml
+#TODO: https://www.linuxschoolonline.com/use-ansible-to-build-and-manage-aws-ec2-instances/

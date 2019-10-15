@@ -38,7 +38,7 @@ CLEANING_REQUIRED_COLUMNS = [
 
 logs_conf = {
     "level": log.INFO,
-    "format": "%(filename)-23s %(asctime)s %(levelname)s: %(message)s",
+    "format": "%(filename)-30s %(asctime)s %(levelname)s: %(message)s",
     "datefmt": "%H:%M:%S",
 }
 

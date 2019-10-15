@@ -1,6 +1,7 @@
 import logging as log
 from datetime import datetime
 import pandas as pd
+from scipy.spatial.distance import cdist
 
 from common import logs_conf
 

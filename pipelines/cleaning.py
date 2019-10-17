@@ -4,8 +4,7 @@ See spider directory for more info.
 How to map to numeric, which columns should be one-hot encoded
 or how to deal with datetime features is decided here.
 A lot of hardcoded column specific values are present in code below,
-but that comes from well thought decision as about how to store
-maps to parse these values.
+as this is more of a configuration as code file.
 """
 from datetime import datetime
 import logging as log

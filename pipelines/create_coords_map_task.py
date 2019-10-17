@@ -133,3 +133,5 @@ if __name__ == "__main__":
         response = send_coords_encoding_map_to_s3(coords_encoding_map, offer_type)
         if response:
             log.info("Succesfully uploaded file to S3.")
+        else:
+            log.error("Failure while sending file to S3.")

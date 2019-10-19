@@ -1,12 +1,11 @@
 import scrapy
 from morizon_spider.items import MorizonSpiderItem
-from datetime import datetime, timedelta
 from .morizon_spider import MorizonSpider
 
 
 class MorizonSpiderRent(MorizonSpider):
 
-    name = "morizon_rent"
+    name = "rent"
 
     def __init__(self, *args, **kwargs):
 

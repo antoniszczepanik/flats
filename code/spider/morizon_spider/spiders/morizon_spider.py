@@ -1,16 +1,21 @@
 import os
-import logging
+import logging as log
 from datetime import datetime, timedelta
 
 import scrapy
+from scrapy.utils.log import configure_logging
 
 from morizon_spider.items import MorizonSpiderItem
-from common import PATHS, select_most_up_to_date_date
+from common import RAW_DATA_PATH, list_s3_dir, select_newest_date, logs_conf
 
+# otherwise DEBUG gets loggen in docker container
+root_logger = log.getLogger()
+for handler in root_logger.handlers:
+    root_logger.removeHandler(handler)
 
 class MorizonSpider(scrapy.Spider):
 
-    name = "morizon_sale"
+    name = "sale"
 
     def __init__(self, *args, **kwargs):
 
@@ -292,8 +297,6 @@ class MorizonSpider(scrapy.Spider):
         return date
 
     def _read_last_scraping_date(self):
-        # 'rent', 'sale, ...
-        spider_type = self.name.split("_")[-1]
-        raw_path = PATHS[spider_type]["raw"]
-        previously_scraped = os.listdir(raw_path)
-        return select_most_up_to_date_date(previously_scraped)
+        raw_s3_dir = RAW_DATA_PATH.format(data_type=self.name)
+        scraped_files = list_s3_dir(raw_s3_dir)
+        return select_newest_date(scraped_files)

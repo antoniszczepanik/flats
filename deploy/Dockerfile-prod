@@ -36,17 +36,12 @@ RUN set -ex \
         /usr/share/doc \
         /usr/share/doc-base
 
-COPY ./requirements.txt /requirements.txt
+COPY ./deploy/requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
-WORKDIR "/user/local"
-RUN git clone https://github.com/kabuboy/flats.git
-WORKDIR "/user/local/flats"
+#add cronjobs etc
 
-COPY ./deploy.sh /deploy.sh
-#TODO: Figure out how to run a setup script
-RUN /bin/bash /deploy.sh
 
-EXPOSE 6800
-
-ENTRYPOINT ["/bin/bash"]
+WORKDIR "/code"
+ENV PYTHONPATH=$PYTHONPATH:/code
+COPY ./code /code

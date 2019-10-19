@@ -106,7 +106,7 @@ if __name__ == "__main__":
         assert "lat" in df.columns
 
         # remove "artificial" duplicates
-        df_unduped = df.drop_duplicates(subset=['lon', 'lat'], keep='last')
+        df_unduped = df.drop_duplicates(subset=["lon", "lat"], keep="last")
 
         repr_coords_df = get_repr_points(df_unduped)
 

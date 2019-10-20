@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """"
-Pipeline to concatinate and dedup all scraping outputs
-It concats data from each folder - sale and rent
-and saves them on s3 in 'morizon-data/spider-name/concated' folder.
+Pipeline to concatinate and dedup all scraping outputs.
 """
 import os
 import logging as log
@@ -10,37 +8,83 @@ import logging as log
 import pandas as pd
 
 import utils
-from common import PATHS, HOME_PATH, get_current_dt, logs_conf
+from common import (
+    RAW_DATA_PATH,
+    CONCATED_DATA_PATH,
+    DATA_TYPES,
+    get_current_dt,
+    logs_conf,
+    list_s3_dir,
+    read_newest_df_from_s3,
+    upload_df_to_s3,
+    read_df_from_s3,
+    select_newest_date,
+    get_date_from_filename,
+)
 
 log.basicConfig(**logs_conf)
 
+# skip concating memory heavy columns
+COLUMNS_TO_SKIP = ("desc", "image_link")
 
-def concat_csvs_to_parquet(in_path, out_path, spider_type):
-    """
-    Concat all files stored in 'in_path' directory and most current parquet file
-    from 'out_path' directory. Save the output to 'out_path' directory.
-    """
-    # filter desc files
-    in_path_content = os.listdir(f"{in_path}")
-    log.info(f"Found {len(in_path_content)} files to concat.")
-    paths_to_concat = [f for f in in_path_content if "desc" not in f]
-    paths_to_concat = [f"{in_path}/{f}" for f in paths_to_concat]
 
-    full_df = utils.concat_dfs(paths_to_concat)
+def concat_data_task():
+    log.info("Starting data concatination pipeline...")
+    for data_type in DATA_TYPES:
+        concat_csvs_to_parquet(data_type, columns_to_skip=COLUMNS_TO_SKIP)
+        log.info(f"Finished concating files for {data_type}.")
+    log.info("Finished concatination pipeline.")
+
+
+def concat_csvs_to_parquet(data_type, columns_to_skip):
+    """
+    Concat all raw csv files and save them as parquet skipping selected cols.
+    """
+    raw_paths = get_unconcated_raw_paths(data_type)
+    if len(raw_paths) == 0:
+        log.info("No files to concat. Skipping")
+        return None
+    raw_df = concat_dfs(raw_paths, columns_to_skip=columns_to_skip)
+
+    previous_concated_df = read_newest_df_from_s3(
+        CONCATED_DATA_PATH.format(data_type=data_type)
+    )
+    log.info(f"Previous concated df shape: {previous_concated_df.shape}")
+
+    full_df = pd.concat([raw_df, previous_concated_df], sort=True)
     full_df = full_df.drop_duplicates("offer_id", keep="last")
+    log.info(f"New concated df shape: {full_df.shape}")
 
     current_dt = get_current_dt()
-    out_filepath = f"{out_path}/{spider_type}_concated_{current_dt}.parquet"
-    log.info(f"Writing {out_filepath} ...")
-    full_df.to_parquet(out_filepath, index=False)
+    target_s3_name = f"/{data_type}_concated_{current_dt}.parquet"
+    target_s3_path = CONCATED_DATA_PATH.format(data_type=data_type) + target_s3_name
+    upload_df_to_s3(full_df, target_s3_path)
 
 
-log.info("Starting data concatination pipeline...")
-for spider_type in PATHS:
-    print(spider_type)
-    in_path = PATHS[spider_type]["raw"]
-    out_path = PATHS[spider_type]["concated"]
-    log.info(f"Starting concating files for {spider_type}.")
-    concat_csvs_to_parquet(in_path, out_path, spider_type)
-    log.info(f"Successfully concated files for {spider_type}")
-log.info("Finished data_concatination pipeline.")
+def get_unconcated_raw_paths(data_type):
+    """Returns paths of raw files newer than last concat date"""
+    concated_paths = list_s3_dir(CONCATED_DATA_PATH.format(data_type=data_type))
+    raw_paths = list_s3_dir(RAW_DATA_PATH.format(data_type=data_type))
+
+    last_concat_date = select_newest_date(concated_paths)
+    # skip datetimes with invalid format
+    raw_paths = [r for r in raw_paths if get_date_from_filename(r) is not None]
+    # skip raw files covered in previous concatination step
+    raw_paths = [r for r in raw_paths if get_date_from_filename(r) > last_concat_date]
+    return raw_paths
+
+
+def concat_dfs(paths, columns_to_skip):
+    """
+    Concat all files and drop all duplicates.
+    """
+    dfs = []
+    for s3_path in paths:
+        df = read_df_from_s3(s3_path, columns_to_skip=columns_to_skip)
+        dfs.append(df)
+    log.info("Concatinating raw dfs ...")
+    concatinated_df = pd.concat(dfs, sort=True).drop_duplicates(keep="last")
+    return concatinated_df
+
+
+concat_data_task()

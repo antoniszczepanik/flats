@@ -47,4 +47,3 @@ coords-map: docker-build docker-run-detached
 features: docker-build docker-run-detached
 	-docker exec -w /code/pipelines -it flats ./feature_engineering_task.py
 	docker kill flats
-pipeline: concat clean features

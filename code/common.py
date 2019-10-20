@@ -66,7 +66,11 @@ def select_newest_file(file_paths):
         return None
     datetimes = []
     for path in file_paths:
-        datetimes.append(get_date_from_filename(path))
+        date = get_date_from_filename(path)
+        # filter nans
+        if date:
+            datetimes.append(date)
+
     max_pos = datetimes.index(max(datetimes))
     return file_paths[max_pos]
 
@@ -77,7 +81,10 @@ def select_newest_date(file_paths):
         return None
     datetimes = []
     for path in file_paths:
-        datetimes.append(get_date_from_filename(path))
+        date = get_date_from_filename(path)
+        # filter nans
+        if date:
+            datetimes.append(date)
     return max(datetimes)
 
 

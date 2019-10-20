@@ -55,7 +55,11 @@ def concat_csvs_to_parquet(data_type, columns_to_skip):
     full_df = pd.concat([raw_df, previous_concated_df], sort=True)
     full_df = full_df.drop_duplicates("offer_id", keep="last")
     log.info(f"New concated df shape: {full_df.shape}")
-
+    if full_df.shape == previous_concated_df.shape:
+        log.info(
+            "New concated file has the same number of records - not sending an update to s3"
+        )
+        return None
     current_dt = get_current_dt()
     target_s3_name = f"/{data_type}_concated_{current_dt}.parquet"
     target_s3_path = CONCATED_DATA_PATH.format(data_type=data_type) + target_s3_name

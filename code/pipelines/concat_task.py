@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """"
 Pipeline to concatinate and dedup all scraping outputs.
 """

@@ -41,6 +41,9 @@ concat: docker-build docker-run-detached
 clean: docker-build docker-run-detached
 	-docker exec -w /code/pipelines -it flats ./cleaning_task.py
 	docker kill flats
+coords-map: docker-build docker-run-detached
+	-docker exec -w /code/pipelines -it flats ./create_coords_map_task.py
+	docker kill flats
 features: docker-build docker-run-detached
 	-docker exec -w /code/pipelines -it flats ./feature_engineering_task.py
 	docker kill flats

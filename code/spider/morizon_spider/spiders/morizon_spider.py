@@ -13,6 +13,7 @@ root_logger = log.getLogger()
 for handler in root_logger.handlers:
     root_logger.removeHandler(handler)
 
+
 class MorizonSpider(scrapy.Spider):
 
     name = "sale"
@@ -124,7 +125,7 @@ class MorizonSpider(scrapy.Spider):
 
             # log current range and number of scraped items
             self.logger.info(
-                f"Currenly scraping offers in {range_low}-{range_high} zł price range"
+                f"Currenly scraping offers in {range_low}-{range_high} zl price range"
             )
             self.logger.info(
                 f"Items scraped: {self.crawler.stats.get_value('item_scraped_count')}"

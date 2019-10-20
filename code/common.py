@@ -14,16 +14,15 @@ logs_conf = {
 }
 
 # data pipelines paths
-S3_DATA_BUCKET = 'flats-data'
-SALE_PATH_ROOT = 'sale'
-RENT_PATH_ROOT = 'rent'
-RAW_DATA_PATH = S3_DATA_BUCKET + '/{data_type}/raw'
-CONCATED_DATA_PATH = S3_DATA_BUCKET + '/{data_type}/concated'
-CLEAN_DATA_PATH = S3_DATA_BUCKET + '/{data_type}/clean'
-FINAL_DATA_PATH = S3_DATA_BUCKET + '/{data_type}/final'
+S3_DATA_BUCKET = "flats-data"
+DATA_TYPES = ("sale", "rent")
+RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
+CONCATED_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/concated"
+CLEAN_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/clean"
+FINAL_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/final"
 
 # models paths
-S3_MODELS_BUCKET = 'flats-models'
+S3_MODELS_BUCKET = "flats-models"
 S3_MODELS_CLEANING_MAP_DIR = "coords_encoding"
 
 CLEANING_REQUIRED_COLUMNS = [
@@ -32,7 +31,8 @@ CLEANING_REQUIRED_COLUMNS = [
     "building_material",
     "building_type",
     "building_year",
-    "conviniences", "date_added",
+    "conviniences",
+    "date_added",
     "date_refreshed",
     "desc_len",
     "direct",
@@ -64,16 +64,10 @@ def select_newest_file(file_paths):
     """ Select string with most current datetime in name. """
     if len(file_paths) == 0:
         return None
-    dt_strings = []
-
+    datetimes = []
     for path in file_paths:
-        date_numbers = "".join([x for x in path if x.isdigit()])
-        # assure only files with datetimes are considered
-        if len(date_numbers) == 14:
-            dt_strings.append(date_numbers)
-    datetimes = [datetime.strptime(x, "%Y%m%d%H%M%S") for x in dt_strings]
+        datetimes.append(get_date_from_filename(path))
     max_pos = datetimes.index(max(datetimes))
-
     return file_paths[max_pos]
 
 
@@ -81,16 +75,19 @@ def select_newest_date(file_paths):
     """ Select newest date from list of strings and return datetime object."""
     if len(file_paths) == 0:
         return None
-    dt_strings = []
-
+    datetimes = []
     for path in file_paths:
-        date_numbers = "".join([x for x in path if x.isdigit()])
-        # assure only files with datetimes are considered
-        if len(date_numbers) == 14:
-            dt_strings.append(date_numbers)
-
-    datetimes = [datetime.strptime(x, "%Y%m%d%H%M%S") for x in dt_strings]
+        datetimes.append(get_date_from_filename(path))
     return max(datetimes)
+
+
+def get_date_from_filename(filename):
+    date_numbers = "".join([x for x in filename if x.isdigit()])
+    # make sure this is a valid datetime format used accross project
+    if len(date_numbers) != 14:
+        log.warning(f"Not getting date from invalid file name: {filename}")
+        return None
+    return datetime.strptime(date_numbers, "%Y%m%d%H%M%S")
 
 
 def get_current_dt():
@@ -127,52 +124,69 @@ def download_file_from_s3(filename, s3_path):
 
 
 def list_s3_dir(s3_dir):
-    """Recursively list given dir in S3 bucket. Returns a list of filenames"""
+    """Returns a list of filenames"""
     bucket, path = split_bucket_path(s3_dir)
     s3_client = boto3.client("s3")
     response = s3_client.list_objects_v2(Bucket=bucket, Prefix=path)
-    file_list = [f"{bucket}/{f['Key']}" for f in response['Contents']]
+    file_list = [f"{bucket}/{f['Key']}" for f in response["Contents"]]
     # do not list directories
-    file_list = [f for f in file_list if f[-1] != '/']
+    file_list = [f for f in file_list if f[-1] != "/"]
+    # do not list recursively
+    file_list = [
+        f for f in file_list if len(f.split("/")) == len(s3_dir.split("/")) + 1
+    ]
     return file_list
 
 
 def split_bucket_path(s3_path):
-    splitted = s3_path.split('/')
+    splitted = s3_path.split("/")
     bucket = splitted[0]
-    path = '/'.join(splitted[1:])
+    path = "/".join(splitted[1:])
     return bucket, path
 
+
 def get_filename(s3_path):
-    return s3_path.split('/')[-1]
+    return s3_path.split("/")[-1]
+
 
 def upload_df_to_s3(df, s3_path):
     filename = get_filename(s3_path)
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmp_path = f'{tmpdir}/{filename}'
-        extension = tmp_path.split('.')[-1]
-        if extension == 'csv':
+        tmp_path = f"{tmpdir}/{filename}"
+        extension = tmp_path.split(".")[-1]
+        if extension == "csv":
             df.to_csv(tmp_path, index=False)
-        elif extension == 'parquet':
+        elif extension == "parquet":
             df.to_parquet(tmp_path)
         else:
-            log.error(f'{extension} extension is not supported.')
+            log.error(f"{extension} extension is not supported.")
             raise InvalidExtensionException
         upload_file_to_s3(tmp_path, s3_path)
 
 
-def read_df_from_s3(s3_path):
+def read_df_from_s3(s3_path, columns_to_skip=None):
     filename = get_filename(s3_path)
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmp_path = f'{tmpdir}/{filename}'
+        tmp_path = f"{tmpdir}/{filename}"
         download_file_from_s3(tmp_path, s3_path)
-        extension = tmp_path.split('.')[-1]
-        if extension == 'csv':
-            df = pd.read_csv(tmp_path)
-        elif extension == 'parquet':
+        extension = tmp_path.split(".")[-1]
+        if extension == "csv":
+            if columns_to_skip:
+                try:
+                    # sample columns
+                    columns = pd.read_csv(tmp_path, nrows=1).columns
+                except pd.errors.EmptyDataError:
+                    log.warning(f"Failed to parse dataframe with no columns: {s3_path}")
+                    return pd.DataFrame()
+                else:
+                    columns_to_use = list(set(columns) - set(columns_to_skip))
+                    df = pd.read_csv(tmp_path, usecols=columns_to_use, low_memory=True)
+            else:
+                df = pd.read_csv(tmp_path, low_memory=True)
+        elif extension == "parquet":
             df = pd.read_parquet(tmp_path)
         else:
-            log.error(f'{extension} extension is not supported.')
+            log.error(f"{extension} extension is not supported.")
             raise InvalidExtensionException
     return df
 
@@ -181,6 +195,11 @@ def read_newest_df_from_s3(s3_dir):
     file_list = list_s3_dir(s3_dir)
     newest_s3_path = select_newest_file(file_list)
     return read_df_from_s3(newest_s3_path)
+
+
+def get_last_operation_date(s3_dir):
+    """Parse datetime from filenames in given s3 directory"""
+    pass
 
 
 class InvalidExtensionException(Exception):

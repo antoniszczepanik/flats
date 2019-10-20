@@ -1,6 +1,5 @@
 black:
 	black ./code
-
 test:
 	pytest ./code
 docker-build:
@@ -24,7 +23,7 @@ scrape-sale: docker-build
 		flats
 	-docker exec -w /code/spider -it flats scrapy crawl sale
 	docker kill flats
-scrape-rent: docker-build
+docker-run-detached:
 	docker run \
 		--name flats \
 		--rm -it -d \
@@ -32,7 +31,17 @@ scrape-rent: docker-build
 		-e AWS_ACCESS_KEY_ID=$(shell aws configure get aws_access_key_id) \
 		-e AWS_SECRET_ACCESS_KEY=$(shell aws configure get aws_secret_access_key) \
 		flats
+scrape-rent: docker-build docker-run-detached
 	-docker exec -w /code/spider -it flats scrapy crawl rent
 	docker kill flats
 scrape: scrape-sale scrape-rent
-
+concat: docker-build docker-run-detached
+	-docker exec -w /code/pipelines -it flats ./concat_task.py
+	docker kill flats
+clean: docker-build docker-run-detached
+	-docker exec -w /code/pipelines -it flats ./cleaning_task.py
+	docker kill flats
+features: docker-build docker-run-detached
+	-docker exec -w /code/pipelines -it flats ./feature_engineering_task.py
+	docker kill flats
+pipeline: concat clean features

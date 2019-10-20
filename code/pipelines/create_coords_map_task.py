@@ -16,12 +16,13 @@ from geopy.distance import great_circle
 from shapely.geometry import MultiPoint
 
 from common import (
-    upload_file_to_s3,
+    DATA_TYPES,
+    CLEAN_DATA_PATH,
+    COORDS_MAP_MODELS_PATH,
+    read_newest_df_from_s3,
     logs_conf,
     get_current_dt,
-    PATHS,
-    S3_MODELS_BUCKET,
-    S3_MODELS_CLEANING_MAP_DIR,
+    upload_df_to_s3,
 )
 from utils import (
     closest_point,
@@ -38,13 +39,58 @@ KMS_PER_RADIAN = 6371.0088
 log.basicConfig(**logs_conf)
 
 
+def create_coords_map_task():
+    for data_type in DATA_TYPES:
+        log.info(f"Starting coords encoding map task for {data_type} data.")
+        newest_df = read_newest_df_from_s3(CLEAN_DATA_PATH.format(data_type=data_type))
+        cols = newest_df.columns
+        if "lon" not in cols or "lat" not in cols:
+            log.warning("Missing coordinates. Skipping.")
+            return None
+        coords_map = get_coords_map(newest_df, data_type)
+
+        current_dt = get_current_dt()
+        target_s3_name = f"/{data_type}_encoding_map_{current_dt}.parquet"
+        target_s3_path = (
+            COORDS_MAP_MODELS_PATH.format(data_type=data_type) + target_s3_name
+        )
+        upload_df_to_s3(coords_map, target_s3_path)
+        log.info(f"Finished coords encoding map task for {data_type} data.")
+    log.info("Finished coords encoding map task.")
+
+
+def get_coords_map(df, data_type):
+    # remove "artificial" duplicates
+    df_unduped = df.drop_duplicates(subset=["lon", "lat"], keep="last")
+    repr_coords_df = get_repr_points(df_unduped)
+    repr_coords_df["coords_tuple"] = create_zipped_coords_series(repr_coords_df)
+
+    df["coords_tuple"] = create_zipped_coords_series(df)
+    # assign a closest point
+    df["coords_closest_tuple"] = [
+        closest_point(x, list(repr_coords_df["coords_tuple"]))
+        for x in df["coords_tuple"]
+    ]
+    coords_encoding_map = (
+        df.loc[:, ["coords_closest_tuple", "price_m2"]]
+        .groupby("coords_closest_tuple", as_index=False)
+        .mean()
+        .sort_values(by="price_m2")
+        .reset_index(drop=True)
+        .rename(columns={"price_m2": "coords_mean_price_m2"})
+        .pipe(unzip_coord_series_to_lon_and_lat, "coords_closest_tuple")
+    )
+    coords_encoding_map["coords_category"] = coords_encoding_map.index + 1
+    return coords_encoding_map
+
+
 def get_repr_points(lon_lat_df):
     """
     Get's lon's and lat's representative for a dataframe with lon and lat
     values. For details see:
     https://geoffboeing.com/2014/08/clustering-to-reduce-spatial-data-set-size/
     """
-    coords = df[["lat", "lon"]].to_numpy()
+    coords = lon_lat_df[["lat", "lon"]].to_numpy()
 
     epsilon = EPSILON / KMS_PER_RADIAN
 
@@ -71,67 +117,4 @@ def get_centermost_point(cluster):
     return tuple(centermost_point)
 
 
-def send_coords_encoding_map_to_s3(coords_encoding_map, offer_type):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        current_dt = get_current_dt()
-        filepath = f"{tmpdir}/{current_dt}.parquet"
-        coords_encoding_map.to_parquet(filepath)
-        s3_path = f"{offer_type}/{S3_MODELS_CLEANING_MAP_DIR}/{current_dt}.parquet"
-        response = upload_file_to_s3(filepath, S3_MODELS_BUCKET, s3_path)
-    if response:
-        return True
-    return False
-
-
-if __name__ == "__main__":
-
-    if len(sys.argv) != 3:
-        log.error(
-            "You should specify source dataframe path and offer type "
-            "(sale or rent) as an argument."
-        )
-    else:
-        offer_type = sys.argv[2]
-        # verify if offer type is in supported types
-        assert offer_type in PATHS.keys()
-
-        path = sys.argv[1]
-        try:
-            df = pd.read_parquet(path)
-        except OSError as e:
-            log.error(f'Did not find "{path}" parquet file. Aborting.')
-            raise e
-
-        assert "lon" in df.columns
-        assert "lat" in df.columns
-
-        # remove "artificial" duplicates
-        df_unduped = df.drop_duplicates(subset=["lon", "lat"], keep="last")
-
-        repr_coords_df = get_repr_points(df_unduped)
-
-        df["coords_tuple"] = create_zipped_coords_series(df)
-        repr_coords_df["coords_tuple"] = create_zipped_coords_series(repr_coords_df)
-
-        # assign a closest point
-        df["coords_closest_tuple"] = [
-            closest_point(x, list(repr_coords_df["coords_tuple"]))
-            for x in df["coords_tuple"]
-        ]
-
-        coords_encoding_map = (
-            df.loc[:, ["coords_closest_tuple", "price_m2"]]
-            .groupby("coords_closest_tuple", as_index=False)
-            .mean()
-            .sort_values(by="price_m2")
-            .reset_index(drop=True)
-            .rename(columns={"price_m2": "coords_mean_price_m2"})
-            .pipe(unzip_coord_series_to_lon_and_lat, "coords_closest_tuple")
-        )
-        coords_encoding_map["coords_category"] = coords_encoding_map.index + 1
-
-        response = send_coords_encoding_map_to_s3(coords_encoding_map, offer_type)
-        if response:
-            log.info("Succesfully uploaded file to S3.")
-        else:
-            log.error("Failure while sending file to S3.")
+create_coords_map_task()

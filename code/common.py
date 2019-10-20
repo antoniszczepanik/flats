@@ -23,7 +23,7 @@ FINAL_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/final"
 
 # models paths
 S3_MODELS_BUCKET = "flats-models"
-S3_MODELS_CLEANING_MAP_DIR = "coords_encoding"
+COORDS_MAP_MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/coords_encoding"
 
 CLEANING_REQUIRED_COLUMNS = [
     "balcony",

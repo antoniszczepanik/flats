@@ -39,6 +39,7 @@ def unzip_coord_series_to_lon_and_lat(df, zipped_colname):
     return df
 
 
-def create_zipped_coords_series(df):
+def add_zipped_coords_column(df, new_col_name):
     """ Zips lon and lat columns to create a series of coords tuples. """
-    return [(x, y) for x, y in zip(df["lat"], df["lon"])]
+    df[new_col_name] = [(x, y) for x, y in zip(df["lat"], df["lon"])]
+    return df

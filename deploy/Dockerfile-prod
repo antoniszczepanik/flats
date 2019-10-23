@@ -42,9 +42,12 @@ RUN pip3 install -r requirements.txt
 COPY ./code /code
 COPY ./deploy/cron_jobs /cron_jobs
 
+
 ENV PYTHONPATH=$PYTHONPATH:/code
 
 WORKDIR "/code"
 
-ENTRYPOINT ["./entrypoint.sh"]
+
+COPY ./deploy/entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 

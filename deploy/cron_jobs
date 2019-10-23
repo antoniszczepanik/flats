@@ -1,8 +1,8 @@
 # Sale scraper everyday at 0:15
-15 0 * * * curl http://localhost:6800/schedule.json -d project=morizon_spider -d spider=morizon_sale >/dev/null 2>&1 
+15 0 * * * 
 # Rent scraper everyday at 0:30
-30 0 * * * curl http://localhost:6800/schedule.json -d project=morizon_spider -d spider=morizon_rent >/dev/null 2>&1 
+30 0 * * * 
 # Data concatination everyday 0:45
-45 0 * * * /home/ubuntu/flats/data_pipelines/data_concat_task.py
+45 0 * * * 
 # Data cleaning everyday at 1:15
-15 1 * * * /home/ubuntu/flats/data_pipelines/data_concat_task.py
+15 1 * * * 

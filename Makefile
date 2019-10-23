@@ -52,5 +52,5 @@ docker-build-prod:
 	docker build  . \
 		-f deploy/Dockerfile-prod \
 		-t flats
-docker-run-prod:
+docker-run-prod: docker-build-prod
 	docker run flats

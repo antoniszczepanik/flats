@@ -54,3 +54,5 @@ docker-build-prod:
 		-t flats
 docker-run-prod: docker-build-prod
 	docker run flats
+rerun-ec2:
+	./deploy/rerun_ec2.sh

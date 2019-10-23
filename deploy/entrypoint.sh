@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-echo "HELLO IT WORKS!"
+crontab /cron_jobs
+
+echo "Added following jobs to crontab:"
+cat /cron_jobs

@@ -39,9 +39,12 @@ RUN set -ex \
 COPY ./deploy/requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
-#add cronjobs etc
+COPY ./code /code
+COPY ./deploy/cron_jobs /cron_jobs
 
+ENV PYTHONPATH=$PYTHONPATH:/code
 
 WORKDIR "/code"
-ENV PYTHONPATH=$PYTHONPATH:/code
-COPY ./code /code
+
+ENTRYPOINT ["./entrypoint.sh"]
+

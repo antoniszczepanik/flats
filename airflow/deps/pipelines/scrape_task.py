@@ -12,7 +12,7 @@ SPIDER_MAP = {
     'rent': MorizonSpiderRent,
 }
 
-def scrape_task(data_type, **kwargs):
+def scrape_task(data_type):
     # use project settings
     settings_file_path = 'spider.morizon_spider.settings' # The path seen from root, ie. from main.py
     os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_file_path)

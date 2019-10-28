@@ -39,24 +39,23 @@ KMS_PER_RADIAN = 6371.0088
 log.basicConfig(**logs_conf)
 
 
-def create_coords_map_task():
-    for data_type in DATA_TYPES:
-        log.info(f"Starting coords encoding map task for {data_type} data.")
-        newest_df = read_newest_df_from_s3(CLEAN_DATA_PATH.format(data_type=data_type))
-        cols = newest_df.columns
-        if "lon" not in cols or "lat" not in cols:
-            log.warning("Missing coordinates. Skipping.")
-            return None
-        coords_map = get_coords_map(newest_df, data_type)
+def create_coords_map_task(data_type):
+    log.info(f"Starting coords encoding map task for {data_type} data.")
+    newest_df = read_newest_df_from_s3(CLEAN_DATA_PATH.format(data_type=data_type))
+    cols = newest_df.columns
+    if "lon" not in cols or "lat" not in cols:
+        log.warning("Missing coordinates. Skipping.")
+        return None
 
-        current_dt = get_current_dt()
-        target_s3_name = f"/{data_type}_encoding_map_{current_dt}.parquet"
-        target_s3_path = (
-            COORDS_MAP_MODELS_PATH.format(data_type=data_type) + target_s3_name
-        )
-        upload_df_to_s3(coords_map, target_s3_path)
-        log.info(f"Finished coords encoding map task for {data_type} data.")
-    log.info("Finished coords encoding map task.")
+    coords_map = get_coords_map(newest_df, data_type)
+
+    current_dt = get_current_dt()
+    target_s3_name = f"/{data_type}_encoding_map_{current_dt}.parquet"
+    target_s3_path = (
+    COORDS_MAP_MODELS_PATH.format(data_type=data_type) + target_s3_name
+    )
+    upload_df_to_s3(coords_map, target_s3_path)
+    log.info(f"Finished coords encoding map task for {data_type} data.")
 
 
 def get_coords_map(df, data_type):

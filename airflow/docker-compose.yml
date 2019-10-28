@@ -19,7 +19,8 @@ services:
             - EXECUTOR=Local
         volumes:
             - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro
-            #- ./dags:/usr/local/airflow/dags
+            - ./dags:/usr/local/airflow/dags
+            - ./deps:/usr/local/airflow/deps
             # Uncomment to include custom plugins
             # - ./plugins:/usr/local/airflow/plugins
         ports:

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """"
 Pipeline to concatinate and dedup all scraping outputs.
 """
@@ -12,7 +10,6 @@ import pipelines.utils as utils
 from common import (
     RAW_DATA_PATH,
     CONCATED_DATA_PATH,
-    DATA_TYPES,
     get_current_dt,
     logs_conf,
     list_s3_dir,
@@ -29,7 +26,7 @@ log.basicConfig(**logs_conf)
 COLUMNS_TO_SKIP = ("desc", "image_link")
 
 
-def concat_data_task(data_type, **kwargs):
+def concat_data_task(data_type):
     log.info("Starting data concatination task...")
     concat_csvs_to_parquet(data_type, columns_to_skip=COLUMNS_TO_SKIP)
     log.info(f"Finished concating files for {data_type}.")

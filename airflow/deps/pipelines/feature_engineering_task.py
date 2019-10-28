@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 Based on clean data and coords encoding map add new coords features.
 """
@@ -18,16 +16,15 @@ from common import (
     upload_df_to_s3,
     get_current_dt,
 )
-from utils import add_zipped_coords_column, unzip_coord_series_to_lon_and_lat, closest_point
+from pipelines.utils import add_zipped_coords_column, unzip_coord_series_to_lon_and_lat, closest_point
 
 log.basicConfig(**logs_conf)
 
-def feature_engineering_task():
+
+def feature_engineering_task(data_type):
     log.info("Starting feature engineering task...")
-    for data_type in DATA_TYPES:
-        add_features(data_type)
-        log.info(f"Finished adding features to {data_type} data.")
-    log.info("Finished feature engineering task.")
+    add_features(data_type)
+    log.info(f"Finished adding features to {data_type} data.")
 
 def add_features(data_type):
     coords_encoding_map = read_newest_df_from_s3(COORDS_MAP_MODELS_PATH.format(data_type=data_type))
@@ -101,6 +98,3 @@ def add_distance_col(df, zipped_coords_1, zipped_coords_2, distance_colname):
         )
     df[distance_colname] = [round(dist, 3) for dist in distances]
     return df
-
-
-feature_engineering_task()

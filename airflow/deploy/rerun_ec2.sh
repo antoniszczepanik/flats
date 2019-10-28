@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # kill existing flats worker
+# TODO: add query to terminate only working instances - not listing terminated etc
 aws ec2 terminate-instances --instance-ids \
 	$(aws ec2 describe-instances \
 		--filters  "Name=tag:Name,Values=flats_worker" \

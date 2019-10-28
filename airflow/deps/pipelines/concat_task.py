@@ -29,11 +29,10 @@ log.basicConfig(**logs_conf)
 COLUMNS_TO_SKIP = ("desc", "image_link")
 
 
-def concat_data_task():
+def concat_data_task(data_type, **kwargs):
     log.info("Starting data concatination task...")
-    for data_type in DATA_TYPES:
-        concat_csvs_to_parquet(data_type, columns_to_skip=COLUMNS_TO_SKIP)
-        log.info(f"Finished concating files for {data_type}.")
+    concat_csvs_to_parquet(data_type, columns_to_skip=COLUMNS_TO_SKIP)
+    log.info(f"Finished concating files for {data_type}.")
     log.info("Finished concatination task.")
 
 

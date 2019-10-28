@@ -16,13 +16,13 @@ default_args = {
     'email': ['szczepanik.antoni@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': False,
-    'retries': 2,
+    'retries': 10,
     'retry_delay': timedelta(minutes=5),
 }
 
 dag = DAG('flats_data',
           default_args=default_args,
-          schedule_interval=None)
+          schedule_interval='15 0 * * *')
 
 for data_type in DATA_TYPES:
 

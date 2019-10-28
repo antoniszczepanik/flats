@@ -1,8 +1,0 @@
-# Sale scraper everyday at 0:15
-15 0 * * * 
-# Rent scraper everyday at 0:30
-30 0 * * * 
-# Data concatination everyday 0:45
-45 0 * * * 
-# Data cleaning everyday at 1:15
-15 1 * * * 

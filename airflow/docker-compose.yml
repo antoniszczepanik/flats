@@ -31,3 +31,4 @@ services:
             interval: 30s
             timeout: 30s
             retries: 3
+        entrypoint: ["/entrypoint.sh", "webserver"]

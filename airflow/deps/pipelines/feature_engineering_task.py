@@ -7,19 +7,19 @@ import pandas as pd
 from geopy.distance import great_circle
 
 from common import (
-    read_newest_df_from_s3,
-    logs_conf,
     DATA_TYPES,
     CLEAN_DATA_PATH,
     FINAL_DATA_PATH,
     COORDS_MAP_MODELS_PATH,
-    upload_df_to_s3,
+    logs_conf,
     get_current_dt,
 )
 from pipelines.utils import add_zipped_coords_column, unzip_coord_series_to_lon_and_lat, closest_point
+from s3_client import s3_client
 
 log.basicConfig(**logs_conf)
 
+s3_client = s3_client()
 
 def feature_engineering_task(data_type):
     log.info("Starting feature engineering task...")
@@ -27,17 +27,18 @@ def feature_engineering_task(data_type):
     log.info(f"Finished adding features to {data_type} data.")
 
 def add_features(data_type):
-    coords_encoding_map = read_newest_df_from_s3(COORDS_MAP_MODELS_PATH.format(data_type=data_type))
-    df = read_newest_df_from_s3(CLEAN_DATA_PATH.format(data_type=data_type))
+    coords_encoding_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH.format(data_type=data_type))
+    df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH.format(data_type=data_type))
 
     df = df.pipe(add_coords_features, coords_encoding_map=coords_encoding_map)
     # round all values in df to 2 decimal places
-    df = df.round(2)
+    round_cols = ['coords_mean_price_m2', 'coords_cluster_center_dist_km']
+    df[round_cols] = df[round_cols].round(2)
 
     current_dt = get_current_dt()
     target_s3_name = f"/{data_type}_final_{current_dt}.parquet"
     target_s3_path = FINAL_DATA_PATH.format(data_type=data_type) + target_s3_name
-    upload_df_to_s3(df, target_s3_path)
+    s3_client.upload_df_to_s3(df, target_s3_path)
 
 
 def add_coords_features(df, coords_encoding_map):

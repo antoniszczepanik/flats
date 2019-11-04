@@ -103,8 +103,8 @@ class s3_client:
 
     def read_newest_df_from_s3(self, s3_dir):
         file_list = self.list_s3_dir(s3_dir)
-        newest_s3_path = select_newest_file(file_list)
-        return self.read_df_from_s3(newest_path)
+        newest_s3_path = self.select_newest_file(file_list)
+        return self.read_df_from_s3(newest_s3_path)
 
 
     def split_bucket_path(self, s3_path):
@@ -113,7 +113,7 @@ class s3_client:
         path = "/".join(splitted[1:])
         return bucket, path
 
-    def select_newest_file(file_paths):
+    def select_newest_file(self, file_paths):
         """ Select string with most current datetime in name. """
         if len(file_paths) == 0:
             return None

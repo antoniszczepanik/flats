@@ -2,8 +2,6 @@ from datetime import datetime
 import logging as log
 import tempfile
 
-import boto3
-from botocore.exceptions import ClientError
 import pandas as pd
 from scipy.spatial.distance import cdist
 
@@ -60,17 +58,25 @@ CLEANING_REQUIRED_COLUMNS = [
 log.basicConfig(**logs_conf)
 
 
-def select_newest_date(self, file_paths):
+def select_newest_date(file_paths):
     """ Select newest date from list of strings and return datetime object."""
     if len(file_paths) == 0:
         return None
     datetimes = []
     for path in file_paths:
-        date = self.get_date_from_filename(path)
+        date = get_date_from_filename(path)
         # filter nans
         if date:
             datetimes.append(date)
     return max(datetimes)
+
+def get_date_from_filename(filename):
+    date_numbers = "".join([x for x in filename if x.isdigit()])
+    # make sure this is a valid datetime format used accross project
+    if len(date_numbers) != 14:
+        log.warning(f"Not getting date from invalid file name: {filename}")
+        return None
+    return datetime.strptime(date_numbers, "%Y%m%d%H%M%S")
 
 
 def get_current_dt():

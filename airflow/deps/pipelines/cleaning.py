@@ -17,7 +17,33 @@ import unidecode
 from common import CLEANING_REQUIRED_COLUMNS, logs_conf
 
 # for which columns fill lacks with 0
-FILL_NA_WITH_ZERO = "parking_spot"
+FILL_NA_WITH_ZERO = (
+    "parking_spot",
+    "taras",
+    "basement",
+    "telecom",
+    "driveway",
+    "fence",
+    "parking_spot",
+    "furniture",
+    "kitchen_furniture",
+    "internet",
+    "gas",
+    "lift",
+)
+
+MODE_MAP = {
+    'building_height':4,
+    'building_material':'brick',
+    'building_year': 2019,
+    'floor':1,
+    'room_n': 3,
+    'floor_n': 4,
+    'balcony': 1,
+    'heating': 3,
+    'lat': 52.2296756,
+    'lon': 21.0122286,
+}
 
 log.basicConfig(**logs_conf)
 
@@ -60,7 +86,7 @@ class MorizonCleaner(object):
             "price": None,
             "price_m2": None,
             "promotion_counter": None,
-            "room_n": self.fillna_mode,
+            "room_n": None,
             "size": None,
             "taras": {"no_info": "no_info", "Tak": 1, "Nie": 0},
             "title": "remove",
@@ -70,6 +96,7 @@ class MorizonCleaner(object):
 
     def clean(self):
         self.df = self.df.dropna(how="all", axis=1)
+        self.df = self.df.dropna(subset=['price_m2', 'price'])
         for column in CLEANING_REQUIRED_COLUMNS:
             cleaning_func = self.cleaning_map[column]
 
@@ -91,18 +118,12 @@ class MorizonCleaner(object):
                 raise InvalidCleaningMapError
 
         return (
-            self.df.pipe(self.one_hot_encode_no_info)
-            .pipe(self.replace_no_info_with_mode)
-            .pipe(self.one_hot_encode_categorical)
+            self.df.pipe(self.replace_no_info_with_mode)
             .pipe(self.remove_duplicate_columns)
             .pipe(self.map_categorical_features)
             .pipe(self.drop_empty_cols)
             .pipe(self.replace_nans_with_mode)
         )
-
-    def fillna_mode(self, column_name):
-        mode = self.df[column_name].mode()
-        self.df[column_name] = self.df[column_name].fillna(mode)
 
     def building_material(self, column_name):
         brick = ["cegla", "cegła"]
@@ -169,9 +190,8 @@ class MorizonCleaner(object):
         self.df[column_name] = self.df[column_name].apply(mapping)
 
     def building_year(self, column_name):
-        current_year = int(datetime.now().year)
         self.df[column_name] = self.df[column_name].apply(
-            lambda x: current_year - x if type(x) in (float, int) else "no_info"
+            lambda x: x if type(x) in (float, int) else "no_info"
         )
 
     def conviniences(self, column_name):
@@ -231,11 +251,9 @@ class MorizonCleaner(object):
         self.df = self.df.drop(column_name, axis=1)
 
     def date_to_int(self, column_name):
-        dt_2018 = datetime(2018, 1, 1)
-        self.df[f"{column_name}_days_from_2018"] = self.df[column_name].apply(
-            lambda x: (datetime.strptime(x, "%Y-%m-%d") - dt_2018).days
+        self.df[f"{column_name}"] = self.df[column_name].apply(
+            lambda x: datetime.strptime(x, "%Y-%m-%d")
         )
-        self.df = self.df.drop(column_name, axis=1)
 
     def equipment(self, column_name):
         def furniture(value):
@@ -329,7 +347,7 @@ class MorizonCleaner(object):
             else:
                 return "no_info"
 
-        self.df["foor_n"] = self.df[column_name].apply(max_floor_n)
+        self.df["floor_n"] = self.df[column_name].apply(max_floor_n)
         self.df[column_name] = self.df[column_name].apply(floor_n)
 
     def heating(self, column_name):
@@ -404,13 +422,6 @@ class MorizonCleaner(object):
         self.df["sewers"] = self.df[column_name].apply(sewers)
         self.df = self.df.drop(column_name, axis=1)
 
-    def one_hot_encode_no_info(self, df):
-        log.info("One-hot encoding no info values...")
-        cols_with_no_info = self.find_cols_with_no_info()
-        for col in cols_with_no_info:
-            log.info(f"One-hot encoding no info values for {col}...")
-            df[col + "_no_info"] = np.where(df[col].isin(["no_info"]), 1, 0)
-        return df
 
     def replace_no_info_with_mode(self, df):
         """
@@ -422,19 +433,12 @@ class MorizonCleaner(object):
         for col in cols_with_no_info:
             log.info(f"Replacing no info with mode for {col}")
             df[col] = df[col].replace("no_info", np.nan)
-            vc = df[col].nunique(dropna=True)
             # columns with 1 or 2 values or specified
-            if vc in (1, 2) or col in FILL_NA_WITH_ZERO:
+            if col in FILL_NA_WITH_ZERO:
                 df.loc[:, col] = df.loc[:, col].fillna(0)
                 log.info(f"Replaced no_info with binary for {col}")
-            else:
-                try:
-                    mode = df.loc[:, col].mode()[0]
-                except IndexError:
-                    log.info(f"Ignoring empty column (IE): {col}")
-                else:
-                    log.info(f"Replaced no_info with mode for {col}")
-                    df.loc[:, col] = df.loc[:, col].fillna(mode)
+            elif col in MODE_MAP.keys():
+                    df.loc[:, col] = df.loc[:, col].fillna(MODE_MAP[col])
         return df
 
     def find_cols_with_no_info(self):
@@ -445,16 +449,6 @@ class MorizonCleaner(object):
         log.info(f"Found {len(no_info_cols)} with no_info value")
         return no_info_cols
 
-    def one_hot_encode_categorical(self, df):
-        log.info("One hot encoding categorical values ...")
-        df[df.select_dtypes(["object"]).columns] = df.select_dtypes(["object"]).apply(
-            lambda x: x.astype("category")
-        )
-        for col in df.select_dtypes(["category"]).columns:
-            if df[col].nunique() < 6:
-                log.info(f"Getting dummies for {col}... ")
-                df = pd.concat([df, pd.get_dummies(df[col], prefix=col)], axis=1)
-        return df
 
     def remove_duplicate_columns(self, df):
         log.info("Removing duplicated columns")
@@ -498,14 +492,14 @@ class MorizonCleaner(object):
     def replace_nans_with_mode(self, df):
         log.info("Replacing remaining NaNs with mode...")
         for col in df.columns:
-            if (df[col].isna().sum() / len(df)) != 0:
-                try:
-                    mode = df.loc[:, col].mode()[0]
-                except IndexError:
-                    log.info(f"Ignoring empty column (IE): {col}")
-                else:
+            if df[col].isna().sum() > 0:
+                if col in MODE_MAP.keys():
+                    df[col] = df[col].fillna(MODE_MAP[col])
                     log.info(f"Replaced no_info with mode for {col}")
-                    df.loc[:, col] = df.loc[:, col].fillna(mode)
+                elif col in FILL_NA_WITH_ZERO:
+                    df[col] = df[col].fillna(0)
+                else:
+                    log.warning(f"Did not found mode value for {col} which had nans!")
         return df
 
 

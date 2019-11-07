@@ -18,6 +18,9 @@ from s3_client import s3_client
 
 log.basicConfig(**logs_conf)
 
+# number of rows to process at once
+CHUNK_SIZE = 5000
+
 s3_client = s3_client()
 
 def cleaning_task(data_type):
@@ -33,7 +36,16 @@ def clean_morizon_data(data_type):
     for each spider. Save the output to out_path directory.
     """
     df = s3_client.read_newest_df_from_s3(CONCATED_DATA_PATH.format(data_type=data_type))
-    clean_df = MorizonCleaner(df).clean()
+
+    batches = [df[i:i+CHUNK_SIZE] for i in range(0, df.shape[0],CHUNK_SIZE)]
+    cleaned_dfs = []
+    for batch_n, batch in enumerate(batches):
+        log.info(f"Processing batch number {batch_n} ...")
+        clean_df = MorizonCleaner(batch).clean()
+        cleaned_dfs.append(clean_df)
+    cleaned_df = pd.concat(cleaned_dfs, sort=True)
+
+    log.info(f'Cleaned dataframe shape: {cleaned_df.shape}')
 
     current_dt = get_current_dt()
     target_s3_name = f"/{data_type}_clean_{current_dt}.parquet"

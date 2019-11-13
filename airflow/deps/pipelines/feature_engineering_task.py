@@ -77,6 +77,8 @@ def add_coords_features(df, coords_encoding_map):
         if 'duplicate' in col or col in [zipped_coords_col, closest_zipped_coords_col]:
             df = df.drop(col, axis=1)
 
+    df = df.pipe(add_coords_factor_col)
+
     log.info("Successfully added coords features")
     return df
 
@@ -99,3 +101,7 @@ def add_distance_col(df, zipped_coords_1, zipped_coords_2, distance_colname):
         )
     df[distance_colname] = [round(dist, 3) for dist in distances]
     return df
+
+def add_coords_factor_col(df: pd.DataFrame) -> pd.DataFrame:
+    df['coords_factor'] = df['coords_mean_price_m2'] + (df['coords_mean_price_m2'] / (df['coords_cluster_center_dist_km'] + 1))
+    pass

@@ -12,7 +12,7 @@ from pipelines.feature_engineering_task import feature_engineering_task
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime(2019, 11, 4),
+    'start_date': datetime.today() - timedelta(days=1),
     'email': ['szczepanik.antoni@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': False,

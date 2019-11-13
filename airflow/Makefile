@@ -25,3 +25,7 @@ clean-rent:
 		   -v $(PWD)/deps:/usr/local/airflow/deps \
 		   'flats-container' \
 		   python3 -c "from deps.pipelines.cleaning_task import cleaning_task; cleaning_task('sale')"
+compose: 
+	docker-compose -f docker-compose-dev.yml up -d
+compose-prod:
+	docker-compose -f docker-compose-prod.yml up -d

@@ -17,5 +17,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 # sudo mkdir /data
 # sudo mount /dev/svdb /data
 
-cd flats/airflow && sudo docker-compose up -d
+sudo apt install make
+
+cd flats/airflow && make compose-prod
 

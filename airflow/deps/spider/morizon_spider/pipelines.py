@@ -4,6 +4,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from datetime import datetime, timedelta
+import columns
 
 
 class MorizonSpiderPipeline(object):
@@ -22,16 +23,10 @@ class MorizonSpiderPipeline(object):
         "listopada": "11",
         "grudnia": "12",
     }
-    # def __init__(self):
-    #       self.ids_seen = set()
 
     def process_item(self, item, spider):
-        # if item['offer_id'] in self.ids_seen:
-        #       raise DropItem(f"Duplicate item found with ID {item['offer_id']}")
-
-        item["date_added"] = self.polish_to_datetime(item["date_added"])
-        item["date_refreshed"] = self.polish_to_datetime(item["date_refreshed"])
-
+        item[columns.DATE_ADDED] = self.polish_to_datetime(item[columns.DATE_ADDED])
+        item[columns.DATE_REFRESHED] = self.polish_to_datetime(item[columns.DATE_REFRESHED])
         return item
 
     def polish_to_datetime(self, date):

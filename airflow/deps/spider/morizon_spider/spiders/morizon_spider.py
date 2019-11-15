@@ -7,6 +7,7 @@ from scrapy.utils.log import configure_logging
 
 from morizon_spider.items import MorizonSpiderItem
 from common import RAW_DATA_PATH, select_newest_date, logs_conf
+import columns
 from s3_client import s3_client
 
 # otherwise DEBUG gets loggen in docker container
@@ -148,7 +149,7 @@ class MorizonSpider(scrapy.Spider):
 
         price = response.xpath("//li[@class='paramIconPrice']/em/text()").get()
         if price:
-            full_info["price"] = (
+            full_info[columns.PRICE] = (
                 price.replace("\xa0", "")
                 .replace(",", ".")
                 .replace(" ", "")
@@ -160,7 +161,7 @@ class MorizonSpider(scrapy.Spider):
 
         price_m2 = response.xpath("//li[@class='paramIconPriceM2']/em/text()").get()
         if price_m2:
-            full_info["price_m2"] = (
+            full_info[columns.PRICE_M2] = (
                 price_m2.replace("\xa0", "")
                 .replace(",", ".")
                 .replace(" ", "")
@@ -169,18 +170,18 @@ class MorizonSpider(scrapy.Spider):
 
         size = response.xpath("//li[@class='paramIconLivingArea']/em/text()").get()
         if size:
-            full_info["size"] = (
+            full_info[columns.SIZE] = (
                 size.replace("\xa0", "").replace(",", ".").replace(" ", "")
             )
 
         room_n = response.xpath("//li[@class='paramIconNumberOfRooms']/em/text()").get()
         if room_n:
-            full_info["room_n"] = room_n
+            full_info[columns.ROOM_N] = room_n
 
         title = " ".join(
             response.xpath("//div[@class='col-xs-9']//span/text()").getall()
         ).replace("\n", "")
-        full_info["title"] = title
+        full_info[columns.TITLE] = title
 
         # list of parameters in offer description
         values = response.xpath("//section[@class='propertyParams']//tr/td").getall()
@@ -190,36 +191,36 @@ class MorizonSpider(scrapy.Spider):
             value = value.split("\n")[1].split(" </td>")[0]
             # retirive info only from specified keys:
             if key == "Piętro":
-                full_info["floor"] = value
+                full_info[columns.FLOOR] = value
             elif key == "Liczba pięter":
-                full_info["building_height"] = value
+                full_info[columns.BUILDING_HEIGHT] = value
             elif key == "Numer oferty":
-                full_info["offer_id"] = value
+                full_info[columns.OFFER_ID] = value
             elif key == "Rok budowy":
-                full_info["building_year"] = value
+                full_info[columns.BUILDING_YEAR] = value
             elif key == "Opublikowano":
                 # further confirm date is in specified range (morizon bug?)
                 value_dt = self._polish_to_datetime(value)
                 if value_dt > self.end_date or value_dt < self.start_date:
                     return
-                full_info["date_added"] = value
+                full_info[columns.DATE_ADDED] = value
             elif key == "Zaktualizowano":
-                full_info["date_refreshed"] = value
+                full_info[columns.DATE_REFRESHED] = value
             elif key == "Typ budynku":
-                full_info["building_type"] = value
+                full_info[columns.BUILDING_TYPE] = value
             elif key == "Materiał budowlany":
-                full_info["building_material"] = value
+                full_info[columns.BUILDING_MATERIAL] = value
             elif key == "Rynek":
-                full_info["market_type"] = value
+                full_info[columns.MARKET_TYPE] = value
             elif key == "Stan nieruchomości":
-                full_info["flat_state"] = value
+                full_info[columns.FLAT_STATE] = value
             elif key == "Balkon":
-                full_info["balcony"] = value
+                full_info[columns.BALCONY] = value
             elif key == "Taras":
-                full_info["taras"] = value
+                full_info[columns.TARAS] = value
 
         # 4 different optional parameters, below list of key value params
-        OTHER_PARAMS = ["heating", "conviniences", "media", "equipment"]
+        OTHER_PARAMS = [columns.HEATING, columns.CONVINIENCES, columns.MEDIA, columns.EQUIPMENT]
         OTHER_PARAMS_POL = ["Ogrzewanie", "Udogodnienia", "Media", "Wyposażenie"]
         for param_name, pol_name in zip(OTHER_PARAMS, OTHER_PARAMS_POL):
             value = response.xpath(
@@ -248,15 +249,15 @@ class MorizonSpider(scrapy.Spider):
         )
         stats = [int(s) for s in stats.split() if s.isdigit()]
 
-        full_info["lat"] = lat
-        full_info["lon"] = lon
-        full_info["url"] = response.request.url
-        full_info["direct"] = direct
-        full_info["desc"] = desc
-        full_info["desc_len"] = desc_len
-        full_info["view_count"] = stats[0]
-        full_info["promotion_counter"] = stats[1]
-        full_info["image_link"] = image_link
+        full_info[columns.LAT] = lat
+        full_info[columns.LON] = lon
+        full_info[columns.URL] = response.request.url
+        full_info[columns.DIRECT] = direct
+        full_info[columns.DESC] = desc
+        full_info[columns.DESC_LEN] = desc_len
+        full_info[columns.VIEW_COUNT] = stats[0]
+        full_info[columns.PROMOTION_COUNTER] = stats[1]
+        full_info[columns.IMAGE_LINK] = image_link
 
         yield full_info
 

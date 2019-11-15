@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import boto3
+
 from common import RAW_DATA_PATH
 
 # Scrapy settings for morizon_spider project
@@ -15,6 +17,16 @@ FEED_FORMAT = "csv"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+
+# AWS configuration
+try:
+    session = boto3.Session(profile_name='flats')
+except ProfileNotFound:
+    session = boto3.Session()
+creds = session.get_credentials()
+AWS_ACCESS_KEY_ID = creds.access_key
+AWS_SECRET_ACCESS_KEY = creds.secret_key
+
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html

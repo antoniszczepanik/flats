@@ -15,11 +15,12 @@ import unidecode
 
 # columns required for performing the cleaning
 from common import CLEANING_REQUIRED_COLUMNS, logs_conf
+import columns
 
 # for which columns fill lacks with 0
 FILL_NA_WITH_ZERO = (
     "parking_spot",
-    "taras",
+    columns.TARAS,
     "basement",
     "telecom",
     "driveway",
@@ -29,20 +30,20 @@ FILL_NA_WITH_ZERO = (
     "kitchen_furniture",
     "internet",
     "gas",
-    "lift",
+    columns.LIFT,
 )
 
 MODE_MAP = {
-    'building_height':4,
-    'building_material':'brick',
-    'building_year': 2019,
-    'floor':1,
-    'room_n': 3,
-    'floor_n': 4,
-    'balcony': 1,
-    'heating': 3,
-    'lat': 52.2296756,
-    'lon': 21.0122286,
+    columns.BUILDING_HEIGHT:4,
+    columns.BUILDING_MATERIAL:'brick',
+    columns.BUILDING_YEAR: 2019,
+    columns.FLOOR:1,
+    columns.ROOM_N: 3,
+    columns.FLOOR_N: 4,
+    columns.BALCONY: 1,
+    columns.HEATING: 3,
+    columns.LAT: 52.2296756,
+    columns.LON: 21.0122286,
 }
 
 log.basicConfig(**logs_conf)
@@ -64,39 +65,39 @@ class MorizonCleaner(object):
         # a dictionary with dictionary mapping functions and None's where
         # no mapping is neccessery
         self.cleaning_map = {
-            "balcony": {"no_info": "no_info", "Nie": 0, "Tak": 1},
-            "building_height": None,
-            "building_material": self.building_material,
-            "building_type": self.building_type,
-            "building_year": self.building_year,
-            "conviniences": self.conviniences,
-            "date_added": self.date_to_int,
-            "date_refreshed": self.date_to_int,
-            "desc_len": None,
-            "direct": None,
-            "equipment": self.equipment,
-            "flat_state": self.flat_state,
-            "floor": self.floor,
-            "heating": self.heating,
-            "lat": None,
-            "lon": None,
-            "market_type": {"wtórny": 1, "pierwotny": 0},
-            "media": self.media,
-            "offer_id": None,
-            "price": None,
-            "price_m2": None,
-            "promotion_counter": None,
-            "room_n": None,
-            "size": None,
-            "taras": {"no_info": "no_info", "Tak": 1, "Nie": 0},
-            "title": "remove",
-            "url": "remove",
-            "view_count": None,
+            columns.BALCONY: {"no_info": "no_info", "Nie": 0, "Tak": 1},
+            columns.BUILDING_HEIGHT: None,
+            columns.BUILDING_MATERIAL: self.building_material,
+            columns.BUILDING_TYPE: self.building_type,
+            columns.BUILDING_YEAR: self.building_year,
+            columns.CONVINIENCES: self.conviniences,
+            columns.DATE_ADDED: self.date_to_int,
+            columns.DATE_REFRESHED: self.date_to_int,
+            columns.DESC_LEN: None,
+            columns.DIRECT: None,
+            columns.EQUIPMENT: self.equipment,
+            columns.FLAT_STATE: self.flat_state,
+            columns.FLOOR: self.floor,
+            columns.HEATING: self.heating,
+            columns.LAT: None,
+            columns.LON: None,
+            columns.MARKET_TYPE: {"wtórny": 1, "pierwotny": 0},
+            columns.MEDIA: self.media,
+            columns.OFFER_ID: None,
+            columns.PRICE: None,
+            columns.PRICE_M2: None,
+            columns.PROMOTION_COUNTER: None,
+            columns.ROOM_N: None,
+            columns.SIZE: None,
+            columns.TARAS: {"no_info": "no_info", "Tak": 1, "Nie": 0},
+            columns.TITLE: "remove",
+            columns.URL: "remove",
+            columns.VIEW_COUNT: None,
         }
 
     def clean(self):
         self.df = self.df.dropna(how="all", axis=1)
-        self.df = self.df.dropna(subset=['price_m2', 'price'])
+        self.df = self.df.dropna(subset=[columns.PRICE_M2, columns.PRICE])
         for column in CLEANING_REQUIRED_COLUMNS:
             cleaning_func = self.cleaning_map[column]
 
@@ -234,20 +235,20 @@ class MorizonCleaner(object):
             else:
                 return "no_info"
 
-        self.df["lift"] = self.df[column_name].apply(create_lift)
-        self.df["basement"] = self.df[column_name].apply(
+        self.df[columns.LIFT] = self.df[column_name].apply(create_lift)
+        self.df[columns.BASEMENT] = self.df[column_name].apply(
             lambda v: check_if_not("piwnica", v)
         )
-        self.df["telecom"] = self.df[column_name].apply(
+        self.df[columns.TELECOM] = self.df[column_name].apply(
             lambda v: check_if_not("domofon", v)
         )
-        self.df["driveway"] = self.df[column_name].apply(
+        self.df[columns.DRIVEWAY] = self.df[column_name].apply(
             lambda v: check_if_not("podjazd", v)
         )
-        self.df["fence"] = self.df[column_name].apply(
+        self.df[columns.FENCE] = self.df[column_name].apply(
             lambda v: check_if_not("ogrodzenie", v)
         )
-        self.df["parking_spot"] = self.df[column_name].apply(create_parking)
+        self.df[columns.PARKING_SPOT] = self.df[column_name].apply(create_parking)
         self.df = self.df.drop(column_name, axis=1)
 
     def date_to_int(self, column_name):
@@ -272,8 +273,8 @@ class MorizonCleaner(object):
             else:
                 return "no_info"
 
-        self.df["furniture"] = self.df[column_name].apply(furniture)
-        self.df["kitchen_furniture"] = self.df[column_name].apply(kitchen_furniture)
+        self.df[columns.FURNITURE] = self.df[column_name].apply(furniture)
+        self.df[columns.KITCHEN_FURNITURE] = self.df[column_name].apply(kitchen_furniture)
         self.df = self.df.drop(column_name, axis=1)
 
     def flat_state(self, column_name):
@@ -347,7 +348,7 @@ class MorizonCleaner(object):
             else:
                 return "no_info"
 
-        self.df["floor_n"] = self.df[column_name].apply(max_floor_n)
+        self.df[columns.FLOOR_N] = self.df[column_name].apply(max_floor_n)
         self.df[column_name] = self.df[column_name].apply(floor_n)
 
     def heating(self, column_name):
@@ -415,11 +416,11 @@ class MorizonCleaner(object):
             else:
                 return 0
 
-        self.df["internet"] = self.df[column_name].apply(internet)
-        self.df["water"] = self.df[column_name].apply(water)
-        self.df["gas"] = self.df[column_name].apply(gas)
-        self.df["electricity"] = self.df[column_name].apply(electricity)
-        self.df["sewers"] = self.df[column_name].apply(sewers)
+        self.df[columns.INTERNET] = self.df[column_name].apply(internet)
+        self.df[columns.WATER] = self.df[column_name].apply(water)
+        self.df[columns.GAS] = self.df[column_name].apply(gas)
+        self.df[columns.ELECTRICITY] = self.df[column_name].apply(electricity)
+        self.df[columns.SEWERS] = self.df[column_name].apply(sewers)
         self.df = self.df.drop(column_name, axis=1)
 
 
@@ -462,22 +463,22 @@ class MorizonCleaner(object):
         log.info("Mapping remaining categorical columns ... ")
         # confirm remaining categorical feats are as expected
         remaining_categorical = (
-            "building_material",
-            "building_type",
-            "heating",
-            "offer_id",
+            columns.BUILDING_MATERIAL,
+            columns.BUILDING_TYPE,
+            columns.HEATING,
+            columns.OFFER_ID,
         )
 
         for c in df.select_dtypes(include=["object"]).columns:
             assert c in remaining_categorical
 
-        df["building_material"] = df["building_material"].map(
+        df[columns.BUILDING_MATERIAL] = df[columns.BUILDING_MATERIAL].map(
             {"brick": 3, "other": 2, "concrete_slab": 1}
         )
-        df["building_type"] = df["building_type"].map(
+        df[columns.BUILDING_TYPE] = df[columns.BUILDING_TYPE].map(
             {"hist": 3, "apart": 3, "house": 2, "block": 1, "other": 2}
         )
-        df["heating"] = df["heating"].map(
+        df[columns.HEATING] = df[columns.HEATING].map(
             {"fireplace": 4, "urban": 3, "gas": 2, "electric": 2, "coal": 1, "other": 3}
         )
         return df

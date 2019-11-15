@@ -14,12 +14,13 @@ from common import (
     logs_conf,
     select_newest_date,
 )
+import columns
 from s3_client import s3_client
 
 log.basicConfig(**logs_conf)
 
 # skip concating memory heavy columns
-COLUMNS_TO_SKIP = ("desc", "image_link")
+COLUMNS_TO_SKIP = (columns.DESC, columns.IMAGE_LINK)
 
 s3_client = s3_client()
 
@@ -46,7 +47,7 @@ def concat_csvs_to_parquet(data_type, columns_to_skip):
     log.info(f"Previous concated df shape: {previous_concated_df.shape}")
 
     full_df = pd.concat([raw_df, previous_concated_df], sort=True)
-    full_df = full_df.drop_duplicates("offer_id", keep="last")
+    full_df = full_df.drop_duplicates(columns.OFFER_ID, keep="last")
     log.info(f"New concated df shape: {full_df.shape}")
     if full_df.shape == previous_concated_df.shape:
         log.info(

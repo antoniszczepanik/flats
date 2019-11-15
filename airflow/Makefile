@@ -29,3 +29,8 @@ compose:
 	docker-compose -f docker-compose-dev.yml up -d
 compose-prod:
 	docker-compose -f docker-compose-prod.yml up -d
+compose-down:
+	docker-compose -f docker-compose-dev.yml down
+compose-restart:
+	docker-compose -f docker-compose-dev.yml restart
+

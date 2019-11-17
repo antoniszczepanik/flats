@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
+
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from datetime import datetime, timedelta
+from airflow.utils.dates import days_ago
 
 from common import DATA_TYPES
 from pipelines.scrape_task import scrape_task
@@ -12,7 +14,7 @@ from pipelines.feature_engineering_task import feature_engineering_task
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime.today() - timedelta(days=1),
+    'start_date': days_ago(1),
     'email': ['szczepanik.antoni@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': False,

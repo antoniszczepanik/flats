@@ -6,6 +6,7 @@ import logging as log
 import pandas as pd
 from geopy.distance import great_circle
 
+import columns
 from common import (
     DATA_TYPES,
     CLEAN_DATA_PATH,
@@ -32,7 +33,7 @@ def add_features(data_type):
 
     df = df.pipe(add_coords_features, coords_encoding_map=coords_encoding_map)
     # round all values in df to 2 decimal places
-    round_cols = ['coords_mean_price_m2', 'coords_cluster_center_dist_km']
+    round_cols = [columns.CLUSTER_MEAN_PRICE_M2, columns.CLUSTER_CENTER_DIST_KM]
     df[round_cols] = df[round_cols].round(2)
 
     current_dt = get_current_dt()
@@ -70,7 +71,7 @@ def add_coords_features(df, coords_encoding_map):
     df = df.pipe(add_distance_col,
                  zipped_coords_1=zipped_coords_col,
                  zipped_coords_2=closest_zipped_coords_col,
-                 distance_colname='coords_cluster_center_dist_km')
+                 distance_colname=columns.CLUSTER_CENTER_DIST_KM)
 
     # drop duplicate and unnecessary columns
     for col in df.columns:
@@ -103,5 +104,5 @@ def add_distance_col(df, zipped_coords_1, zipped_coords_2, distance_colname):
     return df
 
 def add_coords_factor_col(df: pd.DataFrame) -> pd.DataFrame:
-    df['coords_factor'] = df['coords_mean_price_m2'] + (df['coords_mean_price_m2'] / (df['coords_cluster_center_dist_km'] + 1))
+    df[columns.CLUSTER_COORDS_FACTOR] = df[columns.CLUSTER_MEAN_PRICE_M2] + (df[columns.CLUSTER_MEAN_PRICE_M2] / (df[columns.CLUSTER_CENTER_DIST_KM] + 1))
     return df

@@ -19,17 +19,17 @@ import columns
 
 # for which columns fill lacks with 0
 FILL_NA_WITH_ZERO = (
-    "parking_spot",
+    columns.PARKING_SPOT,
     columns.TARAS,
-    "basement",
-    "telecom",
-    "driveway",
-    "fence",
-    "parking_spot",
-    "furniture",
-    "kitchen_furniture",
-    "internet",
-    "gas",
+    columns.BASEMENT,
+    columns.TELECOM,
+    columns.DRIVEWAY,
+    columns.FENCE,
+    columns.PARKING_SPOT,
+    columns.FURNITURE,
+    columns.KITCHEN_FURNITURE,
+    columns.INTERNET,
+    columns.GAS,
     columns.LIFT,
 )
 

@@ -44,4 +44,9 @@ INTERNET = "internet__clean"
 GAS = "gas__clean"
 ELECTRICITY = "electricity__clean"
 SEWERS = "sewers__clean"
-HEATING = "heating__clean"
+
+# FEATURE ENGINEERED COLUMNS
+CLUSTER_ID = 'cluster_id__feature'
+CLUSTER_MEAN_PRICE_M2 = 'cluster_mean_price_m2__feature'
+CLUSTER_CENTER_DIST_KM = 'cluster_center_dist_km__feature'
+CLUSTER_COORDS_FACTOR = 'cluster_coords_factor__feature'

@@ -2,6 +2,7 @@ from datetime import datetime
 import logging as log
 import tempfile
 
+import columns
 import pandas as pd
 from scipy.spatial.distance import cdist
 
@@ -24,34 +25,34 @@ S3_MODELS_BUCKET = "flats-models"
 COORDS_MAP_MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/coords_encoding"
 
 CLEANING_REQUIRED_COLUMNS = [
-    "balcony",
-    "building_height",
-    "building_material",
-    "building_type",
-    "building_year",
-    "conviniences",
-    "date_added",
-    "date_refreshed",
-    "desc_len",
-    "direct",
-    "equipment",
-    "flat_state",
-    "floor",
-    "heating",
-    "lat",
-    "lon",
-    "market_type",
-    "media",
-    "offer_id",
-    "price",
-    "price_m2",
-    "promotion_counter",
-    "room_n",
-    "size",
-    "taras",
-    "title",
-    "url",
-    "view_count",
+    columns.BALCONY,
+    columns.BUILDING_HEIGHT,
+    columns.BUILDING_MATERIAL,
+    columns.BUILDING_TYPE,
+    columns.BUILDING_YEAR,
+    columns.CONVINIENCES,
+    columns.DATE_ADDED,
+    columns.DATE_REFRESHED,
+    columns.DESC_LEN,
+    columns.DIRECT,
+    columns.EQUIPMENT,
+    columns.FLAT_STATE,
+    columns.FLOOR,
+    columns.HEATING,
+    columns.LAT,
+    columns.LON,
+    columns.MARKET_TYPE,
+    columns.MEDIA,
+    columns.OFFER_ID,
+    columns.PRICE,
+    columns.PRICE_M2,
+    columns.PROMOTION_COUNTER,
+    columns.ROOM_N,
+    columns.SIZE,
+    columns.TARAS,
+    columns.TITLE,
+    columns.URL,
+    columns.VIEW_COUNT,
 ]
 
 

@@ -72,12 +72,15 @@ def get_coords_map(df, data_type):
         for x in df["coords_tuple"]
     ]
     coords_encoding_map = (
-        df.loc[:, ["coords_closest_tuple", columns.PRICE_M2]]
+        df.loc[:, ["coords_closest_tuple", columns.PRICE_M2, columns.PRICE]]
         .groupby("coords_closest_tuple", as_index=False)
         .mean()
         .sort_values(by=columns.PRICE_M2)
         .reset_index(drop=True)
-        .rename(columns={columns.PRICE_M2: columns.CLUSTER_MEAN_PRICE_M2})
+        .rename(columns={
+            columns.PRICE_M2: columns.CLUSTER_MEAN_PRICE_M2,
+            columns.PRICE: columns.CLUSTER_MEAN_PRICE,
+        })
         .pipe(unzip_coord_series_to_lon_and_lat, "coords_closest_tuple")
     )
     coords_encoding_map[columns.CLUSTER_ID] = coords_encoding_map.index + 1

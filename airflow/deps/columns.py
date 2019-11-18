@@ -29,6 +29,7 @@ HEATING = "heating__offer"
 CONVINIENCES = "conviniences__offer"
 MEDIA = "media__offer"
 EQUIPMENT = "equipment__offer"
+WATER = "water__offer"
 
 # COLUMNS CREATED WHILE CLEANING
 FLOOR_N = "floor_number__clean"
@@ -46,7 +47,8 @@ ELECTRICITY = "electricity__clean"
 SEWERS = "sewers__clean"
 
 # FEATURE ENGINEERED COLUMNS
-CLUSTER_ID = 'cluster_id__feature'
-CLUSTER_MEAN_PRICE_M2 = 'cluster_mean_price_m2__feature'
-CLUSTER_CENTER_DIST_KM = 'cluster_center_dist_km__feature'
-CLUSTER_COORDS_FACTOR = 'cluster_coords_factor__feature'
+CLUSTER_ID = "cluster_id__feature"
+CLUSTER_MEAN_PRICE = "cluster_mean_price__feature"
+CLUSTER_MEAN_PRICE_M2 = "cluster_mean_price_m2__feature"
+CLUSTER_CENTER_DIST_KM = "cluster_center_dist_km__feature"
+CLUSTER_COORDS_FACTOR = "cluster_coords_factor__feature"

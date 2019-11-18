@@ -71,8 +71,8 @@ class MorizonCleaner(object):
             columns.BUILDING_TYPE: self.building_type,
             columns.BUILDING_YEAR: self.building_year,
             columns.CONVINIENCES: self.conviniences,
-            columns.DATE_ADDED: self.date_to_int,
-            columns.DATE_REFRESHED: self.date_to_int,
+            columns.DATE_ADDED: None,
+            columns.DATE_REFRESHED: None,
             columns.DESC_LEN: None,
             columns.DIRECT: None,
             columns.EQUIPMENT: self.equipment,
@@ -251,10 +251,6 @@ class MorizonCleaner(object):
         self.df[columns.PARKING_SPOT] = self.df[column_name].apply(create_parking)
         self.df = self.df.drop(column_name, axis=1)
 
-    def date_to_int(self, column_name):
-        self.df[f"{column_name}"] = self.df[column_name].apply(
-            lambda x: datetime.strptime(x, "%Y-%m-%d")
-        )
 
     def equipment(self, column_name):
         def furniture(value):
@@ -470,6 +466,7 @@ class MorizonCleaner(object):
         )
 
         for c in df.select_dtypes(include=["object"]).columns:
+            print(c)
             assert c in remaining_categorical
 
         df[columns.BUILDING_MATERIAL] = df[columns.BUILDING_MATERIAL].map(

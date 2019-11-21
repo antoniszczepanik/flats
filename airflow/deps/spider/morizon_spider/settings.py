@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import boto3
+import logging as log
 
 from common import RAW_DATA_PATH
 from botocore.exceptions import ProfileNotFound

@@ -66,10 +66,12 @@ def get_unconcated_raw_paths(data_type):
     raw_paths = s3_client.list_s3_dir(RAW_DATA_PATH.format(data_type=data_type))
 
     last_concat_date = select_newest_date(concated_paths)
+    log.info(f'Will concat raw files older than {last_concat_date}')
     # skip datetimes with invalid format
     raw_paths = [r for r in raw_paths if s3_client.get_date_from_filename(r) is not None]
     # skip raw files covered in previous concatination step
     raw_paths = [r for r in raw_paths if s3_client.get_date_from_filename(r) > last_concat_date]
+    log.info(f'Found {len(raw_paths)} raw files newer than previous concat date')
     return raw_paths
 
 

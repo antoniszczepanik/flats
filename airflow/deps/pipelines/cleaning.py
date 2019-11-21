@@ -463,10 +463,11 @@ class MorizonCleaner(object):
             columns.BUILDING_TYPE,
             columns.HEATING,
             columns.OFFER_ID,
+            columns.DATE_ADDED,
+            columns.DATE_REFRESHED,
         )
 
         for c in df.select_dtypes(include=["object"]).columns:
-            print(c)
             assert c in remaining_categorical
 
         df[columns.BUILDING_MATERIAL] = df[columns.BUILDING_MATERIAL].map(

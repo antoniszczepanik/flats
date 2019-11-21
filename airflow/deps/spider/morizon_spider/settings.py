@@ -2,6 +2,7 @@
 import boto3
 
 from common import RAW_DATA_PATH
+from botocore.exceptions import ProfileNotFound
 
 # Scrapy settings for morizon_spider project
 BOT_NAME = "morizon_spider"

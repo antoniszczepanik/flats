@@ -4,6 +4,7 @@ import logging as log
 import pandas as pd
 from scipy.spatial.distance import cdist
 
+import columns
 from common import logs_conf
 
 log.basicConfig(**logs_conf)
@@ -33,13 +34,13 @@ def closest_point(point, points):
 
 
 def unzip_coord_series_to_lon_and_lat(df, zipped_colname):
-    df["lat"] = df[zipped_colname].apply(lambda x: x[0])
-    df["lon"] = df[zipped_colname].apply(lambda x: x[1])
+    df[columns.LAT] = df[zipped_colname].apply(lambda x: x[0])
+    df[columns.LON] = df[zipped_colname].apply(lambda x: x[1])
     df = df.drop(zipped_colname, axis=1)
     return df
 
 
 def add_zipped_coords_column(df, new_col_name):
     """ Zips lon and lat columns to create a series of coords tuples. """
-    df[new_col_name] = [(x, y) for x, y in zip(df["lat"], df["lon"])]
+    df[new_col_name] = [(x, y) for x, y in zip(df[columns.LAT], df[columns.LON])]
     return df

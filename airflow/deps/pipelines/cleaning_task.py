@@ -41,8 +41,8 @@ def clean_morizon_data(data_type):
     cleaned_dfs = []
     for batch_n, batch in enumerate(batches):
         log.info(f"Processing batch number {batch_n} ...")
-        clean_df = MorizonCleaner(batch).clean()
-        cleaned_dfs.append(clean_df)
+        clean_batch = MorizonCleaner(batch).clean()
+        cleaned_dfs.append(clean_batch)
     cleaned_df = pd.concat(cleaned_dfs, sort=True)
 
     log.info(f'Cleaned dataframe shape: {cleaned_df.shape}')
@@ -50,4 +50,4 @@ def clean_morizon_data(data_type):
     current_dt = get_current_dt()
     target_s3_name = f"/{data_type}_clean_{current_dt}.parquet"
     target_s3_path = CLEAN_DATA_PATH.format(data_type=data_type) + target_s3_name
-    s3_client.upload_df_to_s3(clean_df, target_s3_path)
+    s3_client.upload_df_to_s3(cleaned_df, target_s3_path)

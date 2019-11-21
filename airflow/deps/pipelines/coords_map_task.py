@@ -23,10 +23,10 @@ from common import (
     logs_conf,
     get_current_dt,
 )
-from utils import (
+from pipelines.utils import (
     closest_point,
     unzip_coord_series_to_lon_and_lat,
-    create_zipped_coords_series,
+    add_zipped_coords_column,
 )
 from s3_client import s3_client
 
@@ -63,13 +63,13 @@ def get_coords_map(df, data_type):
     # remove "artificial" duplicates
     df_unduped = df.drop_duplicates(subset=[columns.LON, columns.LAT], keep="last")
     repr_coords_df = get_repr_points(df_unduped)
-    repr_coords_df["coords_tuple"] = create_zipped_coords_series(repr_coords_df)
-
-    df["coords_tuple"] = create_zipped_coords_series(df)
+    coords_tuple_colname = "coords_tuple"
+    repr_coords_df = add_zipped_coords_column(repr_coords_df, coords_tuple_colname)
+    df = add_zipped_coords_column(df, coords_tuple_colname)
     # assign a closest point
     df["coords_closest_tuple"] = [
-        closest_point(x, list(repr_coords_df["coords_tuple"]))
-        for x in df["coords_tuple"]
+        closest_point(x, list(repr_coords_df[coords_tuple_colname]))
+        for x in df[coords_tuple_colname]
     ]
     coords_encoding_map = (
         df.loc[:, ["coords_closest_tuple", columns.PRICE_M2, columns.PRICE]]

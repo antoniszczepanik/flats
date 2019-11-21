@@ -9,7 +9,7 @@ from scipy.spatial.distance import cdist
 
 logs_conf = {
     "level": log.INFO,
-    "format": "%(filename)-30s %(asctime)s %(levelname)s: %(message)s",
+    "format": "%(filename)s %(asctime)s %(levelname)s: %(message)s",
     "datefmt": "%H:%M:%S",
 }
 

@@ -24,13 +24,22 @@ try:
     session = boto3.Session(profile_name='flats')
 except ProfileNotFound:
     # try to get credentials from default profile
-    session = boto3.Session()
+    try:
+        session = boto3.Session()
+    except:
+        log.error('Could not get default boto3 session!')
+        raise ProfileNotFound
+    else:
+        log.info('Using default boto3 profile.')
+else:
+    log.info('Using "flats" boto3 profile.')
+finally:
     creds = session.get_credentials()
-    # if their not there assume IAM role will be used
-    if creds:
-        AWS_ACCESS_KEY_ID = creds.access_key
-        AWS_SECRET_ACCESS_KEY = creds.secret_key
 
+AWS_ACCESS_KEY_ID = creds.access_key
+AWS_SECRET_ACCESS_KEY = creds.secret_key
+
+log.info(f'{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}')
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html

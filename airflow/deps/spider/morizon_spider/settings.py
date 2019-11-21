@@ -23,10 +23,13 @@ ROBOTSTXT_OBEY = False
 try:
     session = boto3.Session(profile_name='flats')
 except ProfileNotFound:
+    # try to get credentials from default profile
     session = boto3.Session()
-creds = session.get_credentials()
-AWS_ACCESS_KEY_ID = creds.access_key
-AWS_SECRET_ACCESS_KEY = creds.secret_key
+    creds = session.get_credentials()
+    # if their not there assume IAM role will be used
+    if creds:
+        AWS_ACCESS_KEY_ID = creds.access_key
+        AWS_SECRET_ACCESS_KEY = creds.secret_key
 
 
 # Configure item pipelines

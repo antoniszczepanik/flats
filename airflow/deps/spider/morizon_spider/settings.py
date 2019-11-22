@@ -40,8 +40,6 @@ finally:
 AWS_ACCESS_KEY_ID = creds.access_key
 AWS_SECRET_ACCESS_KEY = creds.secret_key
 
-log.info(f'{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}')
-
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {"morizon_spider.pipelines.MorizonSpiderPipeline": 300}

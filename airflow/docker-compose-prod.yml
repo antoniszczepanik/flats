@@ -17,6 +17,8 @@ services:
         environment:
             - LOAD_EX=n
             - EXECUTOR=Local
+        volumes:
+            - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro
         expose:
             - "8080"
         command: webserver

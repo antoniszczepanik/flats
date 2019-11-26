@@ -47,7 +47,7 @@ def scrape_task(data_type):
 def upload_scraped_file_to_s3(data_type):
     output_path = SCRAPING_TEMPDIR_PATH.format(data_type=data_type)
     current_dt = get_current_dt()
-    output_target_s3_path  = RAW_DATA_PATH.format(data_type=date_type) + f"/raw_{date_type}_{current_dt}.csv"
+    output_target_s3_path  = RAW_DATA_PATH.format(data_type=data_type) + f"/raw_{data_type}_{current_dt}.csv"
     is_success = s3_client.upload_file_to_s3(output_path, output_target_s3_path)
     os.remove(output_path)
     log.info(f'Removed temporary scraping dump file {output_path}.')

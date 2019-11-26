@@ -13,7 +13,7 @@ logs_conf = {
     "datefmt": "%H:%M:%S",
 }
 
-# data pipelines paths
+# data pipelines s3 paths
 S3_DATA_BUCKET = "flats-data"
 DATA_TYPES = ("sale", "rent")
 RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
@@ -21,9 +21,11 @@ CONCATED_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/concated"
 CLEAN_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/clean"
 FINAL_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/final"
 
-# models paths
+# models s3 paths
 S3_MODELS_BUCKET = "flats-models"
 COORDS_MAP_MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/coords_encoding"
+
+SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,

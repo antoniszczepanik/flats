@@ -9,8 +9,10 @@ from scrapy.utils.project import get_project_settings
 
 from common import (
     RAW_DATA_PATH,
+    get_current_dt,
     select_newest_date,
     logs_conf,
+    SCRAPING_TEMPDIR_PATH,
 )
 from s3_client import s3_client
 from spider.morizon_spider.spiders.morizon_spider import MorizonSpider
@@ -38,6 +40,19 @@ def scrape_task(data_type):
         process = CrawlerProcess(get_project_settings())
         process.crawl(spider)
         process.start()
+
+        upload_scraped_file_to_s3(data_type)
+
+
+def upload_scraped_file_to_s3(data_type):
+    output_path = SCRAPING_TEMPDIR_PATH.format(data_type=data_type)
+    current_dt = get_current_dt()
+    output_target_s3_path  = RAW_DATA_PATH.format(data_type=date_type) + f"/raw_{date_type}_{current_dt}.csv"
+    is_success = s3_client.upload_file_to_s3(output_path, output_target_s3_path)
+    os.remove(output_path)
+    log.info(f'Removed temporary scraping dump file {output_path}.')
+    return is_success
+
 
 def is_needed(data_type):
     raw_paths = s3_client.list_s3_dir(RAW_DATA_PATH.format(data_type=data_type))

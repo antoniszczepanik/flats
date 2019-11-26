@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-import boto3
-import logging as log
-
-from common import RAW_DATA_PATH
-from botocore.exceptions import ProfileNotFound
+from common import SCRAPING_TEMPDIR_PATH
 
 # Scrapy settings for morizon_spider project
 BOT_NAME = "morizon_spider"
@@ -11,34 +7,12 @@ SPIDER_MODULES = ["morizon_spider.spiders"]
 NEWSPIDER_MODULE = "morizon_spider.spiders"
 LOG_LEVEL = "INFO"
 
-# AWS S3 export settings
-FEED_URI = (
-    "s3://" + RAW_DATA_PATH.format(data_type="%(name)s") + "/raw_%(name)s_%(time)s.csv"
-)
+# Export settings
+FEED_URI = SCRAPING_TEMPDIR_PATH.format(data_type="%(name)s")
 FEED_FORMAT = "csv"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-
-# AWS configuration
-try:
-    session = boto3.Session(profile_name='flats')
-except ProfileNotFound:
-    # try to get credentials from default profile
-    try:
-        session = boto3.Session()
-    except:
-        log.error('Could not get default boto3 session!')
-        raise ProfileNotFound
-    else:
-        log.info('Using default boto3 profile.')
-else:
-    log.info('Using "flats" boto3 profile.')
-finally:
-    creds = session.get_credentials()
-
-AWS_ACCESS_KEY_ID = creds.access_key
-AWS_SECRET_ACCESS_KEY = creds.secret_key
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html

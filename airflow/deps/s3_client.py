@@ -20,7 +20,6 @@ class s3_client:
             self.client = boto3.Session().client("s3")
 
     def upload_file_to_s3(self, file_name, s3_path):
-        # If S3 object_name was not specified, use file_name
         bucket, path = self.split_bucket_path(s3_path)
         # Upload the file
         log.info(f"Sending {path} to {bucket} bucket...")

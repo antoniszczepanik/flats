@@ -67,7 +67,7 @@ class s3_client:
             if extension == "csv":
                 df.to_csv(tmp_path, index=False)
             elif extension == "parquet":
-                df.to_parquet(tmp_path)
+                df.to_parquet(tmp_path, object_encoding='bytes')
             else:
                 log.error(f"{extension} extension is not supported.")
                 raise InvalidExtensionException
@@ -90,9 +90,9 @@ class s3_client:
                         return pd.DataFrame()
                     else:
                         columns_to_use = list(set(columns) - set(columns_to_skip))
-                        df = pd.read_csv(tmp_path, usecols=columns_to_use, low_memory=True)
+                        df = pd.read_csv(tmp_path, usecols=columns_to_use)
                 else:
-                    df = pd.read_csv(tmp_path, low_memory=True)
+                    df = pd.read_csv(tmp_path)
             elif extension == "parquet":
                 df = pd.read_parquet(tmp_path)
             else:
@@ -104,7 +104,10 @@ class s3_client:
     def read_newest_df_from_s3(self, s3_dir):
         file_list = self.list_s3_dir(s3_dir)
         newest_s3_path = self.select_newest_file(file_list)
-        return self.read_df_from_s3(newest_s3_path)
+        if newest_s3_path:
+            return self.read_df_from_s3(newest_s3_path)
+        else:
+            return None
 
 
     def split_bucket_path(self, s3_path):

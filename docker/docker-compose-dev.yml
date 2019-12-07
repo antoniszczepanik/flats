@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+    postgres:
+        image: postgres:9.6
+        environment:
+            - POSTGRES_USER=airflow
+            - POSTGRES_PASSWORD=airflow
+            - POSTGRES_DB=airflow
+    webserver:
+        build:
+            context: ../airflow/
+            dockerfile: Dockerfile-webserver
+        image: airflow_webserver
+        container_name: airflow_webserver
+        restart: always
+        depends_on:
+            - postgres
+        environment:
+            - LOAD_EX=n
+            - EXECUTOR=Local
+        volumes:
+            - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro
+            - ../airflow/dags:/usr/local/airflow/dags
+            - ../airflow/deps:/usr/local/airflow/deps
+            # Uncomment to include custom plugins
+            # - ./plugins:/usr/local/airflow/plugins
+        ports:
+            - "8080:8080"
+        command: webserver
+        healthcheck:
+            test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
+        entrypoint: ["/entrypoint.sh", "webserver"]
+    jupyter:
+        build:
+            context: ../airflow/
+            dockerfile: Dockerfile-jupyter
+        container_name: airflow_jupyter
+        volumes:
+            - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro
+            - ./dags:/usr/local/airflow/dags
+            - ./deps:/usr/local/airflow/deps
+        ports:
+            - "8889:8889"
+        entrypoint: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8889", "--NotebookApp.token=''"]

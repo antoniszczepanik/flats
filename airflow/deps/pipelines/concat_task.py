@@ -3,6 +3,7 @@ Pipeline to concatinate and dedup all scraping outputs.
 """
 import os
 import logging as log
+import datetime
 
 import pandas as pd
 
@@ -44,16 +45,22 @@ def concat_csvs_to_parquet(data_type, columns_to_skip):
     previous_concated_df = s3_client.read_newest_df_from_s3(
         CONCATED_DATA_PATH.format(data_type=data_type)
     )
-    log.info(f"Previous concated df shape: {previous_concated_df.shape}")
+    if previous_concated_df:
+        log.info(f"Previous concated df shape: {previous_concated_df.shape}")
 
-    full_df = pd.concat([raw_df, previous_concated_df], sort=True)
-    full_df = full_df.drop_duplicates(columns.OFFER_ID, keep="last")
-    log.info(f"New concated df shape: {full_df.shape}")
-    if full_df.shape == previous_concated_df.shape:
-        log.info(
-            "New concated file has the same number of records - not sending an update to s3"
-        )
-        return None
+        full_df = pd.concat([raw_df, previous_concated_df], sort=True)
+        full_df = full_df.drop_duplicates(columns.OFFER_ID, keep="last")
+        log.info(f"New concated df shape: {full_df.shape}")
+        if full_df.shape == previous_concated_df.shape:
+            log.info(
+                "New concated file has the same number of records - not sending an update to s3"
+            )
+            return None
+    else:
+        log.info('Did not find any concated files. Creating new cocnated file.')
+        full_df = raw_df
+        log.info(f'New concated df shape: {full_df.shape}')
+
     current_dt = get_current_dt()
     target_s3_name = f"/{data_type}_concated_{current_dt}.parquet"
     target_s3_path = CONCATED_DATA_PATH.format(data_type=data_type) + target_s3_name
@@ -66,7 +73,9 @@ def get_unconcated_raw_paths(data_type):
     raw_paths = s3_client.list_s3_dir(RAW_DATA_PATH.format(data_type=data_type))
 
     last_concat_date = select_newest_date(concated_paths)
-    log.info(f'Will concat raw files older than {last_concat_date}')
+    if last_concat_date is None:
+        last_concat_date = datetime.datetime(2000, 1, 1)
+    log.info(f'Will concat raw files newer than {last_concat_date}')
     # skip datetimes with invalid format
     raw_paths = [r for r in raw_paths if s3_client.get_date_from_filename(r) is not None]
     # skip raw files covered in previous concatination step

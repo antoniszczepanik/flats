@@ -45,5 +45,5 @@ def is_needed(data_type):
     if datetime.now() - newest_date > timedelta(hours=SKIP_SCRAPING_BUFFER):
         return True
     else:
-        log.info(f"Previous scraping was done {datetime.now() - newest_date} ago. Skipping")
+        log.info(f"Previous scraping was done {datetime.now() - newest_date} ago. (less than {SKIP_SCRAPING_BUFFER} hours)")
         return False

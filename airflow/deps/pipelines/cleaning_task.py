@@ -45,6 +45,7 @@ def clean_morizon_data(data_type):
         cleaned_dfs.append(clean_batch)
     cleaned_df = pd.concat(cleaned_dfs, sort=True)
 
+    log.info(f'Before cleaning dataframe shape: {df.shape}')
     log.info(f'Cleaned dataframe shape: {cleaned_df.shape}')
 
     current_dt = get_current_dt()

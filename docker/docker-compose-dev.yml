@@ -10,7 +10,7 @@ services:
     webserver:
         build:
             context: ../airflow/
-            dockerfile: Dockerfile-webserver
+            dockerfile: ../docker/Dockerfile-webserver
         image: airflow_webserver
         container_name: airflow_webserver
         restart: always
@@ -37,7 +37,7 @@ services:
     jupyter:
         build:
             context: ../airflow/
-            dockerfile: Dockerfile-jupyter
+            dockerfile: ../docker/Dockerfile-jupyter
         container_name: airflow_jupyter
         volumes:
             - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro

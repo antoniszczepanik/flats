@@ -18,14 +18,6 @@ ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 ENV LC_MESSAGES en_US.UTF-8
 
-COPY requirements.txt /requirements.txt
-
-COPY ./script/entrypoint.sh /entrypoint.sh
-COPY ./config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
-
-# copy dags and deps
-COPY ./dags /usr/local/airflow/dags
-COPY ./deps /usr/local/airflow/deps
 
 RUN set -ex \
     && buildDeps=' \
@@ -60,8 +52,11 @@ RUN set -ex \
     && pip install pyasn1 \
     && pip install apache-airflow[crypto,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
-    && pip install -r /requirements.txt \
-    && apt-get purge --auto-remove -yqq $buildDeps \
+    && apt-get purge --auto-remove -yqq $buildDeps
+
+COPY requirements.txt /requirements.txt
+
+RUN pip install -r /requirements.txt \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf \
@@ -70,7 +65,14 @@ RUN set -ex \
         /var/tmp/* \
         /usr/share/man \
         /usr/share/doc \
+        /usr/share/doc-base \
+        /var/lib/apt/lists/* \
+        /tmp/* \
+        /var/tmp/* \
+        /usr/share/man \
+        /usr/share/doc \
         /usr/share/doc-base
+
 
 COPY ./script/entrypoint.sh /entrypoint.sh
 COPY ./config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg

@@ -66,7 +66,7 @@ class s3_client:
             if extension == "csv":
                 df.to_csv(tmp_path, index=False)
             elif extension == "parquet":
-                df.to_parquet(tmp_path, object_encoding='bytes')
+                df.to_parquet(tmp_path)
             else:
                 log.error(f"{extension} extension is not supported.")
                 raise InvalidExtensionException

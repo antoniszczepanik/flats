@@ -16,9 +16,9 @@ jmespath==0.9.4
 joblib==0.14.0
 lxml==4.4.1
 numpy==1.17.3
-pandas==0.25.2
+pandas==0.25.3
 parsel==1.5.2
-pyarrow==0.15.0
+pyarrow==0.15.1 
 pyasn1==0.4.7
 pyasn1-modules==0.2.7
 pycparser==2.19

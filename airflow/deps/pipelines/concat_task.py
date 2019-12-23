@@ -23,6 +23,12 @@ log.basicConfig(**logs_conf)
 # skip concating memory heavy columns
 COLUMNS_TO_SKIP = (columns.DESC, columns.IMAGE_LINK)
 
+#dtypes to force on given columns
+DTYPES = {
+    columns.BUILDING_YEAR: str,
+    columns.BUILDING_HEIGHT: str,
+}
+
 s3_client = s3_client()
 
 def concat_data_task(data_type):
@@ -61,8 +67,13 @@ def concat_csvs_to_parquet(data_type, columns_to_skip):
         full_df = raw_df
         log.info(f'New concated df shape: {full_df.shape}')
 
+    full_df = full_df.loc[full_df[columns.BUILDING_HEIGHT] != columns.BUILDING_HEIGHT]
+    log.info(f'Shape after removing header in one of the rows: {full_df.shape}')
+    full_df = full_df.loc[~full_df[columns.BUILDING_HEIGHT].str.startswith('https', na=False)]
+    log.info(f'Shape after removing invalid row with img links: {full_df.shape}')
+
     current_dt = get_current_dt()
-    target_s3_name = f"/{data_type}_concated_{current_dt}.parquet"
+    target_s3_name = f"/{data_type}_concated_{current_dt}.csv"
     target_s3_path = CONCATED_DATA_PATH.format(data_type=data_type) + target_s3_name
     s3_client.upload_df_to_s3(full_df, target_s3_path)
 

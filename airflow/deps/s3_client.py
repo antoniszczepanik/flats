@@ -89,9 +89,9 @@ class s3_client:
                         return pd.DataFrame()
                     else:
                         columns_to_use = list(set(columns) - set(columns_to_skip))
-                        df = pd.read_csv(tmp_path, usecols=columns_to_use)
+                        df = pd.read_csv(tmp_path, usecols=columns_to_use, low_memory=False)
                 else:
-                    df = pd.read_csv(tmp_path)
+                    df = pd.read_csv(tmp_path, low_memory=False)
             elif extension == "parquet":
                 df = pd.read_parquet(tmp_path)
             else:

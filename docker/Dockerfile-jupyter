@@ -1,4 +1,4 @@
-FROM airflow_webserver
+FROM airflow_webserver:latest
 
 LABEL maintainer="szczepanik.antoni@gmail.com"
 

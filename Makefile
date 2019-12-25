@@ -73,7 +73,9 @@ unify-raw-rent: build-webserver
 		python3 -c "from deps.pipelines.unify_raw_task import unify_raw_data_task; unify_raw_data_task('rent')"
 
 compose: 
-	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml up -d
+	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml up -d --force-recreate
+compose-build: 
+	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml build
 compose-down:
 	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml down
 compose-restart:

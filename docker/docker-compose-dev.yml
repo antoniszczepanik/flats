@@ -8,9 +8,6 @@ services:
             - POSTGRES_PASSWORD=airflow
             - POSTGRES_DB=airflow
     webserver:
-        build:
-            context: ../airflow/
-            dockerfile: ../docker/Dockerfile-webserver
         image: airflow_webserver
         container_name: airflow_webserver
         restart: always
@@ -35,9 +32,7 @@ services:
             retries: 3
         entrypoint: ["/entrypoint.sh", "webserver"]
     jupyter:
-        build:
-            context: ../airflow/
-            dockerfile: ../docker/Dockerfile-jupyter
+        image: airflow_jupyter
         container_name: airflow_jupyter
         volumes:
             - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro

@@ -37,7 +37,7 @@ def train_task(data_type):
     model = train_model(final_df, data_type)
 
     current_dt = get_current_dt()
-    target_s3_name = f"/{data_type}_model_{current_dt}.parquet"
+    target_s3_name = f"{data_type}_model_{current_dt}.parquet"
     target_s3_path = (
     MODELS_PATH.format(data_type=data_type) + target_s3_name
     )

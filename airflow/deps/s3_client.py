@@ -1,6 +1,7 @@
 from datetime import datetime
 import logging as log
 import tempfile
+from joblib import dump, load
 
 import boto3
 from botocore.exceptions import ClientError, ProfileNotFound
@@ -70,8 +71,26 @@ class s3_client:
             else:
                 log.error(f"{extension} extension is not supported.")
                 raise InvalidExtensionException
-            self.upload_file_to_s3(tmp_path, s3_path)
+            return self.upload_file_to_s3(tmp_path, s3_path)
 
+    def upload_df_to_s3_with_timestamp(self, df, s3_path):
+        """ Assumes s3 path in fomrat 'flats-data/sale/clean'"""
+        current_dt = get_current_dt()
+        s3_path += f"/{keyword}_{current_dt}.joblib"
+        return self.upload_df_to_s3(model, target_s3_path)
+
+    def upload_model_to_s3(self, model, s3_path):
+        filename = self.get_filename(s3_path)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = f"{tmpdir}/{filename}"
+            s = dump(model, tmp_path)
+            return self.upload_file_to_s3(tmp_path, s3_path)
+
+    def upload_model_to_s3_with_timestamp(self, model, s3_path, keyword):
+        """ Assumes s3 path in fomrat 'flats-models/sale'"""
+        current_dt = get_current_dt()
+        s3_path += f"/{keyword}_{current_dt}.joblib"
+        return self.upload_model_to_s3(model, target_s3_path)
 
     def read_df_from_s3(self, s3_path, columns_to_skip=None):
         filename = self.get_filename(s3_path)
@@ -108,6 +127,13 @@ class s3_client:
         else:
             return None
 
+    def read_model_from_s3(self, s3_path):
+        # TODO: Implement reading model from s3
+        pass
+
+    def read_newest_model_from_s3(self, s3_path):
+        # TODO: Implement and test reading model from s3
+        pass
 
     def split_bucket_path(self, s3_path):
         splitted = s3_path.split("/")
@@ -141,7 +167,3 @@ class s3_client:
 
     def get_filename(self, s3_path):
         return s3_path.split("/")[-1]
-
-
-
-

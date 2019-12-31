@@ -7,7 +7,7 @@ import boto3
 from botocore.exceptions import ClientError, ProfileNotFound
 import pandas as pd
 
-from common import logs_conf
+from common import logs_conf, get_current_dt
 
 log.basicConfig(**logs_conf)
 
@@ -20,12 +20,20 @@ class s3_client:
         except ProfileNotFound:
             self.client = boto3.Session().client("s3")
 
-    def upload_file_to_s3(self, file_name, s3_path):
+    def upload_file_to_s3(self, file_name, s3_path, metadata=None):
         bucket, path = self.split_bucket_path(s3_path)
         # Upload the file
         log.info(f"Sending {path} to {bucket} bucket...")
         try:
-            response = self.client.upload_file(file_name, bucket, path)
+            if metadata is not None:
+                response = self.client.upload_file(
+                    file_name,
+                    bucket,
+                    path,
+                    ExtraArgs={"Metadata": metadata},
+                )
+            else:
+                response = self.client.upload_file(file_name, bucket, path)
         except ClientError as e:
             log.error(e)
             return False
@@ -73,24 +81,26 @@ class s3_client:
                 raise InvalidExtensionException
             return self.upload_file_to_s3(tmp_path, s3_path)
 
-    def upload_df_to_s3_with_timestamp(self, df, s3_path):
-        """ Assumes s3 path in fomrat 'flats-data/sale/clean'"""
+    def upload_df_to_s3_with_timestamp(self, df, s3_path, keyword, dtype, extension='parquet'):
+        """ Assumes s3 path in fomrat 'flats-data/{dtype}/clean'"""
+        s3_path = s3_path.format(data_type=dtype)
         current_dt = get_current_dt()
-        s3_path += f"/{keyword}_{current_dt}.joblib"
-        return self.upload_df_to_s3(model, target_s3_path)
+        s3_path += f"/{dtype}_{keyword}_{current_dt}.{extension}"
+        return self.upload_df_to_s3(df, s3_path)
 
-    def upload_model_to_s3(self, model, s3_path):
+    def upload_model_to_s3(self, model, s3_path, metadata=None):
         filename = self.get_filename(s3_path)
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = f"{tmpdir}/{filename}"
             s = dump(model, tmp_path)
-            return self.upload_file_to_s3(tmp_path, s3_path)
+            return self.upload_file_to_s3(tmp_path, s3_path, metadata)
 
-    def upload_model_to_s3_with_timestamp(self, model, s3_path, keyword):
-        """ Assumes s3 path in fomrat 'flats-models/sale'"""
+    def upload_model_to_s3_with_timestamp(self, model, s3_path, dtype, keyword, metadata=None):
+        """ Assumes s3 path in format 'flats-models/{dtype}'"""
+        s3_path=s3_path.format(data_type=dtype)
         current_dt = get_current_dt()
-        s3_path += f"/{keyword}_{current_dt}.joblib"
-        return self.upload_model_to_s3(model, target_s3_path)
+        s3_path += f"/{dtype}_{keyword}_{current_dt}.joblib"
+        return self.upload_model_to_s3(model, s3_path, metadata)
 
     def read_df_from_s3(self, s3_path, columns_to_skip=None):
         filename = self.get_filename(s3_path)
@@ -119,7 +129,8 @@ class s3_client:
         return df
 
 
-    def read_newest_df_from_s3(self, s3_dir):
+    def read_newest_df_from_s3(self, s3_dir, dtype):
+        s3_dir = s3_dir.format(data_type=dtype)
         file_list = self.list_s3_dir(s3_dir)
         newest_s3_path = self.select_newest_file(file_list)
         if newest_s3_path:
@@ -128,8 +139,12 @@ class s3_client:
             return None
 
     def read_model_from_s3(self, s3_path):
-        # TODO: Implement reading model from s3
-        pass
+        filename = self.get_filename(s3_path)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = f"{tmpdir}/{filename}"
+            self.download_file_from_s3(tmp_path, s3_path)
+            model = load(tmp_path)
+            return model
 
     def read_newest_model_from_s3(self, s3_path):
         # TODO: Implement and test reading model from s3

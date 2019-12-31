@@ -11,7 +11,6 @@ import pipelines.utils as utils
 from common import (
     RAW_DATA_PATH,
     CONCATED_DATA_PATH,
-    get_current_dt,
     logs_conf,
     select_newest_date,
 )
@@ -44,7 +43,7 @@ def concat_csvs_to_parquet(data_type, columns_to_skip):
     raw_df = concat_dfs(raw_paths, columns_to_skip=columns_to_skip)
 
     previous_concated_df = s3_client.read_newest_df_from_s3(
-        CONCATED_DATA_PATH.format(data_type=data_type)
+        CONCATED_DATA_PATH, dtype=data_type
     )
     if previous_concated_df is not None:
         log.info(f"Previous concated df shape: {previous_concated_df.shape}")
@@ -62,10 +61,12 @@ def concat_csvs_to_parquet(data_type, columns_to_skip):
         full_df = raw_df
         log.info(f'New concated df shape: {full_df.shape}')
 
-    current_dt = get_current_dt()
-    target_s3_name = f"/{data_type}_concated_{current_dt}.csv"
-    target_s3_path = CONCATED_DATA_PATH.format(data_type=data_type) + target_s3_name
-    s3_client.upload_df_to_s3(full_df, target_s3_path)
+    s3_client.upload_df_to_s3_with_timestamp(full_df,
+                                             s3_path=CONCATED_DATA_PATH,
+                                             keyword='concated',
+                                             dtype=data_type,
+                                             extension='.csv',
+                                             )
 
 
 def get_unconcated_raw_paths(data_type):

@@ -13,7 +13,6 @@ from common import (
     FINAL_DATA_PATH,
     COORDS_MAP_MODELS_PATH,
     logs_conf,
-    get_current_dt,
 )
 from pipelines.utils import add_zipped_coords_column, unzip_coord_series_to_lon_and_lat, closest_point
 from s3_client import s3_client
@@ -28,18 +27,19 @@ def feature_engineering_task(data_type):
     log.info(f"Finished adding features to {data_type} data.")
 
 def add_features(data_type):
-    coords_encoding_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH.format(data_type=data_type))
-    df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH.format(data_type=data_type))
+    coords_encoding_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH, dtype=data_type)
+    df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH, dtype=data_type)
 
     df = df.pipe(add_coords_features, coords_encoding_map=coords_encoding_map)
     # round all values in df to 2 decimal places
     round_cols = [columns.CLUSTER_MEAN_PRICE_M2, columns.CLUSTER_CENTER_DIST_KM]
     df[round_cols] = df[round_cols].round(2)
 
-    current_dt = get_current_dt()
-    target_s3_name = f"/{data_type}_final_{current_dt}.parquet"
-    target_s3_path = FINAL_DATA_PATH.format(data_type=data_type) + target_s3_name
-    s3_client.upload_df_to_s3(df, target_s3_path)
+    s3_client.upload_df_to_s3_with_timestamp(coords_map,
+                                             s3_path=FINAL_DATA_PATH,
+                                             keyword='final',
+                                             dtype=data_type,
+                                             )
 
 
 def add_coords_features(df, coords_encoding_map):

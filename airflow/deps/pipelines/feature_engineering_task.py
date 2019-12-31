@@ -35,7 +35,7 @@ def add_features(data_type):
     round_cols = [columns.CLUSTER_MEAN_PRICE_M2, columns.CLUSTER_CENTER_DIST_KM]
     df[round_cols] = df[round_cols].round(2)
 
-    s3_client.upload_df_to_s3_with_timestamp(coords_map,
+    s3_client.upload_df_to_s3_with_timestamp(df,
                                              s3_path=FINAL_DATA_PATH,
                                              keyword='final',
                                              dtype=data_type,

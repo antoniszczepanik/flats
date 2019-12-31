@@ -20,6 +20,7 @@ RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
 CONCATED_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/concated"
 CLEAN_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/clean"
 FINAL_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/final"
+PREDICTED_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/predicted"
 
 # models s3 paths
 S3_MODELS_BUCKET = "flats-models"
@@ -59,6 +60,31 @@ CLEANING_REQUIRED_COLUMNS = [
     columns.VIEW_COUNT,
 ]
 
+SALE_MODEL_INPUTS = [
+    columns.CLUSTER_COORDS_FACTOR,
+    columns.BUILDING_HEIGHT,
+    columns.SIZE,
+    columns.FLOOR,
+    columns.BUILDING_YEAR,
+    columns.VIEW_COUNT,
+    columns.DESC_LEN,
+    columns.FLOOR_N,
+    columns.LAT,
+    columns.LON,
+]
+
+RENT_MODEL_INPUTS = [
+    columns.CLUSTER_COORDS_FACTOR,
+    columns.SIZE,
+    columns.CLUSTER_ID,
+    columns.CLUSTER_MEAN_PRICE_M2,
+    columns.LAT,
+    columns.BUILDING_YEAR,
+    columns.LON,
+    columns.CLUSTER_CENTER_DIST_KM,
+    columns.DESC_LEN,
+    columns.VIEW_COUNT,
+]
 
 log.basicConfig(**logs_conf)
 

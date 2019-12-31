@@ -52,3 +52,7 @@ CLUSTER_MEAN_PRICE = "cluster_mean_price__feature"
 CLUSTER_MEAN_PRICE_M2 = "cluster_mean_price_m2__feature"
 CLUSTER_CENTER_DIST_KM = "cluster_center_dist_km__feature"
 CLUSTER_COORDS_FACTOR = "cluster_coords_factor__feature"
+
+# COLUMNS AFTER APPLYING A MODEL
+SALE_PRED = 'sale__prediction'
+RENT_PRED = 'sale__prediction'

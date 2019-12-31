@@ -71,6 +71,20 @@ unify-raw-rent: build-webserver
 		-v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
 		'airflow_webserver' \
 		python3 -c "from deps.pipelines.unify_raw_task import unify_raw_data_task; unify_raw_data_task('rent')"
+apply-rent: build-webserver
+	docker run -it  \
+	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+	   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+	   'airflow_webserver' \
+	   python3 -c "from deps.pipelines.apply_task import apply_task; apply_task('rent')"
+apply-sale: build-webserver
+	docker run -it  \
+	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+	   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+	   'airflow_webserver' \
+	   python3 -c "from deps.pipelines.apply_task import apply_task; apply_task('sale')"
 
 compose: 
 	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml up -d --force-recreate

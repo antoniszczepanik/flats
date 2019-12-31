@@ -21,7 +21,6 @@ from common import (
     CLEAN_DATA_PATH,
     COORDS_MAP_MODELS_PATH,
     logs_conf,
-    get_current_dt,
 )
 from pipelines.utils import (
     closest_point,
@@ -42,7 +41,7 @@ s3_client = s3_client()
 
 def coords_map_task(data_type):
     log.info(f"Starting coords encoding map task for {data_type} data.")
-    newest_df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH.format(data_type=data_type))
+    newest_df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH, dtype=data_type)
     cols = newest_df.columns
     if columns.LON not in cols or columns.LAT not in cols:
         log.warning("Missing coordinates. Skipping.")
@@ -50,12 +49,11 @@ def coords_map_task(data_type):
 
     coords_map = get_coords_map(newest_df, data_type)
 
-    current_dt = get_current_dt()
-    target_s3_name = f"/{data_type}_encoding_map_{current_dt}.parquet"
-    target_s3_path = (
-    COORDS_MAP_MODELS_PATH.format(data_type=data_type) + target_s3_name
-    )
-    s3_client.upload_df_to_s3(coords_map, target_s3_path)
+    s3_client.upload_df_to_s3_with_timestamp(coords_map,
+                                             s3_path=COORDS_MAP_MODELS_PATH,
+                                             keyword='coords_map',
+                                             dtype=data_type,
+                                             )
     log.info(f"Finished coords encoding map task for {data_type} data.")
 
 

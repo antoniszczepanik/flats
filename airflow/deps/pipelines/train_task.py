@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from auto_ml import Predictor
 
 import columns
-from common import FINAL_DATA_PATH, MODELS_PATH, get_current_dt
+from common import FINAL_DATA_PATH, MODELS_PATH
 from s3_client import s3_client
 
 log.basicConfig(**logs_conf)
@@ -31,18 +31,17 @@ SALE_MODEL_COLUMNS = [
 
 def train_task(data_type):
     log.info(f"Starting train model task for {data_type} data.")
-    final_df = s3_client.read_newest_df_from_s3(FINAL_DATA_PATH.format(data_type=data_type))
+    final_df = s3_client.read_newest_df_from_s3(FINAL_DATA_PATH, dtype=data_type)
     final_df = final_df[SALE_MODEL_COLUMNS]
 
-    model = train_model(final_df, data_type)
+    model, metadata = train_model(final_df, data_type)
 
-    current_dt = get_current_dt()
-    target_s3_name = f"{data_type}_model_{current_dt}.parquet"
-    target_s3_path = (
-    MODELS_PATH.format(data_type=data_type) + target_s3_name
-    )
-    #TODO: implement upload model (and also read model)
-    s3_client.upload_model_to_s3(model, target_s3_path)
+    s3_client.upload_model_to_s3_with_timestamp(
+        model,
+        common.MODELS_PATH,
+        dtype=data_type,
+        keyword='rf',
+        metadata=metadata)
 
     log.info(f"Finished train model task for {data_type} data.")
 

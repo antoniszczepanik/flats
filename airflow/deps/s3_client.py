@@ -146,9 +146,14 @@ class s3_client:
             model = load(tmp_path)
             return model
 
-    def read_newest_model_from_s3(self, s3_path):
-        # TODO: Implement and test reading model from s3
-        pass
+    def read_newest_model_from_s3(self, s3_dir, dtype):
+        s3_dir = s3_dir.format(data_type=dtype)
+        file_list = self.list_s3_dir(s3_dir)
+        newest_s3_path = self.select_newest_file(file_list)
+        if newest_s3_path:
+            return self.read_model_from_s3(newest_s3_path)
+        else:
+            return None
 
     def split_bucket_path(self, s3_path):
         splitted = s3_path.split("/")

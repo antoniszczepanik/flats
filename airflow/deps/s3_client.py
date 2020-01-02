@@ -92,7 +92,7 @@ class s3_client:
         filename = self.get_filename(s3_path)
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = f"{tmpdir}/{filename}"
-            s = dump(model, tmp_path)
+            s = dump(model, tmp_path, compress=6)
             return self.upload_file_to_s3(tmp_path, s3_path, metadata)
 
     def upload_model_to_s3_with_timestamp(self, model, s3_path, dtype, keyword, metadata=None):

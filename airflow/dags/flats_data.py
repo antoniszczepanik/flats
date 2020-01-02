@@ -9,6 +9,7 @@ from pipelines.scrape_task import scrape_task
 from pipelines.concat_task import concat_data_task
 from pipelines.cleaning_task import cleaning_task
 from pipelines.feature_engineering_task import feature_engineering_task
+from pipelines.apply_task import apply_task
 
 
 default_args = {
@@ -18,8 +19,8 @@ default_args = {
     'email': ['szczepanik.antoni@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': False,
-    'retries': 10,
-    'retry_delay': timedelta(minutes=5),
+    'retries': 3,
+    'retry_delay': timedelta(minutes=2),
 }
 
 dag = DAG('flats_data',
@@ -52,4 +53,10 @@ for data_type in DATA_TYPES:
         op_kwargs={'data_type': data_type},
         dag=dag)
 
-    scrape >> concat >> clean >> engineer_features
+    apply_model = PythonOperator(
+        task_id=f'apply_model_{data_type}',
+        python_callable=apply_task,
+        op_kwargs={'data_type': data_type},
+        dag=dag)
+
+    scrape >> concat >> clean >> engineer_features >> apply_model

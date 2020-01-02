@@ -96,3 +96,14 @@ compose-restart:
 	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml restart
 compose-prod:
 	docker-compose -f $(mkfile_dir)/docker/docker-compose-prod.yml up -d
+jupyter:
+	docker run -d  \
+	-v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+	-v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+	-v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+	-p 8889:8889 \
+	--name airflow_jupyter \
+	--entrypoint "jupyter" \
+	'airflow_jupyter' lab --ip=0.0.0.0 --port=8889 --NotebookApp.token=''
+	sleep 2
+	xdg-open http://localhost:8889/lab? > /dev/null 2>&1 &

@@ -13,4 +13,4 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 sudo apt install make
 
-cd flats && make compose-prod
+cd flats && make build-dev && make compose-prod

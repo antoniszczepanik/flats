@@ -76,14 +76,16 @@ SALE_MODEL_INPUTS = [
 RENT_MODEL_INPUTS = [
     columns.CLUSTER_COORDS_FACTOR,
     columns.SIZE,
-    columns.CLUSTER_ID,
-    columns.CLUSTER_MEAN_PRICE_M2,
-    columns.LAT,
+    columns.BUILDING_HEIGHT,
     columns.BUILDING_YEAR,
     columns.LON,
-    columns.CLUSTER_CENTER_DIST_KM,
+    columns.LAT,
+    columns.CLUSTER_MEAN_PRICE_M2,
+    columns.CLUSTER_ID,
     columns.DESC_LEN,
+    columns.FLOOR,
     columns.VIEW_COUNT,
+    columns.CLUSTER_CENTER_DIST_KM,
 ]
 
 log.basicConfig(**logs_conf)

@@ -39,8 +39,10 @@ def apply_task(data_type):
     log.info(f'Applying model for {data_type}...')
     if data_type == 'sale':
         final_df[columns.SALE_PRED] = get_predictions(model, final_df, SALE_MODEL_INPUTS)
+        final_df[columns.SALE_DIFF] = final_df[columns.PRICE_M2] - final_df[columns.SALE_PRED]
     elif data_type == 'rent':
         final_df[columns.RENT_PRED] = get_predictions(model, final_df, RENT_MODEL_INPUTS)
+        final_df[columns.RENT_DIFF] = final_df[columns.PRICE_M2] - final_df[columns.RENT_PRED]
 
     s3_client.upload_df_to_s3_with_timestamp(
          final_df,

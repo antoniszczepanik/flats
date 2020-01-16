@@ -10,15 +10,19 @@ import pandas as pd
 from common import (
     CONCATED_DATA_PATH,
     PREDICTED_DATA_PATH,
-    INDEX_FILE_PATH,
+    HTML_TEMPLATE_PATH,
+    CSS_LOCAL_PATH,
+    HTML_LOCAL_PATH,
+    HTML_S3_PATH,
+    CSS_S3_PATH,
     logs_conf,
 )
 from s3_client import s3_client
 
-
 log.basicConfig(**logs_conf)
 
 s3_client = s3_client()
+
 
 def update_website_task(data_type):
     log.info("Starting update_website task...")
@@ -66,15 +70,36 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
     if offers_from:
         df = df[df[columns.DATE_ADDED] > offers_from]
     df = df.sort_values(diff_col)
-    df = df[[columns.DATE_ADDED, columns.TITLE, columns.SIZE, columns.URL, columns.PRICE_M2, pred_col, diff_col]]
+    df = df[[
+        columns.DATE_ADDED,
+        columns.TITLE,
+        columns.SIZE,
+        columns.URL,
+        columns.PRICE_M2,
+        pred_col,
+        diff_col
+    ]]
     return df.head(offer_number).to_html()
 
 
 def format_template(sale_html, rent_html, today):
-    with open(INDEX_FILE_PATH, 'w+') as outfile, open('pipelines/website/template.html', 'r') as template:
+    with open(HTML_LOCAL_PATH, 'w+') as outfile, open(HTML_TEMPLATE_PATH, 'r') as template:
         output = template.read().format(
             sale_html_table=sale_html,
             rent_html_table=rent_html,
             today=today,
         )
         outfile.write(output)
+
+def upload_fromatted_html():
+    response_1 = s3_client.upload_file_to_s3(
+        HTML_LOCAL_PATH,
+        HTML_S3_PATH,
+    )
+    response_2 = s3_client.upload_file_to_s3(
+        CSS_LOCAL_PATH,
+        CSS_S3_PATH,
+    )
+    if response_1 and response_2:
+        return True
+    return False

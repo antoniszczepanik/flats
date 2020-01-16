@@ -56,3 +56,5 @@ CLUSTER_COORDS_FACTOR = "cluster_coords_factor__feature"
 # COLUMNS AFTER APPLYING A MODEL
 SALE_PRED = 'sale__prediction'
 RENT_PRED = 'sale__prediction'
+SALE_DIFF = 'sale_price_diff__prediction'
+RENT_DIFF = 'rent_price_diff__prediction'

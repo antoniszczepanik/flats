@@ -28,6 +28,7 @@ COORDS_MAP_MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/coords_encoding"
 MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/models"
 
 SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
+INDEX_FILE_PATH = "/tmp/index.html"
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,

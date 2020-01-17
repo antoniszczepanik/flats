@@ -70,7 +70,7 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
     df[diff_col] = df[columns.PRICE_M2] - df[pred_col]
     if offers_from:
         df = df[df[columns.DATE_ADDED] > offers_from]
-    df = df.sort_values(diff_col, ascending=False)
+    df = df.sort_values(diff_col)
     df = df[[
         columns.URL,
         columns.DATE_ADDED,
@@ -81,7 +81,21 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
         diff_col
     ]]
     df = convert_links_to_a_tags(df)
-    return df.head(offer_number).to_html(index=False, escape=False)
+    return (df.head(offer_number)
+              .rename(columns={
+                  columns.URL:'Offer url',
+                  columns.DATE_ADDED:'Date added',
+                  columns.TITLE:'Title',
+                  columns.SIZE:'Size (m2)',
+                  columns.PRICE_M2:'Offer price/m2(zł)',
+                  pred_col:'Price predicted/m2(zł)',
+                  diff_col:'Price-prediction difference(zł)',
+              })
+              .round(2)
+              .to_html(index=False,
+                       escape=False,
+                       )
+            )
 
 def convert_links_to_a_tags(df):
     a_tag_pattern = '<a href="{link}">Link</a>'

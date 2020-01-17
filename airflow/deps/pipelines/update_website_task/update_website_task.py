@@ -7,6 +7,7 @@ import logging as log
 
 import pandas as pd
 
+import columns
 from common import (
     CONCATED_DATA_PATH,
     PREDICTED_DATA_PATH,
@@ -24,7 +25,7 @@ log.basicConfig(**logs_conf)
 s3_client = s3_client()
 
 
-def update_website_task(data_type):
+def update_website_task():
     log.info("Starting update_website task...")
 
     df_sale = read_and_merge_required_dfs('sale')
@@ -33,8 +34,8 @@ def update_website_task(data_type):
     today = datetime.date.today()
     week_ago = str(today - datetime.timedelta(7))
 
-    sale_html = prepare_top_offers(df_s, 'sale', offers_from=week_ago)
-    rent_html = prepare_top_offers(df_r, 'rent', offers_from=week_ago)
+    sale_html = prepare_top_offers(df_sale, 'sale', offers_from=week_ago)
+    rent_html = prepare_top_offers(df_rent, 'rent', offers_from=week_ago)
 
     format_template(sale_html, rent_html, today)
     response = upload_formatted_html()
@@ -91,14 +92,16 @@ def format_template(sale_html, rent_html, today):
         )
         outfile.write(output)
 
-def upload_fromatted_html():
+def upload_formatted_html():
     response_1 = s3_client.upload_file_to_s3(
         HTML_LOCAL_PATH,
         HTML_S3_PATH,
+        content_type='text/html',
     )
     response_2 = s3_client.upload_file_to_s3(
         CSS_LOCAL_PATH,
         CSS_S3_PATH,
+        content_type='text/css',
     )
     if response_1 and response_2:
         return True

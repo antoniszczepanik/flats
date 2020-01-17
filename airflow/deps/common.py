@@ -30,9 +30,9 @@ MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/models"
 SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
 
 # website paths
-HTML_TEMPLATE_PATH = 'pipelines/update_website_task/template.html'
-CSS_LOCAL_PATH = 'pipelines/update_website_task/stylesheet.css'
-HTML_LOCAL_PATH = '/temp/index.html'
+HTML_TEMPLATE_PATH = 'deps/pipelines/update_website_task/template.html'
+CSS_LOCAL_PATH = 'deps/pipelines/update_website_task/stylesheet.css'
+HTML_LOCAL_PATH = '/tmp/index.html'
 HTML_S3_PATH = 'flats-website/index.html'
 CSS_S3_PATH = 'flats-website/stylesheet.css'
 

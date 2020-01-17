@@ -9,7 +9,11 @@ h4 {
 
 table {
   border-collapse: collapse;
-  width: 100%;
+  width: 70%;
+  margin-left:15%; 
+  margin-right:15%;
+  font-size:12px;
+  text-align: center;
 }
 
 th, td {

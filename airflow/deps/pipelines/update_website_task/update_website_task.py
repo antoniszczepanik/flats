@@ -70,17 +70,23 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
     df[diff_col] = df[columns.PRICE_M2] - df[pred_col]
     if offers_from:
         df = df[df[columns.DATE_ADDED] > offers_from]
-    df = df.sort_values(diff_col)
+    df = df.sort_values(diff_col, ascending=False)
     df = df[[
+        columns.URL,
         columns.DATE_ADDED,
         columns.TITLE,
         columns.SIZE,
-        columns.URL,
         columns.PRICE_M2,
         pred_col,
         diff_col
     ]]
-    return df.head(offer_number).to_html()
+    df = convert_links_to_a_tags(df)
+    return df.head(offer_number).to_html(index=False, escape=False)
+
+def convert_links_to_a_tags(df):
+    a_tag_pattern = '<a href="{link}">Link</a>'
+    df[columns.URL] = df[columns.URL].apply(lambda link: a_tag_pattern.format(link=link))
+    return df
 
 
 def format_template(sale_html, rent_html, today):

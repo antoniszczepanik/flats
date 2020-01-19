@@ -29,6 +29,14 @@ MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/models"
 
 SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
 
+# website paths
+HTML_TEMPLATE_PATH = 'deps/pipelines/update_website_task/template.html'
+CSS_LOCAL_PATH = 'deps/pipelines/update_website_task/stylesheet.css'
+HTML_LOCAL_PATH = '/tmp/index.html'
+HTML_S3_PATH = 'flats-website/index.html'
+CSS_S3_PATH = 'flats-website/stylesheet.css'
+
+
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,
     columns.BUILDING_HEIGHT,
@@ -76,14 +84,16 @@ SALE_MODEL_INPUTS = [
 RENT_MODEL_INPUTS = [
     columns.CLUSTER_COORDS_FACTOR,
     columns.SIZE,
-    columns.CLUSTER_ID,
-    columns.CLUSTER_MEAN_PRICE_M2,
-    columns.LAT,
+    columns.BUILDING_HEIGHT,
     columns.BUILDING_YEAR,
     columns.LON,
-    columns.CLUSTER_CENTER_DIST_KM,
+    columns.LAT,
+    columns.CLUSTER_MEAN_PRICE_M2,
+    columns.CLUSTER_ID,
     columns.DESC_LEN,
+    columns.FLOOR,
     columns.VIEW_COUNT,
+    columns.CLUSTER_CENTER_DIST_KM,
 ]
 
 log.basicConfig(**logs_conf)

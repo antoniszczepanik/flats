@@ -1,27 +1,32 @@
 body {
   background-color:  #001f3f;
   color: grey;
-  width: 70%;
-  margin-left:15%; 
+  width: 700px;
+  margin: auto; 
   text-align: center;
+  font-size: 21px;
 }
 
 h1 {
   color: silver;
-}
-h3 {
-  font-size: 15px;
+  font-size: 60px;
 }
 
 h2 {
   color: silver;
-  font-size: 18px;
+  font-size: 30px;
 }
+
+p {
+  text-align: left;
+  text-indent: 30px;
+}
+
 
 table {
   color: grey;
   border-collapse: collapse;
-  font-size:12px;
+  font-size: 14px;
 }
 
 th {
@@ -33,10 +38,9 @@ th {
 td {
   text-align: right;
   padding: 15px;
-  border-top: 1px solid #ddd;
 }
 
-tr:hover {background-color: #85144b;}
+tr:hover {background-color: #FFFF66;}
 
 footer {
   font-size: 12px;

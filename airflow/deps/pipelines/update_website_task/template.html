@@ -4,15 +4,38 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Flats</title> <meta name="description" content="Most interesting flat sale and rent offers in Poland."> <link rel="stylesheet" href="stylesheet.css" />
+    <title>Flats & flats</title>
+    <meta name="description" content="Find most interesting flat sale and rent offers in Poland."> 
+    <link rel="stylesheet" href="stylesheet.css" />
 </head>
+  
+<h1> Flats & flats </h1>
+
+<p>
+    Hi! This website was created to monitor interesting flat sale & rent 
+    opportunities in Poland. Below you can find list of offers which were
+    detected to be the most undervalued. Results limited to last week are
+    updated daily, around 1am central european time.
+</p>
+<p>
+    If you'd like to find out more about internals of this project (tools used,
+    pipeline architecure, ML behind the predictions, ...) make sure to take a
+    look at 
+    <a href=github.com>projects gihub repo</a>.
+</p>
+
 
 <body>
-  <h2>Top 10 sale offers from last week:<h2/>
+  <h2>Top sale offers from last week<h2/>
     {sale_html_table}
-  <h2>Top 10 rent offers from last week:<h2/>
+  <h2>Top rent offers from last week:<h2/>
     {rent_html_table}
-  <h4>Website generated on {today}<h4/>
 </body>
+
+<footer>
+  Website generated on {today}
+  </br>
+  Created by Antoni Szczepanik
+</footer>
 
 </html>

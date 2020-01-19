@@ -85,7 +85,13 @@ apply-sale: build-webserver
 	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
 	   'airflow_webserver' \
 	   python3 -c "from deps.pipelines.apply_task import apply_task; apply_task('sale')"
-
+update-website: build-webserver
+	docker run -it  \
+	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+	   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+	   'airflow_webserver' \
+	   python3 -c "from deps.pipelines.update_website_task.update_website_task import update_website_task; update_website_task()"
 compose: 
 	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml up -d --force-recreate
 compose-build: 

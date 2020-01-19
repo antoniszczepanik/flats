@@ -10,6 +10,7 @@ from pipelines.concat_task import concat_data_task
 from pipelines.cleaning_task import cleaning_task
 from pipelines.feature_engineering_task import feature_engineering_task
 from pipelines.apply_task import apply_task
+from pipelines.update_website_task.update_website_task import update_website_task
 
 
 default_args = {
@@ -60,3 +61,10 @@ for data_type in DATA_TYPES:
         dag=dag)
 
     scrape >> concat >> clean >> engineer_features >> apply_model
+
+update_website = PythonOperator(
+    task_id=f'update_website',
+    python_callable=update_website_task,
+    dag=dag)
+
+update_website

@@ -80,32 +80,41 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
         columns.SIZE,
         columns.PRICE_M2,
         columns.PRICE,
-        pred_col,
-        diff_col
+        diff_col,
     ]]
     df = convert_links_to_a_tags(df)
     return (df.head(offer_number)
+              .pipe(remove_duplicates_in_title)
+              .pipe(reverse_sign, column=diff_col)
               .rename(columns={
-                  columns.URL:'Offer url',
-                  columns.DATE_ADDED:'Date added',
+                  columns.URL:'Url',
+                  columns.DATE_ADDED:'Added',
                   columns.TITLE:'Title',
                   columns.SIZE:'Size',
-                  columns.PRICE_M2:'Offer price/m2',
-                  columns.PRICE: 'Offer price',
-                  pred_col:'Price predicted/m2',
-                  diff_col:'Price-prediction difference',
+                  columns.PRICE_M2:'Price / m2',
+                  columns.PRICE: 'Price',
+                  diff_col:'Underpriced by',
               })
-              .round(-1)
+              .round(0)
               .to_html(index=False,
                        escape=False,
                        )
             )
 
 def convert_links_to_a_tags(df):
-    a_tag_pattern = '<a href="{link}">Link</a>'
+    a_tag_pattern = '<a href="{link}" target="_blank">Link</a>'
     df[columns.URL] = df[columns.URL].apply(lambda link: a_tag_pattern.format(link=link))
     return df
 
+def remove_duplicates_in_title(df):
+    df[columns.TITLE] = df[columns.TITLE].apply(
+        lambda title: ", ".join(list(set(title.split(', '))))
+    )
+    return df
+
+def reverse_sign(df, column):
+    df[column] = -df[column]
+    return df
 
 def format_template(sale_html, rent_html, today):
     with open(HTML_LOCAL_PATH, 'w+') as outfile, open(HTML_TEMPLATE_PATH, 'r') as template:

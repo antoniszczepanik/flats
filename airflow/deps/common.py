@@ -35,9 +35,9 @@ HTML_TEMPLATE_PATH = 'deps/pipelines/update_website_task/template.html'
 CSS_LOCAL_PATH = 'deps/pipelines/update_website_task/stylesheet.css'
 HTML_LOCAL_PATH = '/tmp/index.html'
 JS_LOCAL_PATH = 'deps/pipelines/update_website_task/script.js'
-HTML_S3_PATH = '{S3_WEBSITE_BUCKET}/index.html'
-CSS_S3_PATH = '{S3_WEBSITE_BUCKET}/stylesheet.css'
-JS_S3_PATH = '{S3_WEBSITE_BUCKET}/script.js'
+HTML_S3_PATH = f'{S3_WEBSITE_BUCKET}/index.html'
+CSS_S3_PATH = f'{S3_WEBSITE_BUCKET}/stylesheet.css'
+JS_S3_PATH = f'{S3_WEBSITE_BUCKET}/script.js'
 
 
 CLEANING_REQUIRED_COLUMNS = [

@@ -95,7 +95,7 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
                   pred_col:'Price predicted/m2',
                   diff_col:'Price-prediction difference',
               })
-              .round(0)
+              .round(-1)
               .to_html(index=False,
                        escape=False,
                        )

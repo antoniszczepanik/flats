@@ -11,7 +11,7 @@
 body {
   background-color: var(--bg-color);
   color: var(--darker-text);
-  width: 800px;
+  width: 700px;
   margin: auto; 
   text-align: center;
   font-size: 21px;
@@ -58,7 +58,7 @@ tr:hover {
 /* Tabs */
 .tab {
   overflow: hidden;
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 0; 
   padding: 0 0 0 0;
   outline: none;

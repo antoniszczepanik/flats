@@ -26,10 +26,22 @@
 
 
 <body>
-<h2>Top sale offers from last week<h2/>
-    {sale_html_table}
-<h2>Top rent offers from last week<h2/>
-    {rent_html_table}
+
+<!-- Tabs -->
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'sale')" id="defaultOpen">Top Sale Offers</button>
+  <button class="tablinks" onclick="openTab(event, 'rent')">Top Rent Offers</button>
+</div>
+
+
+<div id="sale" class="tabcontent">
+  {sale_table}
+</div>
+
+<div id="rent" class="tabcontent">
+  {rent_table}
+</div>
+
 </body>
 
 </br>
@@ -38,5 +50,6 @@
   </br>
   Created by Antoni Szczepanik
 </footer>
-
 </html>
+
+<script type="text/javascript" src="script.js"></script>

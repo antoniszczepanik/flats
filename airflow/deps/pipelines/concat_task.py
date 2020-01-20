@@ -65,7 +65,7 @@ def concat_csvs_to_parquet(data_type, columns_to_skip):
                                              s3_path=CONCATED_DATA_PATH,
                                              keyword='concated',
                                              dtype=data_type,
-                                             extension='.csv',
+                                             extension='csv',
                                              )
 
 

@@ -61,7 +61,7 @@ def read_and_merge_required_dfs(dtype):
         how='left')
     return df
 
-def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
+def prepare_top_offers(df, dtype, offers_from=None, offer_number=30):
     if dtype == 'sale':
         pred_col = columns.SALE_PRED
         diff_col = columns.SALE_DIFF
@@ -78,41 +78,57 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=10):
         columns.DATE_ADDED,
         columns.TITLE,
         columns.SIZE,
-        columns.PRICE_M2,
         columns.PRICE,
+        columns.PRICE_M2,
         diff_col,
     ]]
-    df = convert_links_to_a_tags(df)
-    return (df.head(offer_number)
-              .pipe(remove_duplicates_in_title)
-              .pipe(reverse_sign, column=diff_col)
-              .rename(columns={
-                  columns.URL:'Url',
-                  columns.DATE_ADDED:'Added',
-                  columns.TITLE:'Title',
-                  columns.SIZE:'Size',
-                  columns.PRICE_M2:'Price / m2',
-                  columns.PRICE: 'Price',
-                  diff_col:'Underpriced by',
-              })
+    df = (df.pipe(convert_links_to_a_tags)
+            .pipe(filter_outliers, dtype=dtype)
+            .head(offer_number)
+            .pipe(remove_duplicates_in_title)
+            .pipe(reverse_sign, column=diff_col)
+            .rename(columns={
+                columns.URL:'Url',
+                columns.DATE_ADDED:'Added',
+                columns.TITLE:'Title',
+                columns.SIZE:'Size',
+                columns.PRICE: 'Price',
+                columns.PRICE_M2:'Price / m2',
+                diff_col:'Underpriced by',
+            })
               .round(0)
-              .to_html(index=False,
-                       escape=False,
-                       )
+              .to_html(index=False, escape=False)
             )
+    return df
+
+def filter_outliers(df, dtype):
+    """ Filter offers based on custom defined "outliers" indicators"""
+    df = df.copy()
+    if dtype == 'sale':
+        df = df[df[columns.PRICE_M2] > 1800]
+        df = df[df[columns.PRICE] > 30000]
+    elif dtype == 'rent':
+        df = df[df[columns.PRICE_M2] > 10]
+        df = df[df[columns.PRICE] > 800]
+    df = df[df[columns.SIZE] < 300]
+    df = df[df[columns.SIZE]> 15]
+    return df
 
 def convert_links_to_a_tags(df):
+    df = df.copy()
     a_tag_pattern = '<a href="{link}" target="_blank">Link</a>'
     df[columns.URL] = df[columns.URL].apply(lambda link: a_tag_pattern.format(link=link))
     return df
 
 def remove_duplicates_in_title(df):
+    df = df.copy()
     df[columns.TITLE] = df[columns.TITLE].apply(
         lambda title: ", ".join(list(set(title.split(', '))))
     )
     return df
 
 def reverse_sign(df, column):
+    df = df.copy()
     df[column] = -df[column]
     return df
 

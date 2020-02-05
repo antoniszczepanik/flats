@@ -1,0 +1,33 @@
+/* Define colors used across the page */
+:root {
+  --bg-color: #001f3f;
+  --hover-color: grey;
+  --selected: #02064a;
+  --lighter-text: silver;
+  --darker-text: grey;
+}
+
+/* Body and paragraphs */
+body {
+  background-color: var(--bg-color);
+  color: var(--darker-text);
+  width: 900px;
+  margin: auto; 
+  text-align: center;
+  font-size: 21px;
+}
+
+h1 {
+  color: var(--lighter-text);
+  font-size: 60px;
+}
+
+p {
+  text-align: center;
+  text-indent: 30px;
+  width: 80%;
+}
+
+footer {
+  font-size: 12px;
+}

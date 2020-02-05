@@ -31,14 +31,18 @@ SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
 
 # website paths
 S3_WEBSITE_BUCKET = 'flats.antoniszczepanik.com'
-HTML_TEMPLATE_PATH = 'deps/pipelines/update_website_task/template.html'
-CSS_LOCAL_PATH = 'deps/pipelines/update_website_task/stylesheet.css'
-HTML_LOCAL_PATH = '/tmp/index.html'
-JS_LOCAL_PATH = 'deps/pipelines/update_website_task/script.js'
+
+CSS_LOCAL_PATH = 'deps/pipelines/update_website_task/site/stylesheet.css'
+HTML_LOCAL_PATH = 'deps/pipelines/update_website_task/site/source.html'
+JS_LOCAL_PATH = 'deps/pipelines/update_website_task/site/script.js'
 HTML_S3_PATH = f'{S3_WEBSITE_BUCKET}/index.html'
 CSS_S3_PATH = f'{S3_WEBSITE_BUCKET}/stylesheet.css'
 JS_S3_PATH = f'{S3_WEBSITE_BUCKET}/script.js'
 
+SALE_DATA_LOCAL_PATH = '/tmp/sale.json'
+RENT_DATA_LOCAL_PATH = '/tmp/rent.json'
+SALE_DATA_S3_PATH = f'{S3_WEBSITE_BUCKET}/sale.json'
+RENT_DATA_S3_PATH = f'{S3_WEBSITE_BUCKET}/rent.json'
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,

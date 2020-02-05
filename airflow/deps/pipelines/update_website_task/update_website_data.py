@@ -1,8 +1,7 @@
 """
-Read predicted dataset, generate html with the result, and update website with them.
+Read predicted dataset, generate json data with the result, and update website.
 """
 import datetime
-import os
 import logging as log
 
 import pandas as pd
@@ -11,13 +10,10 @@ import columns
 from common import (
     CONCATED_DATA_PATH,
     PREDICTED_DATA_PATH,
-    HTML_TEMPLATE_PATH,
-    CSS_LOCAL_PATH,
-    HTML_LOCAL_PATH,
-    JS_LOCAL_PATH,
-    HTML_S3_PATH,
-    CSS_S3_PATH,
-    JS_S3_PATH,
+    SALE_DATA_LOCAL_PATH,
+    RENT_DATA_LOCAL_PATH,
+    SALE_DATA_S3_PATH,
+    RENT_DATA_S3_PATH,
     logs_conf,
 )
 from s3_client import s3_client
@@ -27,7 +23,7 @@ log.basicConfig(**logs_conf)
 s3_client = s3_client()
 
 
-def update_website_task():
+def update_website_data_task():
     log.info("Starting update_website task...")
 
     df_sale = read_and_merge_required_dfs('sale')
@@ -36,12 +32,10 @@ def update_website_task():
     today = datetime.date.today()
     week_ago = str(today - datetime.timedelta(7))
 
-    sale_html = prepare_top_offers(df_sale, 'sale', offers_from=week_ago)
-    rent_html = prepare_top_offers(df_rent, 'rent', offers_from=week_ago)
+    response_s = prepare_and_send_top_offers(df_sale, 'sale', offers_from=week_ago)
+    response_r = prepare_and_send_top_offers(df_rent, 'rent', offers_from=week_ago)
 
-    format_template(sale_html, rent_html, today)
-    response = upload_formatted_html()
-    if response:
+    if response_s and response_r:
         log.info(f"Successfully finished updating website.")
 
 def read_and_merge_required_dfs(dtype):
@@ -61,7 +55,7 @@ def read_and_merge_required_dfs(dtype):
         how='left')
     return df
 
-def prepare_top_offers(df, dtype, offers_from=None, offer_number=30):
+def prepare_and_send_top_offers(df, dtype, offers_from=None, offer_number=30):
     if dtype == 'sale':
         pred_col = columns.SALE_PRED
         diff_col = columns.SALE_DIFF
@@ -93,13 +87,17 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=30):
                 columns.TITLE:'Title',
                 columns.SIZE:'Size',
                 columns.PRICE: 'Price',
-                columns.PRICE_M2:'Price / m2',
+                columns.PRICE_M2:'Price m2',
                 diff_col:'Underpriced by',
             })
               .round(0)
-              .to_html(index=False, escape=False)
             )
-    return df
+    if dtype=='sale':
+        df.to_json(SALE_DATA_LOCAL_PATH, orient='records')
+        return upload_json_data(SALE_DATA_LOCAL_PATH, SALE_DATA_S3_PATH)
+    else:
+        df.to_json(RENT_DATA_LOCAL_PATH, orient='records')
+        return upload_json_data(RENT_DATA_LOCAL_PATH, RENT_DATA_S3_PATH)
 
 def filter_outliers(df, dtype):
     """ Filter offers based on custom defined "outliers" indicators"""
@@ -132,31 +130,10 @@ def reverse_sign(df, column):
     df[column] = -df[column]
     return df
 
-def format_template(sale_html, rent_html, today):
-    with open(HTML_LOCAL_PATH, 'w+') as outfile, open(HTML_TEMPLATE_PATH, 'r') as template:
-        output = template.read().format(
-            sale_table=sale_html,
-            rent_table=rent_html,
-            today=today,
-        )
-        outfile.write(output)
-
-def upload_formatted_html():
-    response_html = s3_client.upload_file_to_s3(
-        HTML_LOCAL_PATH,
-        HTML_S3_PATH,
-        content_type='text/html',
+def upload_json_data(from_, to):
+    response = s3_client.upload_file_to_s3(
+        from_,
+        to,
+        content_type='application/json',
     )
-    response_css = s3_client.upload_file_to_s3(
-        CSS_LOCAL_PATH,
-        CSS_S3_PATH,
-        content_type='text/css',
-    )
-    response_js = s3_client.upload_file_to_s3(
-        JS_LOCAL_PATH,
-        JS_S3_PATH,
-        content_type='application/javascript',
-    )
-    if False not in (response_html, response_css, response_js):
-        return True
-    return False
+    return response

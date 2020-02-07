@@ -13,69 +13,124 @@
     <link rel="stylesheet" href="stylesheet.css">
 </head>
   
-
-
 <body>
-  <div id="introduction">
-    <!-- Introduction -->
+
+  <!-- Introduction -->
+  <div class="container">
     <h1> Flats & flats </h1>
-      <p>
-          Hi! This website was created to monitor interesting flat sale & rent 
-          opportunities in Poland. Below you can find list of offers which were
-          detected to be the most undervalued. Results limited to last week are
-          updated daily, around 1am Central European Time.
-      </p>
-      <p>
-          If you'd like to find out more about internals of this project (tools used,
-          pipeline architecure, ML behind the predictions, ...) make sure to take a
-          look at projects  
-          <a href=https://github.com/kabuboy/flats>gihub repo</a>.
-      </p>
+    <h4> Browse most interesting flat rent and sale offers in Poland. </h4>
   </div>
 
-  <!-- Sale table -->
-  <div id="sale" class="tabcontent">
-    <table data-url="sale.json"
-           class="table table-dark table-striped" 
-           data-toggle="table" 
-           data-search="true" 
-           sortable="true">
-      <thead>
-        <tr style="text-align: right;">
-          <th data-field="Url">Url</th>
-          <th data-field="Added" data-sortable="true">Added</th>
-          <th data-field="Title" data-sortable="true">Title</th>
-          <th data-field="Size" data-sortable="true">Size</th>
-          <th data-field="Price m2" data-sortable="true">Price m2</th>
-          <th data-field="Price" data-sortable="true">Price</th>
-          <th data-field="Underpriced by" data-sortable="true">Underpriced by</th>
-        </tr>
-      </thead>
-    </table>
+  <!-- Nav bar --> 
+  <div class="container">
+    <div class="nav nav-pills nav-fill" id="nav-tab" role="tablist">
+
+      <a class="nav-item nav-link active"
+          id="nav-sale-tab"
+          data-toggle="tab"
+          href="#nav-sale"
+          role="tab">Sale Offers</a>
+
+      <a class="nav-item nav-link"
+          id="nav-rent-tab"
+          data-toggle="tab"
+          href="#nav-rent"
+          role="tab">Rent Offers</a>
+
+      <a class="nav-item nav-link"
+          id="nav-about-tab"
+          data-toggle="tab"
+          href="#nav-about"
+          role="tab">About</a>
+    </div>
   </div>
 
-  <!-- Rent table -->
-  <div id="rent" class="tabcontent">
-    <table id="table" 
-           class="table table-dark table-striped" 
-           data-url="rent.json"
-           data-toggle="table" 
-           data-search="true" 
-           sortable="true">
-      <thead>
-        <tr style="text-align: right;">
-          <th data-field="Url">Url</th>
-          <th data-field="Added" data-sortable="true">Added</th>
-          <th data-field="Title" data-sortable="true">Title</th>
-          <th data-field="Size" data-sortable="true">Size</th>
-          <th data-field="Price m2" data-sortable="true">Price m2</th>
-          <th data-field="Price" data-sortable="true">Price</th>
-          <th data-field="Underpriced by" data-sortable="true">Underpriced by</th>
-        </tr>
-      </thead>
-    </table>
+  <!-- Tab contents -->
+  <div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active"
+          id="nav-sale"
+          role="tabpanel"
+          aria-labelledby="nav-sale-tab">
+
+      <!-- Sale table -->
+      <div class="container">
+        <div id="sale">
+          <table data-url="sale.json"
+                class="table table-dark table-striped" 
+                data-toggle="table" 
+                data-search="true" 
+                sortable="true">
+            <thead>
+              <tr style="text-align: right;">
+                <th data-field="Url">Url</th>
+                <th data-field="Added" data-sortable="true">Added</th>
+                <th data-field="Title" data-sortable="true">Title</th>
+                <th data-field="Size" data-sortable="true">Size</th>
+                <th data-field="Price" data-sortable="true">&nbsp;&nbsp;&nbsp;Price&nbsp;&nbsp;</th>
+                <th data-field="Estimate" data-sortable="true">Estimate</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tab-pane fade"
+          id="nav-rent"
+          role="tabpanel"
+          aria-labelledby="nav-rent-tab">
+
+      <!-- Rent table -->
+      <div class="container">
+        <div id="rent">
+          <table data-url="rent.json"
+                class="table table-dark table-striped" 
+                data-toggle="table" 
+                data-search="true" 
+                sortable="true">
+            <thead>
+              <tr style="text-align: right;">
+                <th data-field="Url">Url</th>
+                <th data-field="Added" data-sortable="true">Added</th>
+                <th data-field="Title" data-sortable="true">Title</th>
+                <th data-field="Size" data-sortable="true">Size</th>
+                <th data-field="Price" data-sortable="true">Price</th>
+                <th data-field="Estimate" data-sortable="true">Estimate</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tab-pane fade"
+          id="nav-about"
+          role="tabpanel"
+          aria-labelledby="nav-about-tab">
+
+      <!-- About -->
+      <div class="container">
+        <div id='about'>
+          <p>
+            Hi! This website was created to monitor interesting flat sale & rent 
+            opportunities in Poland. Below you can find list of offers which were
+            detected to be the most undervalued. Results limited to last week are
+            updated daily, around 1am Central European Time. 
+            If you'd like to find out more about internals of this project (tools used,
+            pipeline architecure, ML behind the predictions, ...) make sure to take a
+            look at projects <a href=https://github.com/kabuboy/flats>gihub repo</a>.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
+
+ 
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
@@ -83,10 +138,12 @@
 <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
 <script type="text/javascript" src="script.js"></script>
 
-
 </body>
-</br>
-<footer>
-  Created by Antoni Szczepanik
-</footer>
+
+<div class="container">
+  <footer>
+    Created by Antoni Szczepanik
+  </footer>
+</div>
+
 </html>

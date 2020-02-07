@@ -26,12 +26,7 @@ def update_website_source():
         CSS_S3_PATH,
         content_type='text/css',
     )
-    response_js = s3_client.upload_file_to_s3(
-        JS_LOCAL_PATH,
-        JS_S3_PATH,
-        content_type='application/javascript',
-    )
-    if False not in (response_html, response_css, response_js):
+    if False not in (response_html, response_css):
         return True
     log.warning("Failed to upload site source.")
     return False

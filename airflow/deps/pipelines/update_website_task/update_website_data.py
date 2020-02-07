@@ -62,8 +62,8 @@ def prepare_and_send_top_offers(df, dtype, offers_from=None, offer_number=30):
     elif dtype == 'rent':
         pred_col = columns.RENT_PRED
         diff_col = columns.RENT_DIFF
-
     df[diff_col] = df[columns.PRICE_M2] - df[pred_col]
+    df[pred_col] = df[pred_col] * df[columns.SIZE]
     if offers_from:
         df = df[df[columns.DATE_ADDED] > offers_from]
     df = df.sort_values(diff_col)
@@ -74,21 +74,22 @@ def prepare_and_send_top_offers(df, dtype, offers_from=None, offer_number=30):
         columns.SIZE,
         columns.PRICE,
         columns.PRICE_M2,
-        diff_col,
+        pred_col,
     ]]
     df = (df.pipe(convert_links_to_a_tags)
             .pipe(filter_outliers, dtype=dtype)
             .head(offer_number)
             .pipe(remove_duplicates_in_title)
-            .pipe(reverse_sign, column=diff_col)
+            .pipe(format_price, columns.PRICE)
+            .pipe(round_pred_col, pred_col)
+            .pipe(format_price, pred_col)
             .rename(columns={
-                columns.URL:'Url',
-                columns.DATE_ADDED:'Added',
-                columns.TITLE:'Title',
-                columns.SIZE:'Size',
+                columns.URL: 'Url',
+                columns.DATE_ADDED: 'Added',
+                columns.TITLE: 'Title',
+                columns.SIZE: 'Size',
                 columns.PRICE: 'Price',
-                columns.PRICE_M2:'Price m2',
-                diff_col:'Underpriced by',
+                pred_col: 'Estimate',
             })
               .round(0)
             )
@@ -100,7 +101,7 @@ def prepare_and_send_top_offers(df, dtype, offers_from=None, offer_number=30):
         return upload_json_data(RENT_DATA_LOCAL_PATH, RENT_DATA_S3_PATH)
 
 def filter_outliers(df, dtype):
-    """ Filter offers based on custom defined "outliers" indicators"""
+    """ Filter offers based on hardcoded "outliers" indicators"""
     df = df.copy()
     if dtype == 'sale':
         df = df[df[columns.PRICE_M2] > 1800]
@@ -110,6 +111,11 @@ def filter_outliers(df, dtype):
         df = df[df[columns.PRICE] > 800]
     df = df[df[columns.SIZE] < 300]
     df = df[df[columns.SIZE]> 15]
+    return df
+
+def round_pred_col(df, pred_col):
+    df = df.copy()
+    df[pred_col] = df[pred_col].round(-2)
     return df
 
 def convert_links_to_a_tags(df):
@@ -130,6 +136,12 @@ def reverse_sign(df, column):
     df[column] = -df[column]
     return df
 
+def format_price(df, col):
+    df = df.copy()
+    df[col] = (df[col].astype(int)
+                      .apply(lambda x: f"{x:,}".replace(',', ' ')))
+    return df
+
 def upload_json_data(from_, to):
     response = s3_client.upload_file_to_s3(
         from_,
@@ -137,3 +149,16 @@ def upload_json_data(from_, to):
         content_type='application/json',
     )
     return response
+
+def human_format(num):
+    num = float('{:.3g}'.format(num))
+    magnitude = 0
+    while abs(num) >= 1000:
+        magnitude += 1
+        num /= 1000.0
+    return ('{}{}'.format('{:f}'
+                  .format(num)
+                  .rstrip('0')
+                  .rstrip('.'), ['', 'K', 'M', 'B', 'T'][magnitude])
+                  .replace('.', ',')
+            )

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 cd /flats
-git pull
+sudo git stash && sudo git pull
 make compose-prod-down
 make compose-prod

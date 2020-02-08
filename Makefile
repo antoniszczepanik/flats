@@ -1,5 +1,7 @@
 mkfile_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+.PHONY: deploy deploy-hard
+
 build-webserver:
 	docker build $(mkfile_dir)/airflow/ \
 		-f $(mkfile_dir)/docker/Dockerfile-webserver \

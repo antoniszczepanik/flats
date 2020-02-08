@@ -12,6 +12,7 @@ body {
   margin: auto; 
   font-size: 21px;
   text-align: center;
+  line-height: 22pt;
 }
 
 h1 {
@@ -31,6 +32,10 @@ ol {
   color: var(--lighter-text);
   text-align: left;
 }
+li {
+  color: var(--lighter-text);
+  text-align: left;
+}
 
 footer {
   font-size: 16px;
@@ -39,5 +44,5 @@ footer {
 }
 
 .container {
-    padding: 15px;
+    padding: 8px;
 }

@@ -41,4 +41,5 @@ Twisted==19.7.0
 Unidecode==1.1.1
 urllib3==1.25.6
 w3lib==1.21.0
+werkzeug==0.16.1
 zope.interface==4.6.0

@@ -18,7 +18,7 @@
   <!-- Introduction -->
   <div class="container">
     <h1> Flats & flats </h1>
-    <h4> Browse most interesting flat rent and sale offers in Poland. </h4>
+    <h4> Find undervalued flat rent and sale offers in Poland. </h4>
   </div>
 
   <!-- Nav bar --> 
@@ -114,14 +114,41 @@
       <div class="container">
         <div id='about'>
           <p>
-            Hi! This website was created to monitor interesting flat sale & rent 
-            opportunities in Poland. Below you can find list of offers which were
-            detected to be the most undervalued. Results limited to last week are
-            updated daily, around 1am Central European Time. 
-            If you'd like to find out more about internals of this project (tools used,
-            pipeline architecure, ML behind the predictions, ...) make sure to take a
-            look at projects <a href=https://github.com/kabuboy/flats>gihub repo</a>.
+            Hi! This website was created to identify interesting flat sale & rent 
+            opportunities in Poland. Lists present only offers from last week, as 
+            all of them get quickly outdated. Results are updated daily, around 1am
+            Central European Time.</br>
+            Here's a really minimal summary of how things work:
+
+            <ol>
+              <li>
+                Valuation model is trained based on signification amout of historical
+                data from the polish market (>200K sale and >150K rent offers)
+              </li>
+              <li>
+                Each new offer is assigned an estimate value.
+              </li>
+              <li>
+                Offers from the past week are sorted based on difference between
+                prediction and actual offer price. The ones with biggest differece
+                are presented on this site.
+              </li>
+            </ol>
           </p>
+
+          <p>
+            If you'd like to find out more about technical internals of this project
+            (tools used, pipeline architecure, ML behind the predictions, ...)
+            make sure to take a look at projects <a href=https://github.com/kabuboy/flats>gihub repo</a>.
+          </p>
+
+          <p>
+            Whole project was developed solely by one person and I take pride in
+            each part of it. It's really motivating to see how much is achievable
+            by a single developer these days. Effort continues, so if you see a room
+            for improvement don't hesitate to let me know at szczepanik.antoni@gmail.com
+          </p>
+
         </div>
       </div>
 

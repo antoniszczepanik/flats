@@ -1,4 +1,4 @@
-# [Flats](http://www.flats.antoniszczepanik.com)
+# [Flats](http://flats.antoniszczepanik.com)
 Detect undervalued real estate offers by finding differences between valuation and offer prices.
 
 Set of ETL and ML pipelines designed to valuate flat sale and rent offers.

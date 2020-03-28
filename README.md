@@ -6,7 +6,7 @@ Estimates are assigned to each scraped item and compared to actual prices,
 which allows to instantly identify real estate opportunities.
 The pipeline is run daily and results are presented on [queryable website](http://flats.antoniszczepanik.com).
 
-![alt text](docs/WebsiteScreenshot.png)
+[![alt text](docs/WebsiteScreenshot.png)](http://flats.antoniszczepanik.com)
 
 ### Why?
 

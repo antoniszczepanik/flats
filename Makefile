@@ -42,6 +42,20 @@ clean-sale:
 		   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
 		   'airflow_webserver' \
 		   python3 -c "from deps.pipelines.cleaning_task import cleaning_task; cleaning_task('sale')"
+scrape-sale:
+	docker run -it  \
+		   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+		   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+		   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+		   'airflow_webserver' \
+		   python3 -c "from deps.pipelines.scrape_task import scrape_task; scrape_task('sale')"
+scrape-rent:
+	docker run -it  \
+		   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+		   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+		   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+		   'airflow_webserver' \
+		   python3 -c "from deps.pipelines.scrape_task import scrape_task; scrape_task('rent')"
 clean-rent: 
 	docker run -it  \
 	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
@@ -105,6 +119,20 @@ apply-sale:
 	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
 	   'airflow_webserver' \
 	   python3 -c "from deps.pipelines.apply_task import apply_task; apply_task('sale')"
+features-rent: 
+	docker run -it  \
+	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+	   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+	   'airflow_webserver' \
+	   python3 -c "from deps.pipelines.feature_engineering_task import feature_engineering_task; feature_engineering_task('rent')"
+features-sale: 
+	docker run -it  \
+	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
+	   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
+	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+	   'airflow_webserver' \
+	   python3 -c "from deps.pipelines.feature_engineering_task import feature_engineering_task; feature_engineering_task('sale')"
 update-website-data: 
 	docker run -it  \
 	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
@@ -119,7 +147,8 @@ update-website-source:
 	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
 	   'airflow_webserver' \
 	   python3 -c "from deps.pipelines.update_website_task.update_website_source import update_website_source; update_website_source()"
-
+full-pipeline-rent: scrape-rent clean-rent concat-rent features-rent apply-rent update-website-data
+full-pipeline-sale: scrape-sale clean-sale concat-sale features-sale apply-sale update-website-data
 jupyter:
 	docker run -d --rm \
 	-v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \

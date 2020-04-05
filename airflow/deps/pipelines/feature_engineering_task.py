@@ -4,9 +4,12 @@ Based on clean data and coords encoding map add new coords features.
 import logging as log
 
 import pandas as pd
+import numpy as np
 from geopy.distance import great_circle
+from shapely.geometry import MultiPoint
+from shapely.ops import nearest_points
 
-import columns
+import columns as c
 from common import (
     DATA_TYPES,
     CLEAN_DATA_PATH,
@@ -14,95 +17,96 @@ from common import (
     COORDS_MAP_MODELS_PATH,
     logs_conf,
 )
-from pipelines.utils import add_zipped_coords_column, unzip_coord_series_to_lon_and_lat, closest_point
+from pipelines.utils import add_point_col, unzip_point_to_lon_and_lat
 from s3_client import s3_client
 
 log.basicConfig(**logs_conf)
 
 s3_client = s3_client()
 
+
 def feature_engineering_task(data_type):
     log.info("Starting feature engineering task...")
-    add_features(data_type)
-    log.info(f"Finished adding features to {data_type} data.")
-
-def add_features(data_type):
-    coords_encoding_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH, dtype=data_type)
+    coords_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH, dtype=data_type)
     df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH, dtype=data_type)
+    log.info(f'Shape of input dataframe: {df.shape}')
+    log.info(f'Shape of center coords map: {coords_map.shape}')
 
-    df = df.pipe(add_coords_features, coords_encoding_map=coords_encoding_map)
-    # round all values in df to 2 decimal places
-    round_cols = [columns.CLUSTER_MEAN_PRICE_M2, columns.CLUSTER_CENTER_DIST_KM]
-    df[round_cols] = df[round_cols].round(2)
+    df = df.pipe(add_coords_features, coords_map=coords_map)
 
     s3_client.upload_df_to_s3_with_timestamp(df,
                                              s3_path=FINAL_DATA_PATH,
                                              keyword='final',
                                              dtype=data_type,
                                              )
+    log.info(f"Finished adding features to {data_type} data.")
 
 
-def add_coords_features(df, coords_encoding_map):
+def add_coords_features(df, coords_map):
     log.info("Adding coordinates features ...")
-    zipped_coords_col = 'temp_zipped_coords'
-    closest_zipped_coords_col = 'closest_zipped_coords'
 
-    # add "zipped" coords
-    coords_encoding_map = coords_encoding_map.pipe(add_zipped_coords_column,
-                                                   new_col_name=zipped_coords_col)
-    df = (df.pipe(add_zipped_coords_column,
-                  new_col_name=zipped_coords_col)
-            # add closest point from coords map
-            .pipe(add_closest_zipped_coords_column,
-                  coords_map=coords_encoding_map,
-                  zipped_coords_col=zipped_coords_col,
-                  new_col_name=closest_zipped_coords_col))
+    coords_map = add_point_col(coords_map)
+    coords_map_multipoint = MultiPoint(coords_map['point'])
+    df = add_point_col(df)
+    log.info(f'Finding closest center for each flat ... (df.shape = {df.shape})')
+    df['closest_center'] = df.apply(
+        lambda row: nearest_points(row['point'], coords_map_multipoint)[1], axis=1)
+    df = add_distance_col(df)
+    # unzip points to two columns in map and df - merge on these two columns
+    df = unzip_point_to_lon_and_lat(df, 'closest_center')
+    center_colnames = ['unziped_lat_closest_center', 'unziped_lon_closest_center']
 
-    # merge coords encoding map
-    log.info("Merging coords encoding map ...")
+    log.info(f'Shape before merging map: {df.shape}')
     df = pd.merge(df,
-                  coords_encoding_map,
-                  left_on=closest_zipped_coords_col,
-                  right_on=zipped_coords_col,
+                  coords_map,
+                  left_on=center_colnames,
+                  right_on=[c.LAT, c.LON],
                   how='left',
                   suffixes=('', 'duplicate')
                   )
-    # add distance column
-    df = df.pipe(add_distance_col,
-                 zipped_coords_1=zipped_coords_col,
-                 zipped_coords_2=closest_zipped_coords_col,
-                 distance_colname=columns.CLUSTER_CENTER_DIST_KM)
+    log.info(f'Shape after merging map: {df.shape}')
 
-    # drop duplicate and unnecessary columns
     for col in df.columns:
-        if 'duplicate' in col or col in [zipped_coords_col, closest_zipped_coords_col]:
+        if 'duplicate' in col or col in center_colnames + ['point']:
             df = df.drop(col, axis=1)
 
     df = df.pipe(add_coords_factor_col)
 
-    log.info("Successfully added coords features")
+    cols_to_round = [c.CLUSTER_MEAN_PRICE_M2, c.CLUSTER_CENTER_DIST_KM]
+    df.loc[:,cols_to_round] = df.loc[:,cols_to_round].round(2)
+
+    log.info(f'Output df.shape: {df.shape}')
     return df
 
-def add_closest_zipped_coords_column(df, coords_map, zipped_coords_col, new_col_name):
-    log.info("Adding closest coords columns ...")
-    df[new_col_name] = [
-        closest_point(x, list(coords_map[zipped_coords_col])) for x in df[zipped_coords_col]]
+
+def add_distance_col(df):
+    log.info('Calculating distance between flats and "centers" ...')
+    df['lon1'] = df['closest_center'].map(lambda point: point.x)
+    df['lat1'] = df['closest_center'].map(lambda point: point.y)
+
+    df['lon2'] = df['point'].map(lambda point: point.x)
+    df['lat2'] = df['point'].map(lambda point: point.y)
+
+    df[c.CLUSTER_CENTER_DIST_KM] = get_haversine_dist(df['lon1'], df['lat1'], df['lon2'], df['lat2'])
+
     return df
 
-def add_distance_col(df, zipped_coords_1, zipped_coords_2, distance_colname):
+
+def get_haversine_dist(lon1, lat1, lon2, lat2):
     """
-    Calculate distace between two coords tuples.
-    Takes dataframe with coords tuples as an argument.
+    Calculate the great circle distance between two points
+    on the earth (specified in decimal degrees)
+    All args must be of equal length.
+
     """
-    log.info("Adding distance column...")
-    distances = []
-    for _, row in df.iterrows():
-        distances.append(
-            great_circle(row[zipped_coords_1], row[zipped_coords_2]).km
-        )
-    df[distance_colname] = [round(dist, 3) for dist in distances]
-    return df
+    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = np.sin(dlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.0)**2
+    c = 2 * np.arcsin(np.sqrt(a))
+    km = 6367 * c
+    return np.round(km, 3)
 
 def add_coords_factor_col(df: pd.DataFrame) -> pd.DataFrame:
-    df[columns.CLUSTER_COORDS_FACTOR] = df[columns.CLUSTER_MEAN_PRICE_M2] + (df[columns.CLUSTER_MEAN_PRICE_M2] / (df[columns.CLUSTER_CENTER_DIST_KM] + 1))
+    df[c.CLUSTER_COORDS_FACTOR] = df[c.CLUSTER_MEAN_PRICE_M2] + (df[c.CLUSTER_MEAN_PRICE_M2] / (df[c.CLUSTER_CENTER_DIST_KM] + 1))
     return df

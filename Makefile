@@ -147,8 +147,8 @@ update-website-source:
 	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
 	   'airflow_webserver' \
 	   python3 -c "from deps.pipelines.update_website_task.update_website_source import update_website_source; update_website_source()"
-full-pipeline-rent: scrape-rent clean-rent concat-rent features-rent apply-rent update-website-data
-full-pipeline-sale: scrape-sale clean-sale concat-sale features-sale apply-sale update-website-data
+full-pipeline-rent: scrape-rent concat-rent clean-rent features-rent apply-rent update-website-data
+full-pipeline-sale: scrape-sale concat-sale clean-sale features-sale apply-sale update-website-data
 jupyter:
 	docker run -d --rm \
 	-v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \

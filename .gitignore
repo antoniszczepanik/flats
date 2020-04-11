@@ -4,3 +4,5 @@
 __pycache__/
 *.pem
 *.swp
+site/build
+site/node_modules

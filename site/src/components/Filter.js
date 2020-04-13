@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import './Filter.css';
 
-//Todo: Something is no yes - cannot read state in fuctnion
-//Should use controlled components...
+
 class Filter extends Component {
   constructor(props) {
     super(props);
@@ -10,7 +9,7 @@ class Filter extends Component {
       min_size: 40,
       max_size: 50,
       transaction: 'sale',
-      city: 'Warszawie',
+      city: 'Warszawa',
     };
     this.handleMinSizeChange = this.handleMinSizeChange.bind(this);
     this.handleMaxSizeChange = this.handleMaxSizeChange.bind(this);
@@ -44,7 +43,13 @@ class Filter extends Component {
         -
         <input id="max_size" type="text" value={this.state.max_size} onChange={this.handleMaxSizeChange} />
         m2 w
-        <input id="city" type="text" value={this.state.city} onChange={this.handleCityChange} />
+
+        <select id="city" value={this.state.city} onChange={this.handleCityChange}>
+          <option value="Warszawa">Warszawie</option>   
+          <option value="Kraków">Krakowie</option>
+          <option value="Gdańsk">Gdańsku</option>
+        </select>
+
       </div>
 
     );

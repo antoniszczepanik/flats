@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Filter from './Filter';
+import Filter from './components/Filter';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
     <Filter />
   </React.StrictMode>,
-  document.getElementById('filter')
+  document.getElementById('root'),
 );
 
 // If you want your app to work offline and load faster, you can change

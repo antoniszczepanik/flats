@@ -1,23 +1,28 @@
-#filter {
+.filter {
   text-align: center;
 }
 
-#transaction {
+.transaction {
   width: 6.1rem;
   margin: 0.4rem;
 }
 
-#min_size {
-  width: 1.8rem;
+.min_price {
+  width: 2.5rem;
   margin: 0.4rem;
   text-align: right;
 }
-#max_size {
-  width: 1.8rem;
+.max_price {
+  width: 2.5rem;
   margin: 0.4rem;
   text-align: right;
 }
-#city {
+
+.city {
   width: 8.1rem;
   margin: 0.4rem;
+}
+
+span.nobr {
+  white-space: nowrap;
 }

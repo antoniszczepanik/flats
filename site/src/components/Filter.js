@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
+import FilteredResultsTable from './FilteredResultsTable.js';
 import './Filter.css';
+import RentData from '../data/rent.json';
 
 
 class Filter extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -63,6 +66,15 @@ class Filter extends Component {
           <option value="Kraków">Krakowie</option>
           <option value="Gdańsk">Gdańsku</option>
         </select>
+
+        <FilteredResultsTable
+          min_price={this.state.min_price}
+          max_price={this.state.max_price}
+          city={this.state.city}
+          transaction={this.state.transaction}
+          data={RentData}
+
+        />
 
       </div>
 

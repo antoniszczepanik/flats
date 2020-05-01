@@ -5,7 +5,7 @@ class Result extends Component {
 
   render() {
     return (
-      <div> </div>
+      <div> Single Result </div>
 
     );
   };

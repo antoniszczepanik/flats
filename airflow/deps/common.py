@@ -39,10 +39,8 @@ HTML_S3_PATH = f'{S3_WEBSITE_BUCKET}/index.html'
 CSS_S3_PATH = f'{S3_WEBSITE_BUCKET}/stylesheet.css'
 JS_S3_PATH = f'{S3_WEBSITE_BUCKET}/script.js'
 
-SALE_DATA_LOCAL_PATH = '/tmp/sale.json'
-RENT_DATA_LOCAL_PATH = '/tmp/rent.json'
-SALE_DATA_S3_PATH = f'{S3_WEBSITE_BUCKET}/sale.json'
-RENT_DATA_S3_PATH = f'{S3_WEBSITE_BUCKET}/rent.json'
+SITE_DATA_LOCAL_PATH = '/tmp/top_offers.json'
+SITE_DATA_S3_PATH = f'{S3_WEBSITE_BUCKET}/top_offers.json'
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,

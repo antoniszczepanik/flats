@@ -139,7 +139,7 @@ update-website-data:
 	   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
 	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
 	   'airflow_webserver' \
-	   python3 -c "from deps.pipelines.update_website_task.update_website_data import update_website_data_task; update_website_data_task()"
+	   python3 -c "from deps.pipelines.update_website_data import update_website_data_task; update_website_data_task()"
 update-website-source: 
 	docker run -it  \
 	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \

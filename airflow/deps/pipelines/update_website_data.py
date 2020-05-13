@@ -10,10 +10,8 @@ import columns
 from common import (
     CONCATED_DATA_PATH,
     PREDICTED_DATA_PATH,
-    SALE_DATA_LOCAL_PATH,
-    RENT_DATA_LOCAL_PATH,
-    SALE_DATA_S3_PATH,
-    RENT_DATA_S3_PATH,
+    SITE_DATA_LOCAL_PATH,
+    SITE_DATA_S3_PATH,
     logs_conf,
 )
 from s3_client import s3_client
@@ -30,12 +28,18 @@ def update_website_data_task():
     df_rent = read_and_merge_required_dfs('rent')
 
     today = datetime.date.today()
-    week_ago = str(today - datetime.timedelta(7))
+    month_ago = str(today - datetime.timedelta(30))
 
-    response_s = prepare_and_send_top_offers(df_sale, 'sale', offers_from=week_ago)
-    response_r = prepare_and_send_top_offers(df_rent, 'rent', offers_from=week_ago)
+    top_sale = prepare_top_offers(df_sale, 'sale', offers_from=month_ago)
+    log.info(f'Top sale shape {top_sale.shape}')
+    top_rent = prepare_top_offers(df_rent, 'rent', offers_from=month_ago)
+    log.info(f'Top rent shape {top_rent.shape}')
 
-    if response_s and response_r:
+    top_offers = pd.concat([top_sale, top_rent])
+    log.info(f'Top offers shape {top_offers.shape}')
+    top_offers.to_json(SITE_DATA_LOCAL_PATH, orient='records')
+    resp = upload_json_data(SITE_DATA_LOCAL_PATH, SITE_DATA_S3_PATH)
+    if resp:
         log.info(f"Successfully finished updating website.")
 
 def read_and_merge_required_dfs(dtype):
@@ -55,7 +59,7 @@ def read_and_merge_required_dfs(dtype):
         how='left')
     return df
 
-def prepare_and_send_top_offers(df, dtype, offers_from=None, offer_number=30):
+def prepare_top_offers(df, dtype, offers_from=None, offer_number=100):
     if dtype == 'sale':
         pred_col = columns.SALE_PRED
         diff_col = columns.SALE_DIFF
@@ -67,14 +71,16 @@ def prepare_and_send_top_offers(df, dtype, offers_from=None, offer_number=30):
     if offers_from:
         df = df[df[columns.DATE_ADDED] > offers_from]
     df = df.sort_values(diff_col)
+    df['offer_type'] = dtype
     df = df[[
         columns.URL,
         columns.DATE_ADDED,
         columns.TITLE,
         columns.SIZE,
         columns.PRICE,
-        columns.PRICE_M2,
         pred_col,
+        columns.PRICE_M2,
+        'offer_type'
     ]]
     df = (df.pipe(convert_links_to_a_tags)
             .pipe(filter_outliers, dtype=dtype)
@@ -84,21 +90,17 @@ def prepare_and_send_top_offers(df, dtype, offers_from=None, offer_number=30):
             .pipe(round_pred_col, pred_col)
             .pipe(format_price, pred_col)
             .rename(columns={
-                columns.URL: 'Url',
-                columns.DATE_ADDED: 'Added',
-                columns.TITLE: 'Title',
-                columns.SIZE: 'Size',
-                columns.PRICE: 'Price',
-                pred_col: 'Estimate',
+                columns.URL: 'url',
+                columns.DATE_ADDED: 'added',
+                columns.TITLE: 'title',
+                columns.SIZE: 'size',
+                columns.PRICE: 'price',
+                pred_col: 'estimate',
             })
-              .round(0)
+            .drop(columns=[columns.PRICE_M2])
+                .round(0)
             )
-    if dtype=='sale':
-        df.to_json(SALE_DATA_LOCAL_PATH, orient='records')
-        return upload_json_data(SALE_DATA_LOCAL_PATH, SALE_DATA_S3_PATH)
-    else:
-        df.to_json(RENT_DATA_LOCAL_PATH, orient='records')
-        return upload_json_data(RENT_DATA_LOCAL_PATH, RENT_DATA_S3_PATH)
+    return df
 
 def filter_outliers(df, dtype):
     """ Filter offers based on hardcoded "outliers" indicators"""
@@ -131,11 +133,6 @@ def remove_duplicates_in_title(df):
     )
     return df
 
-def reverse_sign(df, column):
-    df = df.copy()
-    df[column] = -df[column]
-    return df
-
 def format_price(df, col):
     df = df.copy()
     df[col] = (df[col].astype(int)
@@ -149,16 +146,3 @@ def upload_json_data(from_, to):
         content_type='application/json',
     )
     return response
-
-def human_format(num):
-    num = float('{:.3g}'.format(num))
-    magnitude = 0
-    while abs(num) >= 1000:
-        magnitude += 1
-        num /= 1000.0
-    return ('{}{}'.format('{:f}'
-                  .format(num)
-                  .rstrip('0')
-                  .rstrip('.'), ['', 'K', 'M', 'B', 'T'][magnitude])
-                  .replace('.', ',')
-            )

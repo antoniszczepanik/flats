@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import FilteredResultsTable from './FilteredResultsTable.js';
-import './Filter.css';
-import RentData from '../data/rent.json';
+import './SearchBar.css';
 
 
-class Filter extends Component {
+class SearchBar extends Component {
 
   constructor(props) {
     super(props);
@@ -67,15 +65,6 @@ class Filter extends Component {
           <option value="Gdańsk">Gdańsku</option>
         </select>
 
-        <FilteredResultsTable
-          min_price={this.state.min_price}
-          max_price={this.state.max_price}
-          city={this.state.city}
-          transaction={this.state.transaction}
-          data={RentData}
-
-        />
-
       </div>
 
     );
@@ -88,4 +77,4 @@ class Filter extends Component {
 
 }
 
-export default Filter;
+export default SearchBar;

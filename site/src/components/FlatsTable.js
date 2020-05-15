@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
 
-import './FilteredResultsTable.css';
+import FlatRow from './FlatRow.js';
+import './FlatsTable.css';
 
 
 
-class FilteredResultsTable extends Component {
+class FlatsTable extends Component {
   render() {
    return (
       <div>
-        FilteredResultsTable
-      </div>
+       <p> Flats Table </p>
+       <FlatRow/>
+     </div>
+
       
       );
 
@@ -19,4 +22,4 @@ class FilteredResultsTable extends Component {
 
 
 
-export default FilteredResultsTable;
+export default FlatsTable;

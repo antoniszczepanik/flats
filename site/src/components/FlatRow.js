@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import './Result.css';
+import './FlatRow.css';
 
-class Result extends Component {
+class FlatRow extends Component {
 
   render() {
     return (
-      <div> Single Result </div>
+      <div> Flat Rows go here... </div>
 
     );
   };
 }
 
-export default Result;
+export default FlatRow;

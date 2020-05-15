@@ -11,7 +11,7 @@ class FilterableFlatTable extends Component {
         <p> FilterableFlatTable </p>
         <SearchBar/>
         <br/>
-        <FlatsTable/>
+        <FlatsTable flats={this.props.flats} />
       </div>
     );
   };

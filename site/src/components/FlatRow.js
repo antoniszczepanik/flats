@@ -5,7 +5,9 @@ class FlatRow extends Component {
 
   render() {
     return (
-      <div> Flat Rows go here... </div>
+      <div> 
+        {this.props.flat.title}
+      </div>
 
     );
   };

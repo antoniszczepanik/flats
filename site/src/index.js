@@ -5,12 +5,56 @@ import FilterableFlatTable from './components/FilterableFlatTable';
 import * as serviceWorker from './serviceWorker';
 
 const FLATS = [
-  {category: 'Sporting Goods', price: '$49.99', stocked: true, name: 'Football'},
-  {category: 'Sporting Goods', price: '$9.99', stocked: true, name: 'Baseball'},
-  {category: 'Sporting Goods', price: '$29.99', stocked: false, name: 'Basketball'},
-  {category: 'Electronics', price: '$99.99', stocked: true, name: 'iPod Touch'},
-  {category: 'Electronics', price: '$399.99', stocked: false, name: 'iPhone 5'},
-  {category: 'Electronics', price: '$199.99', stocked: true, name: 'Nexus 7'}
+    {
+      'url': '<a href=https://www.morizon.pl/oferta/sprzedaz-mieszkanie-lodz-86m2-mzn2036166499" target="_blank">Link</a>',
+      'added':'2020-04-17',
+      'title':'Kraków fajne mieszkanie',
+      'size':86.0,
+      'price':550.000,
+      'estimate':1524700,
+      'offer_type':'sale'
+   
+    },
+    {
+      'url': '<a href=https://www.morizon.pl/oferta/sprzedaz-mieszkanie-lodz-86m2-mzn2036166499" target="_blank">Link</a>',
+      'added':'2020-04-17',
+      'title':'Kraków ekstra mieszkanie',
+      'size':86.0,
+      'price':550.000,
+      'estimate':1524700,
+      'offer_type':'sale'
+   
+    },
+    {
+      'url': '<a href=https://www.morizon.pl/oferta/sprzedaz-mieszkanie-lodz-86m2-mzn2036166499" target="_blank">Link</a>',
+      'added':'2020-04-17',
+      'title':'Kraków średnie mieszkanie',
+      'size':86.0,
+      'price':550.000,
+      'estimate':1524700,
+      'offer_type':'sale'
+   
+    },
+    {
+      'url': '<a href=https://www.morizon.pl/oferta/sprzedaz-mieszkanie-lodz-86m2-mzn2036166499" target="_blank">Link</a>',
+      'added':'2020-04-17',
+      'title':'Kraków słabe mieszkanie',
+      'size':86.0,
+      'price':550.000,
+      'estimate':1524700,
+      'offer_type':'rent'
+   
+    },
+    {
+      'url': '<a href=https://www.morizon.pl/oferta/sprzedaz-mieszkanie-lodz-86m2-mzn2036166499" target="_blank">Link</a>',
+      'added':'2020-04-17',
+      'title':'Kraków inne mieszkanie',
+      'size':86.0,
+      'price':550.000,
+      'estimate':1524700,
+      'offer_type':'rent'
+   
+    }
 ]
 
 ReactDOM.render(

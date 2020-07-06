@@ -1,3 +1,15 @@
+@media (max-width: 600px) {
+  body {
+    width: 100%;
+  }
+}
+
+@media (min-width: 601px) {
+  body {
+    width: 47rem;
+  }
+}
+
 body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;

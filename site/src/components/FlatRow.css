@@ -1,0 +1,32 @@
+.flatRowRow {
+  text-align: left;
+  color: white;
+}
+
+.flatRowSize {
+  font-size: 1.5rem;
+  text-align: center;
+  vertical-align: middle;
+  color: #ffa7c4;
+  padding-right: 2rem;
+}
+
+.flatRowTitle {
+ font-size: 1.2rem;
+}
+
+.flatRowDescription {
+ font-size: 1rem;
+ font-weight: 500;
+}
+
+.flatRowPrice {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #ffa7c4;
+}
+
+.flatRowDescriptionPart {
+  white-space: nowrap;
+}
+

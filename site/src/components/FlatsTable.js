@@ -7,16 +7,21 @@ import './FlatsTable.css';
 
 class FlatsTable extends Component {
   render() {
+   let offer_type = this.props.transaction;
+   let filtered_flats = this.props.flats.filter( function(flat) {
+       return flat.offer_type === offer_type;
+   });
+
    return (
       <div>
-        <p> Flats Table </p>
-        <div>
+        <table className="flatsTable">
         {
-            this.props.flats.map((flat, index) => (
+            filtered_flats.map((flat, index) => (
                 <FlatRow key={index} flat={flat}/>
             ))
         }
-        </div>
+        </table>
+
      </div>
 
       );

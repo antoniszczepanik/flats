@@ -3,6 +3,7 @@ Read predicted dataset, generate json data with the result, and update website.
 """
 import datetime
 import logging as log
+from unidecode import unidecode
 
 import pandas as pd
 
@@ -28,11 +29,11 @@ def update_website_data_task():
     df_rent = read_and_merge_required_dfs('rent')
 
     today = datetime.date.today()
-    month_ago = str(today - datetime.timedelta(30))
+    ago = str(today - datetime.timedelta(30))
 
-    top_sale = prepare_top_offers(df_sale, 'sale', offers_from=month_ago)
+    top_sale = prepare_top_offers(df_sale, 'sale', offers_from=ago)
     log.info(f'Top sale shape {top_sale.shape}')
-    top_rent = prepare_top_offers(df_rent, 'rent', offers_from=month_ago)
+    top_rent = prepare_top_offers(df_rent, 'rent', offers_from=ago)
     log.info(f'Top rent shape {top_rent.shape}')
 
     top_offers = pd.concat([top_sale, top_rent])
@@ -40,7 +41,7 @@ def update_website_data_task():
     top_offers.to_json(SITE_DATA_LOCAL_PATH, orient='records')
     resp = upload_json_data(SITE_DATA_LOCAL_PATH, SITE_DATA_S3_PATH)
     if resp:
-        log.info(f"Successfully finished updating website.")
+        log.info(f"Successfully finished updating final data in json format.")
 
 def read_and_merge_required_dfs(dtype):
     predicted_df = s3_client.read_newest_df_from_s3(
@@ -59,7 +60,7 @@ def read_and_merge_required_dfs(dtype):
         how='left')
     return df
 
-def prepare_top_offers(df, dtype, offers_from=None, offer_number=100):
+def prepare_top_offers(df, dtype, offers_from=None, offer_number=500):
     if dtype == 'sale':
         pred_col = columns.SALE_PRED
         diff_col = columns.SALE_DIFF
@@ -82,13 +83,10 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=100):
         columns.PRICE_M2,
         'offer_type'
     ]]
-    df = (df.pipe(convert_links_to_a_tags)
-            .pipe(filter_outliers, dtype=dtype)
+    df = (df.pipe(filter_outliers, dtype=dtype)
+            .pipe(detect_cities)
             .head(offer_number)
             .pipe(remove_duplicates_in_title)
-            .pipe(format_price, columns.PRICE)
-            .pipe(round_pred_col, pred_col)
-            .pipe(format_price, pred_col)
             .rename(columns={
                 columns.URL: 'url',
                 columns.DATE_ADDED: 'added',
@@ -98,7 +96,7 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=100):
                 pred_col: 'estimate',
             })
             .drop(columns=[columns.PRICE_M2])
-                .round(0)
+            .round(0)
             )
     return df
 
@@ -115,15 +113,19 @@ def filter_outliers(df, dtype):
     df = df[df[columns.SIZE]> 15]
     return df
 
-def round_pred_col(df, pred_col):
-    df = df.copy()
-    df[pred_col] = df[pred_col].round(-2)
-    return df
+def detect_cities(df):
+    """ Detect cities from titles and remove offers where no city is detected """
+    def get_city_from_title(title):
+        title = unidecode(title).lower()
+        city_list = ['warszawa', 'krakow', 'gdansk']
+        for city in city_list:
+            if city in title:
+                return city
+        return None
 
-def convert_links_to_a_tags(df):
-    df = df.copy()
-    a_tag_pattern = '<a href="{link}" target="_blank">Link</a>'
-    df[columns.URL] = df[columns.URL].apply(lambda link: a_tag_pattern.format(link=link))
+    df['city'] = df[columns.TITLE].apply(get_city_from_title)
+    print(df['city'].value_counts())
+    print(df['city'].isna().sum())
     return df
 
 def remove_duplicates_in_title(df):
@@ -131,12 +133,6 @@ def remove_duplicates_in_title(df):
     df[columns.TITLE] = df[columns.TITLE].apply(
         lambda title: ", ".join(list(set(title.split(', '))))
     )
-    return df
-
-def format_price(df, col):
-    df = df.copy()
-    df[col] = (df[col].astype(int)
-                      .apply(lambda x: f"{x:,}".replace(',', ' ')))
     return df
 
 def upload_json_data(from_, to):

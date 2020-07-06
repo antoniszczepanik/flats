@@ -40,7 +40,7 @@ CSS_S3_PATH = f'{S3_WEBSITE_BUCKET}/stylesheet.css'
 JS_S3_PATH = f'{S3_WEBSITE_BUCKET}/script.js'
 
 SITE_DATA_LOCAL_PATH = '/tmp/top_offers.json'
-SITE_DATA_S3_PATH = f'{S3_WEBSITE_BUCKET}/top_offers.json'
+SITE_DATA_S3_PATH = S3_DATA_BUCKET + '/top_offers/data.json'
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,

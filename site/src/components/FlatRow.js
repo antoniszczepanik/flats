@@ -17,13 +17,16 @@ class FlatRow extends Component {
       <div>
         <hr className="flatRowRuler"></hr>
         <tr className="flatRowRow"> 
-            <td className="flatRowSize"> <nobr>{this.props.flat.size}㎡</nobr></td>
+            <td className="flatRowSize">
+                    <nobr>{this.props.flat.size}㎡</nobr>
+                    <p className="flat_added"> {this.props.flat.added} </p>
+            </td>
             <td>
                 <p className="flatRowTitle">
-                    {this.props.flat.title}
+                    <a href={this.props.flat.url}> {this.props.flat.title} </a>
                 </p>
                 <p className="flatRowDescription"> 
-                    Warte około <span></span>
+                    Warte ok.<span></span>
                     <span className="flatRowPrice"> {this.props.flat.estimate} </span>
                     zł, wystawione za <span></span>
                     <span className="flatRowPrice"> {this.props.flat.price} </span>

@@ -11,7 +11,7 @@ class FilterableFlatTable extends Component {
       min_price: 400,
       max_price: 500,
       transaction: 'sale',
-      city: 'Warszawa',
+      city: 'warszawa',
     };
     this.handleMinPriceChange = this.handleMinPriceChange.bind(this);
     this.handleMaxPriceChange = this.handleMaxPriceChange.bind(this);

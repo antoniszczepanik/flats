@@ -8,10 +8,19 @@ import './FlatsTable.css';
 class FlatsTable extends Component {
   render() {
    let offer_type = this.props.transaction;
-   let filtered_flats = this.props.flats.filter( function(flat) {
-       return flat.offer_type === offer_type;
-   });
-
+   let min_price = this.props.min_price;
+   let max_price = this.props.max_price;
+   let city = this.props.city;
+   if (offer_type === 'sale') {
+       // Convert sale limits to thousands
+       min_price *= 1000
+       max_price *= 1000
+   }
+   let filtered_flats = this.props.flats.filter(flat => flat.offer_type === offer_type)
+                                        .filter(flat => flat.price >= min_price)
+                                        .filter(flat => flat.price >= min_price)
+                                        .filter(flat => flat.price <= max_price)
+                                        .filter(flat => flat.city === city);
    return (
       <div>
         <table className="flatsTable">

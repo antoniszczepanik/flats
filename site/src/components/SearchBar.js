@@ -24,9 +24,9 @@ class SearchBar extends Component {
         </nobr>
 
         <select className="city" value={this.props.city} onChange={this.props.handleCityChange}>
-          <option value="Warszawa">Warszawie</option>   
-          <option value="Kraków">Krakowie</option>
-          <option value="Gdańsk">Gdańsku</option>
+          <option value="warszawa">Warszawie</option>   
+          <option value="krakow">Krakowie</option>
+          <option value="gdansk">Gdańsku</option>
         </select>
 
       </div>

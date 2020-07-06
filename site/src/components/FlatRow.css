@@ -1,15 +1,34 @@
+a:link {
+  text-decoration: none;
+  color: white;
+}
+
+a:visited {
+  color: white;
+  text-decoration: none;
+}
+
 .flatRowRow {
   text-align: left;
   color: white;
 }
 
 .flatRowSize {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   text-align: center;
   vertical-align: middle;
   color: #ffa7c4;
   padding-right: 2rem;
 }
+
+.flat_added {
+  font-size: 0.8rem;
+  text-align: left;
+  color: white;
+  font-weight: 500;
+  vertical-align: down;
+}
+
 
 .flatRowTitle {
  font-size: 1.2rem;

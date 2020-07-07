@@ -26,7 +26,11 @@ class FlatsTable extends Component {
         <table className="flatsTable">
         {
             filtered_flats.map((flat, index) => (
-                <FlatRow key={index} flat={flat}/>
+                <FlatRow 
+                    key={index} 
+                    flat={flat}
+                    transaction={this.props.transaction}
+                />
             ))
         }
         </table>

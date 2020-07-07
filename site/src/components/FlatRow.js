@@ -12,6 +12,10 @@ class FlatRow extends Component {
     return emoji
   };
 
+  formatPrice(number, transaction) {
+      return (transaction === 'sale' ? Math.round(number/1000)*1000 : Math.round(number/100)*100);
+  }
+
   render() {
     return (
       <div>
@@ -19,7 +23,7 @@ class FlatRow extends Component {
         <tr className="flatRowRow"> 
             <td className="flatRowSize">
                     <nobr>{this.props.flat.size}㎡</nobr>
-                    <p className="flat_added"> {this.props.flat.added} </p>
+                    <nobr><p className="flat_added"> {this.props.flat.added} </p> </nobr>
             </td>
             <td>
                 <p className="flatRowTitle">
@@ -27,7 +31,7 @@ class FlatRow extends Component {
                 </p>
                 <p className="flatRowDescription"> 
                     Warte ok.<span></span>
-                    <span className="flatRowPrice"> {this.props.flat.estimate} </span>
+                    <span className="flatRowPrice"> {this.formatPrice(this.props.flat.estimate, this.props.transaction)} </span>
                     zł, wystawione za <span></span>
                     <span className="flatRowPrice"> {this.props.flat.price} </span>
                     zł <span></span>

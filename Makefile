@@ -34,6 +34,7 @@ dev:
 		   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
 		   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
 		   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
+		   -v $(mkfile_dir)/site:/usr/local/airflow/site \
 		   'airflow_webserver' /bin/bash 
 clean-sale:
 	docker run -it  \
@@ -141,12 +142,8 @@ update-website-data:
 	   'airflow_webserver' \
 	   python3 -c "from deps.pipelines.update_website_data import update_website_data_task; update_website_data_task()"
 update-website-source: 
-	docker run -it  \
-	   -v $(HOME)/.aws/credentials:/usr/local/airflow/.aws/credentials:ro \
-	   -v $(mkfile_dir)/airflow/dags:/usr/local/airflow/dags \
-	   -v $(mkfile_dir)/airflow/deps:/usr/local/airflow/deps \
-	   'airflow_webserver' \
-	   python3 -c "from deps.pipelines.update_website_task.update_website_source import update_website_source; update_website_source()"
+	cd site && yarn build
+	aws s3 sync site/build/ s3://flats.antoniszczepanik.com/ --profile=flats
 full-pipeline-rent: scrape-rent concat-rent clean-rent features-rent apply-rent update-website-data
 full-pipeline-sale: scrape-sale concat-sale clean-sale features-sale apply-sale update-website-data
 jupyter:

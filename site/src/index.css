@@ -4,17 +4,23 @@
   }
 }
 
-@media (min-width: 601px) {
+@media (min-width: 551px) {
   body {
     width: 47rem;
   }
+}
+:root {
+  --background: #fbfbfb;
+  --logo: #f38181;
+  --text: #756c83;
+  --other: #b9e1dc;
 }
 
 body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
-  background-color: #282c35;
-  color: hsla(0,0%,100%,0.88);
+  background-color: var(--background);
+  color: var(--text);
   font-family: Montserrat,sans-serif;
   font-size: 1.2rem;
   font-weight: 900;
@@ -25,7 +31,7 @@ body {
 }
 
 h1 {
-  color: #ffa7c4;
+  color: var(--logo);
   font-size: 2.2rem;
   font-weight: 900;
   line-height: 2.5rem;

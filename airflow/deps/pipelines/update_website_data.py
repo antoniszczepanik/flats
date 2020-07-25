@@ -124,8 +124,6 @@ def detect_cities(df):
         return None
 
     df['city'] = df[columns.TITLE].apply(get_city_from_title)
-    print(df['city'].value_counts())
-    print(df['city'].isna().sum())
     return df
 
 def remove_duplicates_in_title(df):

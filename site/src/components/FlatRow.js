@@ -4,14 +4,6 @@ import './FlatRow.css';
 
 class FlatRow extends Component {
   
-  getRandomEmoji() {
-    var emoji_array = [
-        '🤯', '💎', '😬', '🤔'
-    ];
-    let emoji = emoji_array[Math.floor(Math.random()*emoji_array.length)];
-    return emoji
-  };
-
   formatPrice(number, transaction) {
       return (transaction === 'sale' ? Math.round(number/1000)*1000 : Math.round(number/100)*100);
   }
@@ -35,7 +27,6 @@ class FlatRow extends Component {
                     zł, wystawione za <span></span>
                     <span className="flatRowPrice"> {this.props.flat.price} </span>
                     zł <span></span>
-                    {this.getRandomEmoji()}
                 </p>
             </td>
         </tr>

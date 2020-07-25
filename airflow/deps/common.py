@@ -31,16 +31,8 @@ SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
 
 # website paths
 S3_WEBSITE_BUCKET = 'flats.antoniszczepanik.com'
-
-CSS_LOCAL_PATH = 'deps/pipelines/update_website_task/site/stylesheet.css'
-HTML_LOCAL_PATH = 'deps/pipelines/update_website_task/site/source.html'
-JS_LOCAL_PATH = 'deps/pipelines/update_website_task/site/script.js'
-HTML_S3_PATH = f'{S3_WEBSITE_BUCKET}/index.html'
-CSS_S3_PATH = f'{S3_WEBSITE_BUCKET}/stylesheet.css'
-JS_S3_PATH = f'{S3_WEBSITE_BUCKET}/script.js'
-
 SITE_DATA_LOCAL_PATH = '/tmp/top_offers.json'
-SITE_DATA_S3_PATH = S3_DATA_BUCKET + '/top_offers/data.json'
+SITE_DATA_S3_PATH = S3_WEBSITE_BUCKET + '/data.json'
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,

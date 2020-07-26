@@ -1,6 +1,7 @@
 version: '3.7'
 
 services:
+    # add minio flag to support using minio in compose (also flats network)
     postgres:
         image: postgres:9.6
         environment:
@@ -16,6 +17,7 @@ services:
         environment:
             - LOAD_EX=n
             - EXECUTOR=Local
+            - USE_MINIO=true
         volumes:
             - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro
             - ../airflow/dags:/usr/local/airflow/dags
@@ -31,3 +33,7 @@ services:
             timeout: 30s
             retries: 3
         entrypoint: ["/entrypoint.sh", "webserver"]
+networks:
+        default:
+                external:
+                        name: flats

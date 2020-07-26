@@ -1,7 +1,8 @@
 from datetime import datetime
-import logging as log
-import tempfile
 from joblib import dump, load
+import logging as log
+import os
+import tempfile
 
 import boto3
 from botocore.exceptions import ClientError, ProfileNotFound
@@ -15,10 +16,19 @@ log.basicConfig(**logs_conf)
 class s3_client:
 
     def __init__(self):
-        try:
-            self.client = boto3.Session(profile_name='flats').client("s3")
-        except ProfileNotFound:
-            self.client = boto3.Session().client("s3")
+        if os.environ.get("USE_MINIO", False) == "true":
+            log.info("Will use minio as S3 connection")
+            self.client = boto3.Session().client(
+                "s3",
+                endpoint_url="http://minio:9000",
+                aws_access_key_id="minio",
+                aws_secret_access_key="miniominio",
+            )
+        else:
+            try:
+                self.client = boto3.Session(profile_name='flats').client("s3")
+            except ProfileNotFound:
+                self.client = boto3.Session().client("s3")
 
     def upload_file_to_s3(self, file_name, s3_path, metadata=None, content_type=None):
         bucket, path = self.split_bucket_path(s3_path)

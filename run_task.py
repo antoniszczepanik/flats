@@ -3,8 +3,10 @@
 Runs task in Airflow container.
 
 Usage:
-    run_task.py TASK OFFER_TYPE
+    run_task.py TASK OFFER_TYPE [--use-remote]
 
+Options:
+    --use-remote  Use remote connection, not local minio instance
 Arguments:
     TASK  name of the task to be executed.
 
@@ -31,6 +33,7 @@ TASK_FUNCTIONS = {
     # on demand - not run on airflow
     "coord-map": "from deps.pipelines.coords_map_task import coords_map_task; coords_map_task('{offer_type}')",
     "unify-raw": "from deps.pipelines.unify_raw_task import unify_raw_data_task; unify_raw_data_task('{offer_type}')",
+    "monitor": "from deps.pipelines.monitor import monitor; monitor('{offer_type}')",
 }
 
 if __name__ == "__main__":
@@ -39,7 +42,6 @@ if __name__ == "__main__":
             tasks='\n    '.join(TASK_FUNCTIONS)
         )
     )
-
     task = args['TASK']
     if task not in TASK_FUNCTIONS:
         print(f'Invalid task name ({task}). See --help for list of supported tasks.')
@@ -57,9 +59,11 @@ if __name__ == "__main__":
     cmd.extend(["-v", f"{cwd}/airflow/dags:/usr/local/airflow/dags"])
     cmd.extend(["-v", f"{cwd}/airflow/deps:/usr/local/airflow/deps"])
     cmd.extend(["-v", f"{home}/.aws/credentials:/usr/local/airflow/.aws/credentials:ro"])
-    cmd.extend(["-e", "USE_MINIO=true"])
+    if not args['--use-remote']:
+        cmd.extend(["-e", "USE_MINIO=true"])
     cmd.extend(["--network=flats"])
     cmd.extend(["airflow_webserver"])
+
 
     python_command = TASK_FUNCTIONS[task]
     if offer_type == None:

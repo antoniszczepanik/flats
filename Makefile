@@ -48,6 +48,7 @@ jupyter:
 	-e USE_MINIO=true \
 	-p 8889:8889 \
 	--name airflow_jupyter \
+	--network flats \
 	--entrypoint "jupyter" \
 	'airflow_jupyter' lab --ip=0.0.0.0 --port=8889 --NotebookApp.token=''
 	sleep 5

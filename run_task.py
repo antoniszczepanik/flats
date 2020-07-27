@@ -12,6 +12,9 @@ Arguments:
 
 Examples:
     run_task.py clean sale
+
+Tasks available:
+{tasks}
 """
 import os
 import pathlib
@@ -39,7 +42,7 @@ TASK_FUNCTIONS = {
 if __name__ == "__main__":
     args = docopt(
         __doc__.format(
-            tasks='\n    '.join(TASK_FUNCTIONS)
+            tasks='    ' + '\n    '.join(TASK_FUNCTIONS.keys())
         )
     )
     task = args['TASK']

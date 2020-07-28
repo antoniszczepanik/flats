@@ -7,7 +7,7 @@ class SearchBar extends Component {
   render() {
     return (
       <div className="filter">
-        Chcę 
+        Chcę (może)
 
         <select className="transaction" value={this.props.transaction} onChange={this.props.handleTransactionChange}>
           <option value="rent">wynajać</option>

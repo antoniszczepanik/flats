@@ -4,6 +4,8 @@ name: publish
 
 on:
   push:
+    paths:
+      - 'site/**'
     branches: [ master ]
 
 jobs:

@@ -21,6 +21,8 @@ services:
             - EXECUTOR=Local
         volumes:
             - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro
+            - ../airflow/dags:/usr/local/airflow/dags
+            - ../airflow/deps:/usr/local/airflow/deps
         expose:
             - "8080"
         command: webserver

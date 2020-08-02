@@ -22,8 +22,6 @@ services:
             - $HOME/.aws/credentials:/usr/local/airflow/.aws/credentials:ro
             - ../airflow/dags:/usr/local/airflow/dags
             - ../airflow/deps:/usr/local/airflow/deps
-            # Uncomment to include custom plugins
-            # - ./plugins:/usr/local/airflow/plugins
         ports:
             - "8080:8080"
         command: webserver

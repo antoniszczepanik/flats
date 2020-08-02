@@ -1,6 +1,5 @@
 """
 Set of rules for cleaning data scraped with morizon_spider.
-See spider directory for more info.
 How to map to numeric, which columns should be one-hot encoded
 or how to deal with datetime features is decided here.
 A lot of hardcoded column specific values are present in code below,
@@ -114,7 +113,6 @@ class MorizonCleaner(object):
                 self.df = self.df.drop(column, axis=1)
             elif cleaning_func is None:
                 log.info(f"Skipping {column} ...")
-                continue
             else:
                 raise InvalidCleaningMapError
 
@@ -333,7 +331,10 @@ class MorizonCleaner(object):
                 elif value[0] == "no_info":
                     return "no_info"
                 else:
-                    return int(value[0])
+                    try:
+                        return int(value[0])
+                    except ValueError:
+                        return "no_info"
             else:
                 raise ValueError(f'"{value}" value is not expected in this column')
 
@@ -425,15 +426,15 @@ class MorizonCleaner(object):
         Replace with 0 if binary (no info == lack of feature)
         else with mode value.
         """
-        log.info("Replacing no info with mode...")
+        log.debug("Replacing no info with mode...")
         cols_with_no_info = self.find_cols_with_no_info()
         for col in cols_with_no_info:
-            log.info(f"Replacing no info with mode for {col}")
+            log.debug(f"Replacing no info with mode for {col}")
             df[col] = df[col].replace("no_info", np.nan)
             # columns with 1 or 2 values or specified
             if col in FILL_NA_WITH_ZERO:
                 df.loc[:, col] = df.loc[:, col].fillna(0)
-                log.info(f"Replaced no_info with binary for {col}")
+                log.debug(f"Replaced no_info with binary for {col}")
             elif col in MODE_MAP.keys():
                     df.loc[:, col] = df.loc[:, col].fillna(MODE_MAP[col])
         return df
@@ -448,7 +449,7 @@ class MorizonCleaner(object):
 
 
     def remove_duplicate_columns(self, df):
-        log.info("Removing duplicated columns")
+        log.debug("Removing duplicated columns")
         return df.loc[:, ~df.columns.duplicated()]
 
     def map_categorical_features(self, df):
@@ -456,7 +457,7 @@ class MorizonCleaner(object):
         Arbitrary mapping of remaing categorical features.
         Why not? :)
         """
-        log.info("Mapping remaining categorical columns ... ")
+        log.debug("Mapping remaining categorical columns ... ")
         # confirm remaining categorical feats are as expected
         remaining_categorical = (
             columns.BUILDING_MATERIAL,
@@ -468,7 +469,8 @@ class MorizonCleaner(object):
         )
 
         for c in df.select_dtypes(include=["object"]).columns:
-            assert c in remaining_categorical
+            if c not in remaining_categorical:
+                df[c] = pd.to_numeric(df[c], downcast='signed')
 
         df[columns.BUILDING_MATERIAL] = df[columns.BUILDING_MATERIAL].map(
             {"brick": 3, "other": 2, "concrete_slab": 1}
@@ -477,14 +479,14 @@ class MorizonCleaner(object):
             {"hist": 3, "apart": 3, "house": 2, "block": 1, "other": 2}
         )
         df[columns.HEATING] = df[columns.HEATING].map(
-            {"fireplace": 4, "urban": 3, "gas": 2, "electric": 2, "coal": 1, "other": 3}
+            {"fireplace": 4, "urban": 3, "gas": 2, "electric": 2, "coal": 1, "other": 3, "no_info": 3, "no_heating": 0}
         )
         return df
 
     def drop_empty_cols(self, df):
         for col in df.columns:
             if (df[col].isna().sum() / len(df)) == 1:
-                log.info(f"Dropping empty {col}")
+                log.debug(f"Dropping empty {col}")
                 df = df.drop(col, axis=1)
         return df
 
@@ -494,7 +496,7 @@ class MorizonCleaner(object):
             if df[col].isna().sum() > 0:
                 if col in MODE_MAP.keys():
                     df[col] = df[col].fillna(MODE_MAP[col])
-                    log.info(f"Replaced no_info with mode for {col}")
+                    log.debug(f"Replaced no_info with mode for {col}")
                 elif col in FILL_NA_WITH_ZERO:
                     df[col] = df[col].fillna(0)
                 else:

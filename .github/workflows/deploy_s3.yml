@@ -1,6 +1,6 @@
 
 
-name: publish
+name: deploy_static_to_S3
 
 on:
   push:

@@ -1,0 +1,20 @@
+
+
+name: pull_on_ec2
+
+on:
+  push:
+    paths:
+      - 'airflow/dags/**'
+      - 'airflow/deps/**'
+    branches: [ master ]
+
+jobs:
+  deploy:
+    - name: Reset to master on ec2
+    uses: garygrossgarten/github-action-ssh@release
+    with:
+        command: cd flats && git fetch && git reset --hard origin/master
+        host: ${{ secrets.HOST }}
+        username: ubuntu
+        privateKey: ${{ secrets.PRIVATE_KEY}}

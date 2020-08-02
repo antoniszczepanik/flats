@@ -62,9 +62,9 @@ for data_type in DATA_TYPES:
 
     scrape >> concat >> clean >> engineer_features >> apply_model
 
-#update_website_data = PythonOperator(
-#    task_id='update_website',
-#    python_callable=update_website_data_task,
-#    dag=dag)
-#
-#update_website_data
+update_website_data = PythonOperator(
+    task_id='update_website',
+    python_callable=update_website_data_task,
+    dag=dag)
+
+update_website_data

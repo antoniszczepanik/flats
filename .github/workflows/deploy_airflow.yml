@@ -17,7 +17,7 @@ jobs:
       - name: fetch & reset to master on ec2
         uses: garygrossgarten/github-action-ssh@release
         with:
-          command: ls && pwd && cd flats && git fetch && git reset --hard origin/master
+          command: "ls -a && pwd && cd flats && git fetch && git reset --hard origin/master"
           host: ${{ secrets.HOST }}
           username: ubuntu
           privateKey: ${{ secrets.PRIVATE_KEY}}

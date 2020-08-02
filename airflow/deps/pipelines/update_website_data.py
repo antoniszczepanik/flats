@@ -29,7 +29,7 @@ def update_website_data_task():
     df_rent = read_and_merge_required_dfs('rent')
 
     today = datetime.date.today()
-    ago = str(today - datetime.timedelta(30))
+    ago = str(today - datetime.timedelta(7))
 
     top_sale = prepare_top_offers(df_sale, 'sale', offers_from=ago)
     log.info(f'Top sale shape {top_sale.shape}')

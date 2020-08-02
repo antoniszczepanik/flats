@@ -1,6 +1,6 @@
 
 
-name: pull_on_ec2
+name: Update Airflow
 
 on:
   push:
@@ -11,10 +11,13 @@ on:
 
 jobs:
   deploy:
-    - name: Reset to master on ec2
-    uses: garygrossgarten/github-action-ssh@release
-    with:
-        command: cd flats && git fetch && git reset --hard origin/master
-        host: ${{ secrets.HOST }}
-        username: ubuntu
-        privateKey: ${{ secrets.PRIVATE_KEY}}
+      name: Update Airflow
+      runs-on: ubuntu-latest
+      steps:
+      - name: fetch & reset to master on ec2
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          command: cd flats && git fetch && git reset --hard origin/master
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          privateKey: ${{ secrets.PRIVATE_KEY}}

@@ -2,7 +2,7 @@
 Pipeline to concatinate and dedup all scraping outputs.
 """
 import os
-import logging as log
+import logging
 import datetime
 
 import pandas as pd
@@ -11,13 +11,12 @@ import pipelines.utils as utils
 from common import (
     RAW_DATA_PATH,
     CONCATED_DATA_PATH,
-    logs_conf,
     select_newest_date,
 )
 import columns
 from s3_client import s3_client
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 # skip concating memory heavy columns
 COLUMNS_TO_SKIP = (columns.DESC, columns.IMAGE_LINK)

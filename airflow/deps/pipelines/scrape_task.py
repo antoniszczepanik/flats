@@ -1,6 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
-import logging as log
+import logging
 import os
 
 import scrapy
@@ -11,7 +11,6 @@ from common import (
     RAW_DATA_PATH,
     get_current_dt,
     select_newest_date,
-    logs_conf,
     SCRAPING_TEMPDIR_PATH,
 )
 from s3_client import s3_client
@@ -27,7 +26,7 @@ spiders = {
 # mainly for development purposes (working with airflow)
 SKIP_SCRAPING_BUFFER = 12
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 

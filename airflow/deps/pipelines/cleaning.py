@@ -6,14 +6,14 @@ A lot of hardcoded column specific values are present in code below,
 as this is more of a configuration as code file.
 """
 from datetime import datetime
-import logging as log
+import logging
 
 import pandas as pd
 import numpy as np
 import unidecode
 
 # columns required for performing the cleaning
-from common import CLEANING_REQUIRED_COLUMNS, logs_conf
+from common import CLEANING_REQUIRED_COLUMNS
 import columns
 
 # for which columns fill lacks with 0
@@ -45,7 +45,7 @@ MODE_MAP = {
     columns.LON: 21.0122286,
 }
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 
 class MorizonCleaner(object):

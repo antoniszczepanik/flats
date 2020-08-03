@@ -2,7 +2,7 @@
 Read predicted dataset, generate json data with the result, and update website.
 """
 import datetime
-import logging as log
+import logging
 from unidecode import unidecode
 
 import pandas as pd
@@ -13,11 +13,10 @@ from common import (
     PREDICTED_DATA_PATH,
     SITE_DATA_LOCAL_PATH,
     SITE_DATA_S3_PATH,
-    logs_conf,
 )
 from s3_client import s3_client
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 

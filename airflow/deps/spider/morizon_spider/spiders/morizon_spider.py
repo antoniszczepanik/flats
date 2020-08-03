@@ -10,7 +10,7 @@ from common import RAW_DATA_PATH, select_newest_date, logs_conf
 import columns
 from s3_client import s3_client
 
-# otherwise DEBUG gets loggen in docker container
+# otherwise DEBUG gets logged into container
 root_logger = log.getLogger()
 for handler in root_logger.handlers:
     root_logger.removeHandler(handler)

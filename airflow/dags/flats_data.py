@@ -12,7 +12,6 @@ from pipelines.feature_engineering_task import feature_engineering_task
 from pipelines.apply_task import apply_task
 from pipelines.update_website_data import update_website_data_task
 
-
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,

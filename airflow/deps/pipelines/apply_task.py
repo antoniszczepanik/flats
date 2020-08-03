@@ -2,7 +2,7 @@
 Read final data with all the features and apply a model.
 """
 import os
-import logging as log
+import logging
 
 import pandas as pd
 
@@ -15,11 +15,10 @@ from common import (
     logs_conf,
 )
 import columns
-
 from s3_client import s3_client
 
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 

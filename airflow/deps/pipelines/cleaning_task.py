@@ -3,19 +3,18 @@ Load concated data and output clean parquets (categorical variables mapped to
 numerical format). Does not drop any rows.
 """
 import os
-import logging as log
+import logging
 
 import pandas as pd
 
 from common import (
     CONCATED_DATA_PATH,
     CLEAN_DATA_PATH,
-    logs_conf,
 )
 from pipelines.cleaning import MorizonCleaner
 from s3_client import s3_client
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 # number of rows to process at once
 CHUNK_SIZE = 5000

@@ -1,7 +1,7 @@
 """
 Based on clean data and coords encoding map add new coords features.
 """
-import logging as log
+import logging
 
 import pandas as pd
 import numpy as np
@@ -15,12 +15,11 @@ from common import (
     CLEAN_DATA_PATH,
     FINAL_DATA_PATH,
     COORDS_MAP_MODELS_PATH,
-    logs_conf,
 )
 from pipelines.utils import add_point_col, unzip_point_to_lon_and_lat
 from s3_client import s3_client
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 

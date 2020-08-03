@@ -7,7 +7,7 @@ coordinates to categorical and interesting feature engineering at later steps.
 """
 import pandas as pd
 import numpy as np
-import logging as log
+import logging
 import sys
 import tempfile
 
@@ -20,7 +20,6 @@ from common import (
     DATA_TYPES,
     CLEAN_DATA_PATH,
     COORDS_MAP_MODELS_PATH,
-    logs_conf,
 )
 from pipelines.utils import (
     closest_point,
@@ -35,7 +34,7 @@ EPSILON = 3
 MIN_SAMPLES = 1
 KMS_PER_RADIAN = 6371.0088
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 

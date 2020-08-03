@@ -1,6 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
-import logging as log
+import logging
 import tempfile
 
 import columns
@@ -8,10 +8,13 @@ import pandas as pd
 from scipy.spatial.distance import cdist
 
 logs_conf = {
-    "level": log.INFO,
+    "level": logging.INFO,
     "format": "%(filename)s %(asctime)s %(levelname)s: %(message)s",
     "datefmt": "%H:%M:%S",
 }
+logging.basicConfig(**logs_conf)
+logger = logging.getLogger('deps')
+logger.setLevel(logging.INFO)
 
 # data pipelines s3 paths
 S3_DATA_BUCKET = "flats-data"
@@ -93,7 +96,7 @@ RENT_MODEL_INPUTS = [
     columns.CLUSTER_CENTER_DIST_KM,
 ]
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 
 def select_newest_date(file_paths):

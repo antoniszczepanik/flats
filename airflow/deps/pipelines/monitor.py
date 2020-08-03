@@ -1,11 +1,11 @@
-import logging as log
+import logging
 
 from s3_client import s3_client
 import columns
 import common
 
 
-log.basicConfig(**common.logs_conf)
+log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 

@@ -1,12 +1,12 @@
-import logging as log
+import logging
 
 import pandas as pd
 
 import columns
-from common import RAW_DATA_PATH, logs_conf
+from common import RAW_DATA_PATH
 from s3_client import s3_client
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 

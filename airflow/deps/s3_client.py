@@ -1,6 +1,6 @@
 from datetime import datetime
 from joblib import dump, load
-import logging as log
+import logging
 import os
 import tempfile
 
@@ -8,9 +8,9 @@ import boto3
 from botocore.exceptions import ClientError, ProfileNotFound
 import pandas as pd
 
-from common import logs_conf, get_current_dt
+from common import get_current_dt
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 
 class s3_client:

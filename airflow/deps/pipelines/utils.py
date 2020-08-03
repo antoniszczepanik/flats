@@ -1,13 +1,12 @@
 from datetime import datetime
-import logging as log
+import logging
 
 import pandas as pd
 from shapely.geometry import MultiPoint, Point
 
 import columns as c
-from common import logs_conf
 
-log.basicConfig(**logs_conf)
+log = logging.getLogger(__name__)
 
 
 def update_txt_list(path_list, path):

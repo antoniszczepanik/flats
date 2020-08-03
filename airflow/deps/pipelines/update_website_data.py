@@ -117,7 +117,19 @@ def detect_cities(df):
     """ Detect cities from titles and remove offers where no city is detected """
     def get_city_from_title(title):
         title = unidecode(title).lower()
-        city_list = ['warszawa', 'krakow', 'gdansk']
+        city_list = [
+            'warszawa',
+            'krakow',
+            'lodz',
+            'wroclaw',
+            'poznan',
+            'gdansk',
+            'katowice',
+            'szczecin',
+            'bydgoszcz',
+            'lublin',
+            'bialystok',
+        ]
         for city in city_list:
             if city in title:
                 return city

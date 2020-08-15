@@ -33,13 +33,14 @@ def apply_task(data_type):
         return
 
     final_df = s3_client.read_newest_df_from_s3(FINAL_DATA_PATH, dtype=data_type)
-    final_df = final_df.dropna()
 
     log.info(f'Applying model for {data_type}...')
     if data_type == 'sale':
+        final_df = final_df.dropna(subset=SALE_MODEL_INPUTS)
         final_df[columns.SALE_PRED] = get_predictions(model, final_df, SALE_MODEL_INPUTS)
         final_df[columns.SALE_DIFF] = final_df[columns.PRICE_M2] - final_df[columns.SALE_PRED]
     elif data_type == 'rent':
+        final_df = final_df.dropna(subset=RENT_MODEL_INPUTS)
         final_df[columns.RENT_PRED] = get_predictions(model, final_df, RENT_MODEL_INPUTS)
         final_df[columns.RENT_DIFF] = final_df[columns.PRICE_M2] - final_df[columns.RENT_PRED]
 

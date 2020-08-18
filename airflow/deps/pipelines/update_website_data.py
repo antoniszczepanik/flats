@@ -28,7 +28,7 @@ def update_website_data_task():
     df_rent = read_and_merge_required_dfs('rent')
 
     today = datetime.date.today()
-    ago = str(today - datetime.timedelta(7))
+    ago = str(today - datetime.timedelta(3))
 
     top_sale = prepare_top_offers(df_sale, 'sale', offers_from=ago)
     log.info(f'Top sale shape {top_sale.shape}')
@@ -59,32 +59,25 @@ def read_and_merge_required_dfs(dtype):
         how='left')
     return df
 
-def prepare_top_offers(df, dtype, offers_from=None, offer_number=500):
+def prepare_top_offers(df, dtype, offers_from=None):
     if dtype == 'sale':
         pred_col = columns.SALE_PRED
         diff_col = columns.SALE_DIFF
     elif dtype == 'rent':
         pred_col = columns.RENT_PRED
         diff_col = columns.RENT_DIFF
+
     df[diff_col] = df[columns.PRICE_M2] - df[pred_col]
     df[pred_col] = df[pred_col] * df[columns.SIZE]
+
     if offers_from:
         df = df[df[columns.DATE_ADDED] > offers_from]
-    df = df.sort_values(diff_col)
-    df['offer_type'] = dtype
-    df = df[[
-        columns.URL,
-        columns.DATE_ADDED,
-        columns.TITLE,
-        columns.SIZE,
-        columns.PRICE,
-        pred_col,
-        columns.PRICE_M2,
-        'offer_type'
-    ]]
-    df = (df.pipe(filter_outliers, dtype=dtype)
+
+    df = (df.pipe(sort_and_filter_by_pred_actual_ratio, pred_col)
+            .assign(offer_type=dtype)
+            .pipe(select_output_cols, pred_col)
+            .pipe(filter_outliers, dtype=dtype)
             .pipe(detect_cities)
-            .head(offer_number)
             .pipe(remove_duplicates_in_title)
             .rename(columns={
                 columns.URL: 'url',
@@ -98,6 +91,25 @@ def prepare_top_offers(df, dtype, offers_from=None, offer_number=500):
             .round(0)
             )
     return df
+
+def sort_and_filter_by_pred_actual_ratio(df: pd.DataFrame, pred_col: str) -> pd.DataFrame:
+    df = df.copy()
+    df['pred_to_price'] = df[pred_col] / df[columns.PRICE]
+    return (df.loc[df['pred_to_price'] > 1.1] # only offers more attractive than 10% discount
+              .sort_values(by='pred_to_price')
+              .drop(columns=['pred_to_price']))
+
+def select_output_cols(df: pd.DataFrame, pred_col: str) -> pd.DataFrame:
+    return df[[
+        columns.URL,
+        columns.DATE_ADDED,
+        columns.TITLE,
+        columns.SIZE,
+        columns.PRICE,
+        pred_col,
+        columns.PRICE_M2,
+        'offer_type'
+    ]]
 
 def filter_outliers(df, dtype):
     """ Filter offers based on hardcoded "outliers" indicators"""

@@ -96,7 +96,7 @@ def sort_and_filter_by_pred_actual_ratio(df: pd.DataFrame, pred_col: str) -> pd.
     df = df.copy()
     df['pred_to_price'] = df[pred_col] / df[columns.PRICE]
     return (df.loc[df['pred_to_price'] > 1.1] # only offers more attractive than 10% discount
-              .sort_values(by='pred_to_price')
+              .sort_values(by='pred_to_price', ascending=False)
               .drop(columns=['pred_to_price']))
 
 def select_output_cols(df: pd.DataFrame, pred_col: str) -> pd.DataFrame:

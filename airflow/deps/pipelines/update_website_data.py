@@ -64,25 +64,25 @@ def prepare_top_offers(df, dtype, offers_from=None):
         df = df[df[columns.DATE_ADDED] > offers_from]
 
     pred_col = columns.SALE_PRED if dtype == 'sale' else columns.RENT_PRED
+    df = sort_and_filter_by_pred_actual_ratio(df, pred_col)
+    df[pred_col] = df[pred_col] * df[columns.SIZE]
 
-    df = (df.pipe(sort_and_filter_by_pred_actual_ratio, pred_col)
-            .assign(offer_type=dtype)
-            .assign(pred_col=lambda df: df[pred_col] * df[columns.SIZE])
-            .pipe(select_output_cols, pred_col)
-            .pipe(filter_outliers, dtype=dtype)
-            .pipe(detect_cities)
-            .pipe(remove_duplicates_in_title)
-            .rename(columns={
-                columns.URL: 'url',
-                columns.DATE_ADDED: 'added',
-                columns.TITLE: 'title',
-                columns.SIZE: 'size',
-                columns.PRICE: 'price',
-                pred_col: 'estimate',
-            })
-            .drop(columns=[columns.PRICE_M2])
-            .round(0)
-            )
+    df = (df.assign(offer_type=dtype)
+          .pipe(select_output_cols, pred_col)
+          .pipe(filter_outliers, dtype=dtype)
+          .pipe(detect_cities)
+          .pipe(remove_duplicates_in_title)
+          .rename(columns={
+              columns.URL: 'url',
+              columns.DATE_ADDED: 'added',
+              columns.TITLE: 'title',
+              columns.SIZE: 'size',
+              columns.PRICE: 'price',
+              pred_col: 'estimate',
+          })
+          .drop(columns=[columns.PRICE_M2])
+          .round(0)
+          )
     return df
 
 def sort_and_filter_by_pred_actual_ratio(df: pd.DataFrame, pred_col: str) -> pd.DataFrame:

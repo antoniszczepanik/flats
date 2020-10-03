@@ -17,9 +17,9 @@ class SearchBar extends Component {
         mieszkanie za
 
         <nobr>
-          <input className="min_price" type="text" value={this.props.min_price} onChange={this.props.handleMinPriceChange} />
+          <input className="min_price" type="nubmer" value={this.props.min_price} onChange={this.props.handleMinPriceChange} />
           -
-          <input className="max_price" type="text" value={this.props.max_price} onChange={this.props.handleMaxPriceChange} />
+          <input className="max_price" type="number" value={this.props.max_price} onChange={this.props.handleMaxPriceChange} />
           {this.formatCurrency()}zł w
         </nobr>
 

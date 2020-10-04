@@ -2,16 +2,14 @@ mkfile_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 .PHONY: deploy deploy-hard
 
-build-webserver:
-	docker build $(mkfile_dir)/airflow/ \
-		-f $(mkfile_dir)/docker/Dockerfile-webserver \
-		-t 'airflow_webserver'
+build:
+	docker build $(mkfile_dir)/code \
+		-f $(mkfile_dir)/docker/Dockerfile \
+		-t 'flats'
 build-jupyter:
 	docker build $(mkfile_dir)/airflow/ \
 		-f $(mkfile_dir)/docker/Dockerfile-jupyter \
 		-t 'airflow_jupyter'
-build: build-webserver build-jupyter
-
 compose: 
 	docker-compose -f $(mkfile_dir)/docker/docker-compose-dev.yml up -d --force-recreate
 compose-build: 

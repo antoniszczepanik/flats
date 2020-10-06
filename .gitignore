@@ -7,3 +7,4 @@ __pycache__/
 site/build
 site/node_modules
 site/public/data.json
+.aws/*

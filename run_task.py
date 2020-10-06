@@ -60,7 +60,7 @@ if __name__ == "__main__":
     home = str(pathlib.Path.home())
 
     cmd.extend(["-v", f"{cwd}/code:/usr/local/code"])
-    cmd.extend(["-v", f"{home}/.aws/credentials:/usr/local/airflow/.aws/credentials:ro"])
+    cmd.extend(["-v", f"{home}/.aws/credentials:/root/.aws/credentials:ro"])
     if not args['--use-remote']:
         cmd.extend(["-e", "USE_MINIO=true"])
     cmd.extend(["--network=flats"])

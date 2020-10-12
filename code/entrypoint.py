@@ -35,7 +35,15 @@ TASK_FUNCTIONS = {
     "monitor": "from pipelines.monitor import monitor; monitor('{offer_type}')",
 }
 
-ALL_TASKS = [TASK_FUNCTIONS[task] for task in ["scrape", "concat", "clean", "features", "apply", "update_data"]]
+ALL_TASKS = [TASK_FUNCTIONS[task] for task in ["scrape", "concat", "clean", "features", "apply", "update-data"]]
+
+
+def run_command(task_function: str, offer_type: str = None):
+    if offer_type:
+        task_function = task_function.format(offer_type=offer_type)
+    cmd = ["python3", "-c", task_function]
+    print(" ".join(cmd))
+    subprocess.run(cmd)
 
 if __name__ == "__main__":
     args = docopt(
@@ -44,7 +52,7 @@ if __name__ == "__main__":
         )
     )
     task = args['TASK']
-    if task not in TASK_FUNCTIONS or task != "all":
+    if task not in TASK_FUNCTIONS and task != "all":
         print(f'Invalid task name ({task}). See --help for list of supported tasks.')
         exit(0)
 
@@ -61,10 +69,3 @@ if __name__ == "__main__":
     else:
         task_fn = TASK_FUNCTIONS[task]
         run_command(task_fn, offer_type=offer_type)
-
-def run_command(task_funciton: str, offer_type: str = None):
-    if offer_type:
-        task_function.format(offer_type)
-    cmd = ["python3", "-c", task_function]
-    print(" ".join(cmd))
-    subprocess.run(cmd)

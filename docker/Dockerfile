@@ -1,8 +1,9 @@
 FROM python:3.7-buster
 LABEL maintainer="szczepanik.antoni@gmail.com"
 
-COPY requirements.txt /requirements.txt
+RUN pip install pandas==1.1.3
 
+COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
 # copy dags and deps

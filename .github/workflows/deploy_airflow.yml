@@ -3,7 +3,8 @@
 name: Update and push flats image
 
 on:
-  push:
+  - workflow_dispatch
+  - push:
     paths:
       - 'code/**'
       - 'docker/**'

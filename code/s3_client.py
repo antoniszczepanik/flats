@@ -91,14 +91,12 @@ class s3_client:
             extension = tmp_path.split(".")[-1]
             if extension == "csv":
                 df.to_csv(tmp_path, index=False)
-            elif extension == "parquet":
-                df.to_parquet(tmp_path)
             else:
                 log.error(f"{extension} extension is not supported.")
                 raise InvalidExtensionException
             return self.upload_file_to_s3(tmp_path, s3_path)
 
-    def upload_df_to_s3_with_timestamp(self, df, s3_path, keyword, dtype, extension='parquet'):
+    def upload_df_to_s3_with_timestamp(self, df, s3_path, keyword, dtype, extension='csv'):
         """ Assumes s3 path in fomrat 'flats-data/{dtype}/clean'"""
         s3_path = s3_path.format(data_type=dtype)
         current_dt = get_current_dt()

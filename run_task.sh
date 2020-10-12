@@ -5,4 +5,4 @@ docker run -it --rm \
     -v "$HOME/.aws/credentials:/root/.aws/credentials:ro" \
     --network=flats \
     --name=flats \
-    flats "$@"
+    antoniszczepanik/flats "$@"

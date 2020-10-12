@@ -3,12 +3,15 @@
 name: Update and push flats image
 
 on:
-  workflow_dispatch:
   push:
     paths:
       - 'code/**'
       - 'docker/**'
-    branches: [ master ]
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - master
 
 jobs:
   build:

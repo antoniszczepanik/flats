@@ -1,7 +1,7 @@
 FROM python:3.7-buster
 LABEL maintainer="szczepanik.antoni@gmail.com"
 
-RUN pip install pandas==1.1.3
+COPY pip.conf /etc/pip.conf
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt

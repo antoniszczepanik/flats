@@ -39,5 +39,3 @@ def add_point_col(df: pd.DataFrame) -> pd.DataFrame:
     """ Zips lon and lat columns to create a series of coords "points". """
     df['point'] = [Point(x, y) for x, y in zip(df[c.LON], df[c.LAT])]
     return df
-
-

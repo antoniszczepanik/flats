@@ -35,6 +35,8 @@ TASK_FUNCTIONS = {
     "monitor": "from pipelines.monitor import monitor; monitor('{offer_type}')",
 }
 
+ALL_TASKS = [TASK_FUNCTIONS[task] for task in ["scrape", "concat", "clean", "features", "apply", "update_data"]]
+
 if __name__ == "__main__":
     args = docopt(
         __doc__.format(
@@ -42,7 +44,7 @@ if __name__ == "__main__":
         )
     )
     task = args['TASK']
-    if task not in TASK_FUNCTIONS:
+    if task not in TASK_FUNCTIONS or task != "all":
         print(f'Invalid task name ({task}). See --help for list of supported tasks.')
         exit(0)
 
@@ -53,11 +55,16 @@ if __name__ == "__main__":
     if not args['--use-remote']:
         os.environ["USE_MINIO"] = 'true'
 
-
-    python_command = TASK_FUNCTIONS[task]
-    if offer_type == None:
-        cmd = ["python3", "-c", python_command]
+    if task == "all":
+        for task_fn in ALL_TASKS:
+            run_command(task_fn, offer_type=offer_type)
     else:
-        cmd = ["python3", "-c", python_command.format(offer_type=offer_type)]
+        task_fn = TASK_FUNCTIONS[task]
+        run_command(task_fn, offer_type=offer_type)
+
+def run_command(task_funciton: str, offer_type: str = None):
+    if offer_type:
+        task_function.format(offer_type)
+    cmd = ["python3", "-c", task_function]
     print(" ".join(cmd))
     subprocess.run(cmd)

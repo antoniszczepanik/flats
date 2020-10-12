@@ -1,6 +1,9 @@
 FROM python:3.7-buster
 LABEL maintainer="szczepanik.antoni@gmail.com"
 
+RUN apt-get update && apt-get install -y \
+    jq \
+    unzip
 RUN pip install pandas==1.1.3
 
 COPY requirements.txt /requirements.txt

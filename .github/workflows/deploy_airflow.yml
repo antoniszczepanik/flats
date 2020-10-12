@@ -21,14 +21,13 @@ jobs:
         with:
           version: latest
       - name: login to docker hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" \
-           | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: build the image
-      run: |
-        docker buildx build --push \
-          --tag antoniszczepanik/flats:latest \
-          --platform linux/amd64,linux/arm/v7,linux/arm64 code \
-          -f docker/Dockerfile
+        run: |
+           docker buildx build --push \
+           --tag antoniszczepanik/flats:latest \
+           --platform linux/amd64,linux/arm/v7,linux/arm64 code \
+           -f docker/Dockerfile
 
 
 

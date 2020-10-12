@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Runs task in Airflow container.
+Runs a series or one of tasks.
 
 Usage:
     run_task.py TASK OFFER_TYPE [--use-remote]
@@ -20,11 +20,7 @@ import os
 import pathlib
 import subprocess
 import sys
-try:
-    from docopt import docopt
-except ModuleNotFoundError as e:
-    print("Please install docopt first (run `[sudo] pip install docopt`).")
-    sys.exit(1)
+from docopt import docopt
 
 TASK_FUNCTIONS = {
     "scrape": "from pipelines.scrape_task import scrape_task; scrape_task('{offer_type}')",
@@ -33,7 +29,7 @@ TASK_FUNCTIONS = {
     "features": "from pipelines.feature_engineering_task import feature_engineering_task; feature_engineering_task('{offer_type}')",
     "apply": "from pipelines.apply_task import apply_task; apply_task('{offer_type}')",
     "update-data": "from pipelines.update_website_data import update_website_data_task; update_website_data_task()",
-    # on demand - not run on airflow
+    # not under cron
     "coord-map": "from pipelines.coords_map_task import coords_map_task; coords_map_task('{offer_type}')",
     "unify-raw": "from pipelines.unify_raw_task import unify_raw_data_task; unify_raw_data_task('{offer_type}')",
     "monitor": "from pipelines.monitor import monitor; monitor('{offer_type}')",
@@ -54,25 +50,14 @@ if __name__ == "__main__":
     if offer_type not in ('sale', 'rent', None):
         print(f'Invalid offer type ({offer_type}).')
 
-    cmd = ["docker", "run", "-it", "--rm"]
-
-    cwd = os.getcwd()
-    home = str(pathlib.Path.home())
-
-    cmd.extend(["-v", f"{cwd}/code:/usr/local/code"])
-    cmd.extend(["-v", f"{home}/.aws/credentials:/root/.aws/credentials:ro"])
     if not args['--use-remote']:
-        cmd.extend(["-e", "USE_MINIO=true"])
-    cmd.extend(["--network=flats"])
-    cmd.extend(["--name=flats"])
-    cmd.extend(["flats"])
+        os.environ["USE_MINIO"] = 'true'
 
 
     python_command = TASK_FUNCTIONS[task]
     if offer_type == None:
-        cmd.extend(["python3", "-c", python_command])
+        cmd = ["python3", "-c", python_command]
     else:
-        cmd.extend(["python3", "-c", python_command.format(offer_type=offer_type)])
-
+        cmd = ["python3", "-c", python_command.format(offer_type=offer_type)]
     print(" ".join(cmd))
     subprocess.run(cmd)

@@ -3,8 +3,8 @@ mkfile_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 .PHONY: deploy deploy-hard
 
 build:
-	docker build $(mkfile_dir)/code \
-		-f $(mkfile_dir)/docker/Dockerfile \
+	docker build $(mkfile_dir)code \
+		-f $(mkfile_dir)docker/Dockerfile \
 		-t 'flats'
 build-jupyter:
 	docker build $(mkfile_dir)/airflow/ \

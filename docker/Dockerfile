@@ -13,3 +13,4 @@ ENV PYTHONPATH=$PYTHONPATH:/usr/local/code
 ENV PYTHONPATH=$PYTHONPATH:/usr/local/code/spider
 
 WORKDIR /usr/local/code
+ENTRYPOINT ["/usr/local/bin/python3", "entrypoint.py"]

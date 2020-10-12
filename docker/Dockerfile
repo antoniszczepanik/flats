@@ -1,12 +1,10 @@
 FROM python:3.7-buster
 LABEL maintainer="szczepanik.antoni@gmail.com"
 
-RUN apt-get update && apt-get install -y \
-    jq \
-    unzip
-RUN pip install pandas==1.1.3
-
 COPY requirements.txt /requirements.txt
+# use piwheels to download packages on pi faster
+COPY pip.conf /etc/pip.conf
+
 RUN pip install -r /requirements.txt
 
 # copy dags and deps

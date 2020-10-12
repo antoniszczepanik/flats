@@ -2,6 +2,7 @@ FROM python:3.7-buster
 LABEL maintainer="szczepanik.antoni@gmail.com"
 
 COPY pip.conf /etc/pip.conf
+RUN apt-get update && sudo apt-get install -y libatlas-base-dev
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt

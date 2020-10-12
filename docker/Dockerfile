@@ -2,7 +2,7 @@ FROM python:3.7-buster
 LABEL maintainer="szczepanik.antoni@gmail.com"
 
 COPY pip.conf /etc/pip.conf
-RUN apt-get update && apt-get install -y libatlas-base-dev
+RUN apt-get update && apt-get install -y libatlas-base-dev libgeos-c1v5 libgeos-3.7.1
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt

@@ -7,8 +7,7 @@ api = Api(app)
 
 class HelloWorld(Resource):
     def get(self):
-
-        return {'hello': 'asdfasdfworld'}
+        return {'hello': 'yellow'}
 
 class Other(Resource):
     def get(self):

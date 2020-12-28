@@ -1,10 +1,9 @@
 build:
 	docker build -t flats-server .
 
-# Mounting directories does not work in below for some reason
 run-dev: build
 	docker run -it -p 5000:5000 \
-		-v src:/src \
+		-v ${PWD}/src:/src \
 		--rm \
 		--name flats-server \
 		flats-server
@@ -20,7 +19,7 @@ bash:
 	docker run \
 		-it \
 		-p 5000:5000 \
-		-v src:/src \
+		-v ${PWD}/src:/src \
 		--rm \
 		--name flats-server \
 		--entrypoint /bin/bash \

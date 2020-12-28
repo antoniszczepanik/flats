@@ -60,8 +60,8 @@ def read_and_merge_required_dfs(dtype):
     return df
 
 def prepare_top_offers(df, dtype, offers_from=None):
-    if offers_from:
-        df = df[df[columns.DATE_ADDED] > offers_from]
+    #if offers_from:
+    #    df = df[df[columns.DATE_ADDED] > offers_from]
 
     pred_col = columns.SALE_PRED if dtype == 'sale' else columns.RENT_PRED
     df = sort_and_filter_by_pred_actual_ratio(df, pred_col)
@@ -69,9 +69,9 @@ def prepare_top_offers(df, dtype, offers_from=None):
 
     df = (df.assign(offer_type=dtype)
           .pipe(select_output_cols, pred_col)
-          .pipe(filter_outliers, dtype=dtype)
+          #.pipe(filter_outliers, dtype=dtype)
           .pipe(detect_cities)
-          .pipe(remove_duplicates_in_title)
+          #.pipe(remove_duplicates_in_title)
           .rename(columns={
               columns.URL: 'url',
               columns.DATE_ADDED: 'added',
@@ -88,8 +88,7 @@ def prepare_top_offers(df, dtype, offers_from=None):
 def sort_and_filter_by_pred_actual_ratio(df: pd.DataFrame, pred_col: str) -> pd.DataFrame:
     df = df.copy()
     df['pred_to_price'] = df[pred_col] / df[columns.PRICE_M2]
-    return (df.loc[df['pred_to_price'] > 1.1] # only offers more attractive than 10% discount
-              .sort_values(by='pred_to_price', ascending=False)
+    return (df.sort_values(by='pred_to_price', ascending=False)
               .drop(columns=['pred_to_price']))
 
 def select_output_cols(df: pd.DataFrame, pred_col: str) -> pd.DataFrame:

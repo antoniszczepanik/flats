@@ -7,3 +7,8 @@ which allows to instantly identify real estate opportunities.
 The pipeline is run daily and results are presented on [queryable website](http://flats.antoniszczepanik.com).
 
 [![alt text](docs/iletomieszkanie15082020.png)](http://flats.antoniszczepanik.com)
+
+Architecture:
+
+- api webserver / storage & valuation
+- scraper/processer

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Resource, Api
+from db import db
 
 app = Flask(__name__)
 
@@ -7,7 +8,7 @@ api = Api(app)
 
 class HelloWorld(Resource):
     def get(self):
-        return {'hello': 'yellow'}
+        return db[0]
 
 class Other(Resource):
     def get(self):

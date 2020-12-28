@@ -1,0 +1,12 @@
+TODO:
+- figure out how to reliably store database dumps
+- connect pgadmin with pg, add basic tables
+
+- create flats table
+
+- insert flats with api
+- get flats from api
+
+# leaflet & postgis
+https://www.youtube.com/watch?v=VsEsQACg6_w
+https://www.youtube.com/watch?v=jjS4Ft-1cOM

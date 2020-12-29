@@ -1,0 +1,1 @@
+psql -h "localhost" -U "admin" -f create_table.sql flats

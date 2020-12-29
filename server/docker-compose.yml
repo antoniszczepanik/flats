@@ -3,11 +3,11 @@ version: '3'
 services:
   server:
     restart: always
-    build: .
+    image: flats-server
     ports:
       - "5000:5000"
     volumes:
-      - src:/src
+      - ./src:/src
     networks:
       - db
     depends_on:
@@ -15,31 +15,14 @@ services:
 
   postgres:
     restart: always
-    image: postgres
+    image: postgis/postgis
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     volumes:
-      - ./data:/var/lib/postgresql/data 
-    networks:
-      - db
-
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-       PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
-       PGADMIN_DEFAULT_PASSWORD: "admin"
-       PGADMIN_LISTEN_PORT: 80
-    ports:
-        - "8080:80"
-    tty: true
-    depends_on:
-      - postgres
-    links:
-      - postgres
+      - /home/antoni/flats-buckets/data:/var/lib/postgresql/data 
     networks:
       - db
 
@@ -49,5 +32,3 @@ volumes:
 networks: 
   db:
     driver: bridge
-
-

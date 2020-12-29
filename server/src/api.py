@@ -2,20 +2,23 @@ from flask import Flask
 from flask_restful import Resource, Api
 from db import db
 
+import psycopg2
+
 app = Flask(__name__)
 
 api = Api(app)
 
-class HelloWorld(Resource):
-    def get(self):
-        return db[0]
+conn = psycopg2.connect("host=postgres dbname=flats user=admin password=admin")
+cur = conn.cursor()
 
-class Other(Resource):
+class Offers(Resource):
     def get(self):
-        return {'hello': 'Other'}
+        return ["offer1", "offer2"]
 
-api.add_resource(HelloWorld, '/')
-api.add_resource(Other, '/other/')
+    def post(self):
+        return "post offer"
+
+api.add_resource(Offers, '/offers/')
 
 if __name__ == '__main__':
     app.config['DEBUG'] = True

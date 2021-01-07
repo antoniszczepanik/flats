@@ -24,7 +24,6 @@ class Offers(Resource):
         return post_offer(args), 201
 
 class Offer(Resource):
-
     @marshal_with(OFFER_FIELDS)
     def get(self, offer_id=None):
         if offer_id is None:

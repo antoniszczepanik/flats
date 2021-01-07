@@ -1,7 +1,8 @@
 TODO:
+server:
 - some parts of api still not work: dates and urls
 - add another endpoint for data filtered by coords
 
-# leaflet & postgis
-https://www.youtube.com/watch?v=VsEsQACg6_w
-https://www.youtube.com/watch?v=jjS4Ft-1cOM
+front:
+- make sure response is returned in a nice format
+- display responses in a simple way on a map

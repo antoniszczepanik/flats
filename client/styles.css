@@ -1,14 +1,7 @@
-@media (max-width: 600px) {
-  body {
-    width: 100%;
-  }
+body {
+  width: 80%;
 }
 
-@media (min-width: 551px) {
-  body {
-    width: 47rem;
-  }
-}
 :root {
   --background: #fbfbfb;
   --logo: #f38181;
@@ -22,26 +15,26 @@ body {
   background-color: var(--background);
   color: var(--text);
   font-family: Montserrat,sans-serif;
-  font-size: 1.2rem;
-  font-weight: 900;
-  margin: 0;
-  margin: auto; 
-  padding: 0.7rem;
   text-align: center;
+  margin: auto;
 }
 
 h1 {
   color: var(--logo);
-  font-size: 2.2rem;
+  font-size: 3.5em;
   font-weight: 900;
-  line-height: 2.5rem;
-  padding: 0rem;
+  padding: 0.01em;
 }
 
 h4 {
-  font-size: 0.85rem;
+  font-size: 1.5em;
+}
+#mapid { 
+  height: 600px;
 }
 
-.siteHeader {
-  padding: 2rem;
+@media (max-width: 600px) {
+  body {
+    width: 100%;
+  }
 }

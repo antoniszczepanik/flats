@@ -21,8 +21,8 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-    volumes:
-      - /home/antoni/flats-buckets/data:/var/lib/postgresql/data 
+#    volumes:
+            #  - /home/antoni/postgres/data:/var/lib/postgresql/data 
     networks:
       - db
 

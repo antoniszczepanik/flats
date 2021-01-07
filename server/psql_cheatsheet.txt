@@ -1,1 +1,6 @@
-psql -h "localhost" -U "admin" -f create_table.sql flats
+psql -h "localhost" -U "admin" -f init_db.sql flats
+psql -h "localhost" -U "admin" flats
+
+
+INSERT INTO offers (type__offer, offer_id__offer) VALUES('rent', 'delete-morizon-id1');
+ALTER TABLE offers ALTER COLUMN offer_id__offer SET NOT NULL;

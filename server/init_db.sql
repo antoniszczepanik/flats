@@ -1,5 +1,5 @@
 CREATE DATABASE flats;
-CREATE EXTENSION postgis;
+\c flats;
 CREATE TYPE offer_type AS ENUM ('sale', 'rent');
 CREATE TABLE offers (
 	offer_id SERIAL NOT NULL,
@@ -19,10 +19,11 @@ CREATE TABLE offers (
 	floor__offer SMALLINT CHECK (floor__offer >=0),
 	heating__offer SMALLINT CHECK (heating__offer >=0),
 	image_link__offer VARCHAR(300),
-	location__offer geometry(Point,4326),
+	lon__offer DOUBLE PRECISION CHECK(lon__offer >=0),
+	lat__offer DOUBLE PRECISION CHECK(lat__offer >=0),
 	market_type__offer BOOLEAN,
 	media__offer BOOLEAN,
-	offer_id__offer CHAR(100),
+	offer_id__offer CHAR(100) UNIQUE,
 	price__offer DOUBLE PRECISION CHECK (price__offer >=0),
 	price_m2__offer DOUBLE PRECISION CHECK (price_m2__offer >=0),
 	promotion_counter__offer SMALLINT CHECK (promotion_counter__offer >=0),
@@ -30,7 +31,7 @@ CREATE TABLE offers (
 	size__offer DOUBLE PRECISION CHECK (size__offer >=0),
 	taras__offer BOOLEAN,
 	title__offer VARCHAR(300),
-	url__offer VARCHAR(300),
+	url__offer VARCHAR(300) UNIQUE,
 	view_count__offer SMALLINT CHECK (view_count__offer >=0),
 	water__offer BOOLEAN,
 	floor_number__clean SMALLINT CHECK (floor_number__clean >=0),
@@ -53,6 +54,6 @@ CREATE TABLE offers (
 	cluster_coords_factor__feature DOUBLE PRECISION CHECK (cluster_coords_factor__feature >=0),
 	sale__prediction DOUBLE PRECISION CHECK (sale__prediction >=0),
 	rent__prediction DOUBLE PRECISION CHECK (rent__prediction >=0),
-	sale_price_diff__prediction DOUBLE PRECISION CHECK (sale_price_diff__prediction >=0),
-	rent_price_diff__prediction DOUBLE PRECISION CHECK (rent_price_diff__prediction >=0)
+	sale_price_diff__prediction DOUBLE PRECISION,
+	rent_price_diff__prediction DOUBLE PRECISION
 );

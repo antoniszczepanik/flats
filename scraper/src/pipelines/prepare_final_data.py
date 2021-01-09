@@ -63,6 +63,7 @@ def read_and_merge_required_dfs(dtype):
 def prepare_offers(df, dtype):
     pred_col = columns.SALE_PRED if dtype == 'sale' else columns.RENT_PRED
     df[pred_col] = df[pred_col] * df[columns.SIZE]
+    df['price_estimate_diff'] = df[pred_col] - df[columns.PRICE]
     df = (df.assign(offer_type=dtype)
           .pipe(select_output_cols, pred_col)
           .rename(columns={
@@ -75,6 +76,7 @@ def prepare_offers(df, dtype):
               pred_col: 'estimate',
               columns.LON: 'lon',
               columns.LAT: 'lat',
+              columns.OFFER_ID: 'offer_id',
           })
           )
     return df
@@ -90,5 +92,7 @@ def select_output_cols(df: pd.DataFrame, pred_col: str) -> pd.DataFrame:
         columns.PRICE_M2,
         columns.LON,
         columns.LAT,
-        'offer_type'
+        columns.OFFER_ID,
+        'offer_type',
+        'price_estimate_diff',
     ]]

@@ -57,16 +57,16 @@ function getOfferHtml(offer) {
   <table class="table table-hover">
     <tbody>
       <tr>
-        <td>Wycena droższa o:</td>
-        <td><strong class="${color_class}">${roundLargeToThousands( price_pred_diff)} zł </strong></td>
-      </tr>
-      <tr>
         <td>Cena:</td>
         <td><strong>${roundLargeToThousands(offer.price)} zł</strong></td>
       </tr>
       <tr>
         <td>Warte:</td>
         <td><strong>${roundLargeToThousands( (offer.estimate / 50) * 50)} zł</strong></td>
+      </tr>
+      <tr>
+        <td>Różnica:</td>
+        <td><strong class="${color_class}">${roundLargeToThousands( price_pred_diff)} zł </strong></td>
       </tr>
       <tr>
         <td>Powierzchnia:</td>

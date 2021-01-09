@@ -1,0 +1,93 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>IleToMieszkanie?</title>
+  <meta name="description" content="Detekcja ofert nieruchomości o zaniżonej cenie">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+</head>
+
+<body>
+  <h1>IleToMieszkanie?</h1>
+  <h4>Detekcja ofert nieruchomości o zaniżonych cenach</h4>
+
+  <form>
+    <div class="input-group">
+
+      <div class="form-group">
+        <label for="offer_type">Rodzaj oferty</label>
+        <select class="form-control" id="offer_type">
+          <option value="rent">Wynajem</option>
+          <option value="sale">Sprzedaż</option>
+        </select>
+
+      </div>
+      <div class="form-group">
+        <label for="from_date">Aktualność ofert</label>
+        <select class="form-control" id="from_date">
+          <option value=2>z ostatniego dnia</option>
+          <option value=3>z ostatnich 3 dni </option>
+          <option value=7>z ostatnich 7 dni </option>
+          <option value=30>z ostatnich 30 dni </option>
+          <option value=90>z ostatnich 90 dni </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="min_price">Cena</label>
+        <div class="input-group">
+          <input id="min_price" type="number" class="form-control" placeholder="Cena od" />
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">-</span>
+          </div>
+          <input id="max_price" type="number" class="form-control" placeholder="Cena do" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="min_size">Powierzchnia w m2</label>
+        <div class="input-group">
+          <input id="min_size" type="number" class="form-control" placeholder="Powierzchnia od" />
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">-</span>
+          </div>
+          <input id="max_size" type="number" class="form-control" placeholder="Powierzchnia do" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="min_price_estimate_diff">Wycena droższa o</label>
+        <div class="input-group">
+          <input id="min_price_estimate_diff" type="number" class="form-control" placeholder="zł" />
+          <div class="input-group-append">
+            <button type="button" onclick="refreshOffers()" class="btn btn-secondary">Szukaj</button>
+          </div>
+        </div>
+
+      </div>
+      <div>
+      </div>
+    </div>
+    <div>Liczba ofert: <span id="offer_number"> 10</span></div>
+  </form>
+
+  <div id="mapid"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+    crossorigin="anonymous"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

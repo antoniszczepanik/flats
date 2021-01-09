@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
-OFFER_TYPE=$1
+./run_task.sh scrape rent
+./run_task.sh concat rent
+./run_task.sh clean rent
+./run_task.sh features rent
+./run_task.sh apply rent
 
-./run_task.sh concat $OFFER_TYPE
-./run_task.sh clean $OFFER_TYPE
-./run_task.sh features $OFFER_TYPE
-./run_task.sh apply $OFFER_TYPE
-./run_task.sh update-data $OFFER_TYPE
+./run_task.sh scrape sale
+./run_task.sh concat sale
+./run_task.sh clean sale
+./run_task.sh features sale
+./run_task.sh apply sale
+
+./run_task.sh prepare-final whatever

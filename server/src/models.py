@@ -17,3 +17,5 @@ class Offer(Base):
     price_m2 = Column(Float)
     estimate = Column(Float)
     offer_type = Column(String)
+    offer_id = Column(String, unique=True)
+    price_estimate_diff = Column(Float)

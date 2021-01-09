@@ -15,6 +15,8 @@ class OfferBase(BaseModel):
     price_m2: float
     estimate: float
     offer_type: str
+    offer_id: str
+    price_estimate_diff: float
 
 
 class OfferCreate(OfferBase):

@@ -5,8 +5,25 @@ import pandas as pd
 from shapely.geometry import MultiPoint, Point
 
 import columns as c
+from common import S3_FINAL_PATH
+from s3_client import s3_client
+
+s3_client = s3_client()
 
 log = logging.getLogger(__name__)
+
+def get_process_from_date(data_type):
+    from_date = os.environ.get("PROCESS_RAW_FILES_FROM")
+    if not from_date:
+        from_date = get_last_processing_date(data_type)
+    return from_date
+
+def get_last_processing_date(data_type):
+    final_paths = s3_client.list_s3_dir(S3_FINAL_PATH.format(data_type=data_type))
+    if final_paths is None:
+        return datetime.datetime(2000, 1, 1)
+    else:
+        return select_newest_date(final_paths)
 
 
 def update_txt_list(path_list, path):
@@ -39,3 +56,18 @@ def add_point_col(df: pd.DataFrame) -> pd.DataFrame:
     """ Zips lon and lat columns to create a series of coords "points". """
     df['point'] = [Point(x, y) for x, y in zip(df[c.LON], df[c.LAT])]
     return df
+
+def read_df(path, keyword, dtype, extension="csv"):
+    path += f"{keyword}/{dtype}_{keyword}.{extension}"
+    if extension != 'csv':
+        raise InvalidExtensionException
+    log.info(f"Reading {keyword} {dtype} dataframe from {path}")
+    return pd.read_csv(path)
+
+def save_df(df, path, keyword, dtype, extension="csv"):
+    path += f"{keyword}/{dtype}_{keyword}.{extension}"
+    extension = path.split(".")[-1]
+    if extension != 'csv':
+        raise InvalidExtensionException
+    log.info(f"Saving {keyword} {dtype} dataframe to {path}")
+    return df.to_csv(path, index=False)

@@ -16,7 +16,7 @@ from common import (
     FINAL_DATA_PATH,
     COORDS_MAP_MODELS_PATH,
 )
-from pipelines.utils import add_point_col, unzip_point_to_lon_and_lat
+from pipelines.utils import add_point_col, unzip_point_to_lon_and_lat, read_df, save_df
 from s3_client import s3_client
 
 log = logging.getLogger(__name__)
@@ -24,20 +24,14 @@ log = logging.getLogger(__name__)
 s3_client = s3_client()
 
 
-def feature_engineering_task(data_type):
-    log.info("Starting feature engineering task...")
+def features(data_type):
+    log.info("Starting add features task...")
     coords_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH, dtype=data_type)
-    df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH, dtype=data_type)
+    df = read_df(LOCAL_ROOT, keyword='clean', data_type)
     log.info(f'Shape of input dataframe: {df.shape}')
     log.info(f'Shape of center coords map: {coords_map.shape}')
-
     df = df.pipe(add_coords_features, coords_map=coords_map)
-
-    s3_client.upload_df_to_s3_with_timestamp(df,
-                                             s3_path=FINAL_DATA_PATH,
-                                             keyword='final',
-                                             dtype=data_type,
-                                             )
+    save_df(df, LOCAL_ROOT, keyword='final', data_type)
     log.info(f"Finished adding features to {data_type} data.")
 
 

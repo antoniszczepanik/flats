@@ -73,3 +73,15 @@ def read_offer(offer_id: int, db: Session = Depends(get_db)):
     if db_offer is None:
         raise HTTPException(status_code=404, detail="Offer not found")
     return db_offer
+
+@app.get("api/v1/predict/", response_model=schemas.PricePrediction)
+def get_prediction(
+    building_height: int,
+    size: float,
+    floor: int,
+    building_year: int,
+    floor_n: int,
+    lon: float,
+    lat: float,
+):
+    return {"prediction": 10}

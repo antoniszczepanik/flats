@@ -26,3 +26,20 @@ class Offer(OfferBase):
     id: int
     class Config:
         orm_mode = True
+
+class PricePrediction(BaseModel):
+    prediction: float
+
+
+#SALE_MODEL_INPUTS = [
+#    columns.CLUSTER_COORDS_FACTOR,
+#    columns.BUILDING_HEIGHT,
+#    columns.SIZE,
+#    columns.FLOOR,
+#    columns.BUILDING_YEAR,
+#    columns.VIEW_COUNT,
+#    columns.DESC_LEN,
+#    columns.FLOOR_N,
+#    columns.LAT,
+#    columns.LON,
+#]

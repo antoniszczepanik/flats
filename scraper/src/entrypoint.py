@@ -9,6 +9,7 @@ Options:
     --use-remote  Use remote connection, not local minio instance
 Arguments:
     TASK  name of the task to be executed.
+    OFFER_TYPE for which offer type processing should be executed (rent/sale)
 
 Examples:
     run_task.py clean sale
@@ -23,20 +24,15 @@ import sys
 from docopt import docopt
 
 TASK_FUNCTIONS = {
-    "scrape": "from pipelines.scrape_task import scrape_task; scrape_task('{offer_type}')",
-    "concat": "from pipelines.concat_task import concat_data_task; concat_data_task('{offer_type}')",
-    "clean": "from pipelines.cleaning_task import cleaning_task; cleaning_task('{offer_type}')",
-    "features": "from pipelines.feature_engineering_task import feature_engineering_task; feature_engineering_task('{offer_type}')",
-    "apply": "from pipelines.apply_task import apply_task; apply_task('{offer_type}')",
-    "prepare-final": "from pipelines.prepare_final_data import task; task()",
-    # not under cron
-    "coord-map": "from pipelines.coords_map_task import coords_map_task; coords_map_task('{offer_type}')",
-    "unify-raw": "from pipelines.unify_raw_task import unify_raw_data_task; unify_raw_data_task('{offer_type}')",
-    "monitor": "from pipelines.monitor import monitor; monitor('{offer_type}')",
+    # Scrape data, get newest scraping date from last scrape file
+    "scrape": "from pipelines.scrape_task import task; task('{offer_type}')",
+    # Do all processing, get all files newer then last final file
+    "process": "from pipelines.process import process; process('{offer_type}')",
+    # on demand
+    "coord-map": "from pipelines.on_demand.coords_map_task import coords_map_task; coords_map_task('{offer_type}')",
+    "unify-raw": "from pipelines.on_demand.unify_raw_task import unify_raw_data_task; unify_raw_data_task('{offer_type}')",
+    #"monitor": "from pipelines.on_demand.monitor import monitor; monitor('{offer_type}')",
 }
-
-ALL_TASKS = [TASK_FUNCTIONS[task] for task in ["scrape", "concat", "clean", "features", "apply", "prepare-final"]]
-
 
 def run_command(task_function: str, offer_type: str = None):
     if offer_type:

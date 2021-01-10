@@ -26,7 +26,7 @@ COLUMNS_TO_SKIP = (columns.DESC, columns.IMAGE_LINK)
 
 s3_client = s3_client()
 
-def cleaning_task(data_type):
+def clean(data_type):
     log.info("Starting data cleaning pipeline...")
     clean_morizon_data(data_type)
     log.info(f"Successfully cleaned data for {data_type}.")

@@ -1,17 +1,16 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 import os
 
-import scrapy
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
+import scrapy
 
 from common import (
     RAW_DATA_PATH,
+    SCRAPING_TEMPDIR_PATH,
     get_current_dt,
     select_newest_date,
-    SCRAPING_TEMPDIR_PATH,
 )
 from s3_client import s3_client
 from spider.morizon_spider.spiders.morizon_spider import MorizonSpider
@@ -30,7 +29,7 @@ log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 
-def scrape_task(data_type):
+def task(data_type):
     if is_needed(data_type):
         # use project settings
         settings_file_path = 'spider.morizon_spider.settings' # The path seen from root, ie. from main.py

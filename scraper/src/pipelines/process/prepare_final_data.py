@@ -8,50 +8,36 @@ import pandas as pd
 
 import columns
 from common import (
-    CONCATED_DATA_PATH,
-    PREDICTED_DATA_PATH,
     TO_UPLOAD_DATA_PATH,
     SITE_DATA_LOCAL_PATH,
     SITE_DATA_S3_PATH,
 )
 from s3_client import s3_client
+from pipelines.utils import get_last_processing_date, read_df
+from pipelines.process.cleaning_task import get_df_to_process
 
 log = logging.getLogger(__name__)
-
 s3_client = s3_client()
 
-
-def task():
+def prepare_final(dtype):
     log.info("Starting prepare data task ...")
-
-    df_sale = read_and_merge_required_dfs('sale')
-    df_rent = read_and_merge_required_dfs('rent')
-
-    top_sale = prepare_offers(df_sale, 'sale')
-    log.info(f'Prepared sale shape {top_sale.shape}')
-    top_rent = prepare_offers(df_rent, 'rent')
-    log.info(f'Prepared rent shape {top_rent.shape}')
-
-    top_offers = pd.concat([top_sale, top_rent])
-    log.info(f'All offers shape {top_offers.shape}')
-
+    df = read_and_merge_required_dfs(df)
+    top = prepare_offers(df, dtype)
+    log.info(f'Final shape {top_sale.shape}')
     s3_client.upload_df_to_s3_with_timestamp(
-         top_offers,
+         top,
          TO_UPLOAD_DATA_PATH,
-         keyword='prepared',
-         dtype='sale',
+         keyword='final',
+         dtype=dtype,
     )
 
 
 def read_and_merge_required_dfs(dtype):
-    predicted_df = s3_client.read_newest_df_from_s3(
-        PREDICTED_DATA_PATH,
-        dtype=dtype,
-    )
-    concated_df = s3_client.read_newest_df_from_s3(
-        CONCATED_DATA_PATH,
-        dtype=dtype,
-    )
+    predicted_df = read_df(LOCAL_ROOT, keyword='predicted', data_type)
+
+    from_date = get_process_from_date(dtype)
+    concated_df = get_df_to_process(dtype, from_date)
+
     df = predicted_df.merge(
         concated_df[[columns.OFFER_ID,
                      columns.URL,

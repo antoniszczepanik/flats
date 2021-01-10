@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 import tempfile
 
@@ -19,12 +18,9 @@ logger.setLevel(logging.INFO)
 # data pipelines s3 paths
 S3_DATA_BUCKET = "flats-data"
 DATA_TYPES = ("sale", "rent")
-RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
-CONCATED_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/concated"
-CLEAN_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/clean"
-FINAL_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/final"
-PREDICTED_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/predicted"
-TO_UPLOAD_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/to_upload"
+S3_RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
+LOCAL_ROOT = "/data/"
+S3_FINAL_PATH = "/{data_type}/final"
 
 # models s3 paths
 S3_MODELS_BUCKET = "flats-models"

@@ -3,17 +3,17 @@ Load concated data and output clean parquets (categorical variables mapped to
 numerical format). Does not drop any rows.
 """
 import datetime
-import os
 import logging
 
 import pandas as pd
 
+import columns
 from common import (
     S3_RAW_DATA_PATH,
     LOCAL_ROOT,
     select_newest_date,
 )
-from pipelines.cleaning_utils import MorizonCleaner
+from pipelines.process.cleaning_utils import MorizonCleaner
 from pipelines.utils import save_df, get_process_from_date
 from s3_client import s3_client
 
@@ -51,7 +51,7 @@ def clean_morizon_data(data_type):
 
     log.info(f'Before cleaning dataframe shape: {df.shape}')
     log.info(f'Cleaned dataframe shape: {cleaned_df.shape}')
-    save_df(cleaned_df, LOCAL_ROOT, keyword='clean', data_type)
+    save_df(cleaned_df, LOCAL_ROOT, keyword='clean', dtype=data_type)
 
 
 
@@ -72,6 +72,7 @@ def concat_dfs(paths):
     for s3_path in paths:
         df = s3_client.read_df_from_s3(s3_path, columns_to_skip=COLUMNS_TO_SKIP)
         dfs.append(df)
-    log.info("Concatinating raw dfs ...")
     concatinated_df = pd.concat(dfs, sort=True).drop_duplicates(keep="last")
+    log.info("Successfully concatinated raw dfs.")
+    log.info(f"shape: {concatinated_df.shape}")
     return concatinated_df

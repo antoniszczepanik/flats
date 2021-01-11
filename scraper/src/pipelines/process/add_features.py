@@ -12,8 +12,7 @@ from shapely.ops import nearest_points
 import columns as c
 from common import (
     DATA_TYPES,
-    CLEAN_DATA_PATH,
-    FINAL_DATA_PATH,
+    LOCAL_ROOT,
     COORDS_MAP_MODELS_PATH,
 )
 from pipelines.utils import add_point_col, unzip_point_to_lon_and_lat, read_df, save_df
@@ -27,11 +26,11 @@ s3_client = s3_client()
 def features(data_type):
     log.info("Starting add features task...")
     coords_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH, dtype=data_type)
-    df = read_df(LOCAL_ROOT, keyword='clean', data_type)
+    df = read_df(LOCAL_ROOT, keyword='clean', dtype=data_type)
     log.info(f'Shape of input dataframe: {df.shape}')
     log.info(f'Shape of center coords map: {coords_map.shape}')
     df = df.pipe(add_coords_features, coords_map=coords_map)
-    save_df(df, LOCAL_ROOT, keyword='final', data_type)
+    save_df(df, LOCAL_ROOT, keyword='final', dtype=data_type)
     log.info(f"Finished adding features to {data_type} data.")
 
 

@@ -1,2 +1,2 @@
 build:
-	docker build -t flats .
+	docker build -t flats-scraper .

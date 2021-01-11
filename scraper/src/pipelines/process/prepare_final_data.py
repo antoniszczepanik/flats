@@ -7,13 +7,9 @@ from unidecode import unidecode
 import pandas as pd
 
 import columns
-from common import (
-    TO_UPLOAD_DATA_PATH,
-    SITE_DATA_LOCAL_PATH,
-    SITE_DATA_S3_PATH,
-)
+from common import S3_FINAL_PATH, LOCAL_ROOT
 from s3_client import s3_client
-from pipelines.utils import get_last_processing_date, read_df
+from pipelines.utils import get_process_from_date, read_df
 from pipelines.process.cleaning_task import get_df_to_process
 
 log = logging.getLogger(__name__)
@@ -21,29 +17,30 @@ s3_client = s3_client()
 
 def prepare_final(dtype):
     log.info("Starting prepare data task ...")
-    df = read_and_merge_required_dfs(df)
+    df = read_and_merge_required_dfs(dtype)
     top = prepare_offers(df, dtype)
-    log.info(f'Final shape {top_sale.shape}')
+    log.info(f'Final shape {top.shape}')
     s3_client.upload_df_to_s3_with_timestamp(
          top,
-         TO_UPLOAD_DATA_PATH,
+         S3_FINAL_PATH,
          keyword='final',
          dtype=dtype,
     )
 
 
 def read_and_merge_required_dfs(dtype):
-    predicted_df = read_df(LOCAL_ROOT, keyword='predicted', data_type)
-
+    predicted_df = read_df(LOCAL_ROOT, keyword='predicted', dtype=dtype)
+    log.info(f'Predicted shape {predicted_df.shape}')
     from_date = get_process_from_date(dtype)
     concated_df = get_df_to_process(dtype, from_date)
+    log.info(f'Concated shape {concated_df.shape}')
 
     df = predicted_df.merge(
         concated_df[[columns.OFFER_ID,
                      columns.URL,
                      columns.TITLE]],
         on=columns.OFFER_ID,
-        how='left')
+        how='left').drop_duplicates(subset=columns.OFFER_ID, keep="last")
     return df
 
 def prepare_offers(df, dtype):

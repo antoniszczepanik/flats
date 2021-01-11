@@ -3,31 +3,36 @@
 Runs a series or one of tasks.
 
 Usage:
-    run_task.py TASK OFFER_TYPE [--use-remote]
+    run.sh TASK OFFER_TYPE [--use-remote] [--from-date=<date>]
 
 Options:
     --use-remote  Use remote connection, not local minio instance
+    --from-date DATE  Only consider files newer than specified date
 Arguments:
     TASK  name of the task to be executed.
     OFFER_TYPE for which offer type processing should be executed (rent/sale)
 
 Examples:
-    run_task.py clean sale
+    run.sh clean sale
+    run.sh clean sale --user-remote
+    run.sh clean sale --from-date="2020-01-01"
 
 Tasks available:
 {tasks}
 """
+import datetime
 import os
 import pathlib
 import subprocess
 import sys
+
 from docopt import docopt
 
 TASK_FUNCTIONS = {
     # Scrape data, get newest scraping date from last scrape file
     "scrape": "from pipelines.scrape_task import task; task('{offer_type}')",
     # Do all processing, get all files newer then last final file
-    "process": "from pipelines.process import process; process('{offer_type}')",
+    "process": "from pipelines.process.process import process_task; process_task('{offer_type}')",
     # on demand
     "coord-map": "from pipelines.on_demand.coords_map_task import coords_map_task; coords_map_task('{offer_type}')",
     "unify-raw": "from pipelines.on_demand.unify_raw_task import unify_raw_data_task; unify_raw_data_task('{offer_type}')",
@@ -58,6 +63,10 @@ if __name__ == "__main__":
 
     if not args['--use-remote']:
         os.environ["USE_MINIO"] = 'true'
+
+    from_date_str = args.get('--from-date')
+    if from_date_str:
+        os.environ["PROCESS_RAW_FILES_FROM"] = from_date_str
 
     if task == "all":
         for task_fn in ALL_TASKS:

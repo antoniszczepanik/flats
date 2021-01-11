@@ -1,11 +1,12 @@
 from datetime import datetime
 import logging
+import os
 
 import pandas as pd
 from shapely.geometry import MultiPoint, Point
 
 import columns as c
-from common import S3_FINAL_PATH
+from common import S3_FINAL_PATH, select_newest_date
 from s3_client import s3_client
 
 s3_client = s3_client()
@@ -13,15 +14,17 @@ s3_client = s3_client()
 log = logging.getLogger(__name__)
 
 def get_process_from_date(data_type):
-    from_date = os.environ.get("PROCESS_RAW_FILES_FROM")
-    if not from_date:
+    from_date_str = os.environ.get("PROCESS_RAW_FILES_FROM")
+    if not from_date_str:
         from_date = get_last_processing_date(data_type)
+    else:
+        from_date = datetime.strptime(from_date_str, '%Y-%m-%d')
     return from_date
 
 def get_last_processing_date(data_type):
     final_paths = s3_client.list_s3_dir(S3_FINAL_PATH.format(data_type=data_type))
-    if final_paths is None:
-        return datetime.datetime(2000, 1, 1)
+    if not final_paths:
+        return datetime(2000, 1, 1)
     else:
         return select_newest_date(final_paths)
 
@@ -58,14 +61,14 @@ def add_point_col(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def read_df(path, keyword, dtype, extension="csv"):
-    path += f"{keyword}/{dtype}_{keyword}.{extension}"
+    path += f"/{dtype}_{keyword}.{extension}"
     if extension != 'csv':
         raise InvalidExtensionException
     log.info(f"Reading {keyword} {dtype} dataframe from {path}")
     return pd.read_csv(path)
 
 def save_df(df, path, keyword, dtype, extension="csv"):
-    path += f"{keyword}/{dtype}_{keyword}.{extension}"
+    path += f"/{dtype}_{keyword}.{extension}"
     extension = path.split(".")[-1]
     if extension != 'csv':
         raise InvalidExtensionException

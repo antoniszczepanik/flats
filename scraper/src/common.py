@@ -20,7 +20,7 @@ S3_DATA_BUCKET = "flats-data"
 DATA_TYPES = ("sale", "rent")
 S3_RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
 LOCAL_ROOT = "/data/"
-S3_FINAL_PATH = "/{data_type}/final"
+S3_FINAL_PATH = S3_DATA_BUCKET + "/{data_type}/final"
 
 # models s3 paths
 S3_MODELS_BUCKET = "flats-models"
@@ -31,8 +31,6 @@ SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
 
 # website paths
 S3_WEBSITE_BUCKET = 'flats.antoniszczepanik.com'
-SITE_DATA_LOCAL_PATH = '/tmp/top_offers.json'
-SITE_DATA_S3_PATH = S3_WEBSITE_BUCKET + '/data.json'
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,

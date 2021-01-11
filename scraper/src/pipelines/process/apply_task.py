@@ -7,11 +7,10 @@ import logging
 import pandas as pd
 
 from common import (
-    FINAL_DATA_PATH,
+    LOCAL_ROOT,
     MODELS_PATH,
     RENT_MODEL_INPUTS,
     SALE_MODEL_INPUTS,
-    PREDICTED_DATA_PATH,
 )
 import columns
 from s3_client import s3_client
@@ -31,7 +30,7 @@ def model_apply(data_type):
         log.warning(f'Did not find any model for {data_type}')
         return
 
-    final_df = read_df(LOCAL_ROOT, keyword='final', data_type)
+    final_df = read_df(LOCAL_ROOT, keyword='final', dtype=data_type)
 
     log.info(f'Applying model for {data_type}...')
     if data_type == 'sale':
@@ -42,7 +41,7 @@ def model_apply(data_type):
         final_df = final_df.dropna(subset=RENT_MODEL_INPUTS)
         final_df[columns.RENT_PRED] = get_predictions(model, final_df, RENT_MODEL_INPUTS)
         final_df[columns.RENT_DIFF] = final_df[columns.PRICE_M2] - final_df[columns.RENT_PRED]
-    save_df(final_df, LOCAL_ROOT, keyword='predicted', data_type)
+    save_df(final_df, LOCAL_ROOT, keyword='predicted', dtype=data_type)
     log.info(f"Successfully applied model for {data_type}.")
     log.info("Finished apply model pipeline.")
 

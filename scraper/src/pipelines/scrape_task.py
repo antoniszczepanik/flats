@@ -7,7 +7,7 @@ from scrapy.utils.project import get_project_settings
 import scrapy
 
 from common import (
-    RAW_DATA_PATH,
+    S3_RAW_DATA_PATH,
     SCRAPING_TEMPDIR_PATH,
     get_current_dt,
     select_newest_date,
@@ -45,7 +45,7 @@ def task(data_type):
 def upload_scraped_file_to_s3(data_type):
     output_path = SCRAPING_TEMPDIR_PATH.format(data_type=data_type)
     current_dt = get_current_dt()
-    output_target_s3_path  = RAW_DATA_PATH.format(data_type=data_type) + f"/raw_{data_type}_{current_dt}.csv"
+    output_target_s3_path  = S3_RAW_DATA_PATH.format(data_type=data_type) + f"/raw_{data_type}_{current_dt}.csv"
     is_success = s3_client.upload_file_to_s3(output_path, output_target_s3_path)
     os.remove(output_path)
     log.info(f'Removed temporary scraping dump file {output_path}.')
@@ -53,7 +53,7 @@ def upload_scraped_file_to_s3(data_type):
 
 
 def is_needed(data_type):
-    raw_paths = s3_client.list_s3_dir(RAW_DATA_PATH.format(data_type=data_type))
+    raw_paths = s3_client.list_s3_dir(S3_RAW_DATA_PATH.format(data_type=data_type))
     newest_date = select_newest_date(raw_paths)
     if datetime.now() - newest_date > timedelta(hours=SKIP_SCRAPING_BUFFER):
         return True

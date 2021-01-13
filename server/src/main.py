@@ -67,14 +67,14 @@ def read_offers(
     return offers
 
 
-@app.get("api/v1/offers/{offer_id}", response_model=schemas.Offer)
+@app.get("/api/v1/offers/{offer_id}", response_model=schemas.Offer)
 def read_offer(offer_id: int, db: Session = Depends(get_db)):
     db_offer = crud.get_offer(db, offer_id=offer_id)
     if db_offer is None:
         raise HTTPException(status_code=404, detail="Offer not found")
     return db_offer
 
-@app.get("api/v1/predict/", response_model=schemas.PricePrediction)
+@app.get("/api/v1/predict/", response_model=schemas.PricePrediction)
 def get_prediction(
     building_height: int,
     size: float,

@@ -4,18 +4,20 @@ services:
   server:
     restart: always
     image: flats_v2_server
+    container_name: server
     ports:
       - "8000:8000"
     volumes:
       - ./src:/src
     networks:
-      - db
+      - flats
     depends_on:
       - postgres
 
   postgres:
     restart: always
     image: postgres
+    container_name: postgres
     ports:
       - "5432:5432"
     environment:
@@ -24,11 +26,11 @@ services:
 #    volumes:
             #  - /home/antoni/postgres/data:/var/lib/postgresql/data 
     networks:
-      - db
+      - flats
 
 volumes:
         src:
 
-networks: 
-  db:
-    driver: bridge
+networks:
+  flats:
+    external: true

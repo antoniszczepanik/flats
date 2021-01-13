@@ -55,6 +55,8 @@ def upload_scraped_file_to_s3(data_type):
 def is_needed(data_type):
     raw_paths = s3_client.list_s3_dir(S3_RAW_DATA_PATH.format(data_type=data_type))
     newest_date = select_newest_date(raw_paths)
+    if not newest_date:
+        return True
     if datetime.now() - newest_date > timedelta(hours=SKIP_SCRAPING_BUFFER):
         return True
     else:

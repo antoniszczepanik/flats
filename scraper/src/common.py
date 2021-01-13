@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 S3_DATA_BUCKET = "flats-data"
 DATA_TYPES = ("sale", "rent")
 S3_RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
-LOCAL_ROOT = "/data/"
+LOCAL_ROOT = "/data"
 S3_FINAL_PATH = S3_DATA_BUCKET + "/{data_type}/final"
 
 # models s3 paths

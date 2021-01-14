@@ -4,14 +4,20 @@ from typing import List
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+import pandas as pd
 
+from add_features import get_coords_factor
 import crud
+import columns as c
 import models
 import schemas
 from database import SessionLocal, engine
+from s3_client import S3Client
 
 models.Base.metadata.create_all(bind=engine)
-
+s3 = S3Client()
+# models s3 paths
+model = s3.read_newest_model_from_s3("flats-models/{data_type}/models", dtype="sale")
 app = FastAPI()
 
 origins = [
@@ -76,12 +82,23 @@ def read_offer(offer_id: int, db: Session = Depends(get_db)):
 
 @app.get("/api/v1/predict/", response_model=schemas.PricePrediction)
 def get_prediction(
-    building_height: int,
     size: float,
     floor: int,
-    building_year: int,
     floor_n: int,
+    building_year: int,
     lon: float,
     lat: float,
 ):
-    return {"prediction": 10}
+    coords_factor = get_coords_factor(lon, lat)
+    return {"prediction": size * model.predict([[
+        coords_factor,
+        floor_n,
+        size,
+        floor,
+        building_year,
+        50, # view count placeholder
+        1000, # desc len placeholder
+        floor_n,
+        lon,
+        lat,
+    ]])}

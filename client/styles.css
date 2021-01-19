@@ -1,0 +1,53 @@
+body {
+  width: 80%;
+}
+
+:root {
+  --background: #fbfbfb;
+  --logo: #f38181;
+  --text: #756c83;
+  --other: #b9e1dc;
+}
+
+body {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--background);
+  color: var(--text);
+  font-family: Montserrat,sans-serif;
+  text-align: center;
+  margin: auto;
+}
+
+h1 {
+  color: var(--logo);
+  font-size: 3.5em;
+  font-weight: 900;
+  padding: 0.01em;
+}
+
+h4 {
+  font-size: 1.5em;
+}
+#mapid { 
+  height: 700px;
+}
+.offer-div-icon {
+  background: white;
+  border: 0.1em solid black;
+  border-radius: .5em;
+  display: inline-block;
+}
+.form-group {
+  margin: 1em;
+}
+.submit-button {
+  margin: 1em;
+}
+
+
+@media (max-width: 600px) {
+  body {
+    width: 100%;
+  }
+}

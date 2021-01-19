@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  server:
+    restart: always
+    image: flats_v2_server
+    container_name: server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/src
+      - /home/antoni/.aws/credentials:/root/.aws/credentials:ro
+    networks:
+      - flats
+
+    environment:
+      USE_MINIO: "true"
+    depends_on:
+      - postgres
+
+  postgres:
+    restart: always
+    image: postgres
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+#    volumes:
+            #  - /home/antoni/postgres/data:/var/lib/postgresql/data 
+    networks:
+      - flats
+
+volumes:
+        src:
+
+networks:
+  flats:
+    external: true

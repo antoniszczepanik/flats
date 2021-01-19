@@ -29,27 +29,43 @@ After that you can scrape first offers. MinIO is used as local S3 storage so you
 
 `cd scraper && ./setup_minio.sh`
 
-If you'd like to mount MinIO elsewhere take a look at `./setup_minio.sh` script.
+If you'd like to mount MinIO elsewhere than `~/flats_buckets` take a look at `./setup_minio.sh` script.
 Then we can run container that scrapes and processes the data.
 
+TODO: Generate coord map and 
+
 `./run.sh scrape sale && ./run.sh process sale`
+
+And you just scraped and valuated first batch of offers.
+
+If you'd like to learn more about the script you can
+
+`./run.sh --help`
+
 
 
 # Technical description
 
 The project is structured as 3 components.
 
-- Scraper, which scrapes & valuates the offer. (model is applied as part of scraping pipeline)
-- Server with Postgres in the background, allowing to query large amount of data.
-- Client, just to present the results in digestable form.
+- Scraper, which scrapes & valuates the offers. (model is applied as part of scraping pipeline)
+- Server (REST + Postgres) allowing to query significant amount of data.
+- Client, just to present the results in digestable form, on a map.
 
 ## Scraper
-- scraper process architecture
-- model
+Scraper works as follows:
+1. Scrape offers.
+2. Clean data, filter outliers, generate new features, etc
+3. Apply previously trained model.
+4. Upload offers to the server.
+
+Additionally one can run one of on demand tasks
+- Model training, which will read raw scraped data after specified date.
+- "Coords map" generation. This is a table of neigborhoods with mean prices & additional features assigned. 
+  It will be stored in MinIO and used when applying the model.
 
 ## Webserver
-- technologies
-- [png]
+Just a REST API with Postgres as a backend, written in FastAPI, Pyhon.
 
 ## Client
-- Vanilla Javascript + Leaflet
+Vanilla Javascript + Leaflet

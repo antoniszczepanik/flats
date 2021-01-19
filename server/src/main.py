@@ -90,14 +90,14 @@ def get_prediction(
     lat: float,
 ):
     coords_factor = get_coords_factor(lon, lat)
-    return {"prediction": size * model.predict([[
+    return {"prediction": model.predict([[
         coords_factor,
         floor_n,
         size,
         floor,
         building_year,
-        50, # view count placeholder
-        1000, # desc len placeholder
+        0, # view count placeholder
+        0, # desc len placeholder
         floor_n,
         lon,
         lat,

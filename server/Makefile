@@ -10,10 +10,10 @@ run: build
 		flats_v2_server
 bash: build
 	docker run -it --rm\
-		-p 8000:8000 \
 		-v ${PWD}/src:/src \
 		--network flats \
-		--name postgres \
+		-p 8000:8000 \
+		--name server \
 		flats_v2_server bash
 pg:
 	docker run -it --rm \

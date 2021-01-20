@@ -2,11 +2,45 @@
 
 1. Rent & sale offers are scraped and valuated.
 2. Offer price is compared with valuations.
-3. You can filter most interesing & preview most interesting ones on map.
+3. You can filter & preview most interesting ones on map.
 
 [picture]
 
-# How to run the project?
+# Technical description
+
+The project is structured as 3 components.
+
+- Scraper which scrapes & valuates the offers.
+- Server (REST + Postgres) allowing to query the data.
+- Client, just to present the results on a map.
+
+## Scraper
+
+Scraper works as follows:
+1. It scrapes offers.
+2. Data is cleaned, outliers are filtered, new features are added, etc
+3. Newest of previously trained models is applied.
+4. Offers are uploaded through API.
+
+Additionally one can run one of on demand tasks
+- Model training, which will read raw scraped data after specified date.
+- "Coords map" generation. This is a table of neigborhoods with mean prices & additional features assigned. 
+  It will be stored in MinIO and used when applying the model.
+
+### Model
+The model is Random Forest Regressor.
+It's trained on all historically scraped data, so the valuation is of offer price.
+Currently the error is around 14% nRMSE for both sale and rent offers.
+
+## Webserver
+REST API with Postgres backend, written in FastAPI, Pyhon.
+Here is chart of the architecture.
+
+## Client
+The client has been written in vanilla Javascript and Leaflet was used for mapping capabilities.
+
+
+# How to run it?
 
 All components in this project are packaged as docker containers.
 In order to run it you have to have `docker` and `docker-comspose` installed.
@@ -33,29 +67,3 @@ If you'd like to learn more about the script you can
 `./run.sh --help`
 
 
-
-# Technical description
-
-The project is structured as 3 components.
-
-- Scraper, which scrapes & valuates the offers. (model is applied as part of scraping pipeline)
-- Server (REST + Postgres) allowing to query significant amount of data.
-- Client, just to present the results in digestable form, on a map.
-
-## Scraper
-Scraper works as follows:
-1. Scrape offers.
-2. Clean data, filter outliers, generate new features, etc
-3. Apply previously trained model.
-4. Upload offers to the server.
-
-Additionally one can run one of on demand tasks
-- Model training, which will read raw scraped data after specified date.
-- "Coords map" generation. This is a table of neigborhoods with mean prices & additional features assigned. 
-  It will be stored in MinIO and used when applying the model.
-
-## Webserver
-Just a REST API with Postgres as a backend, written in FastAPI, Pyhon.
-
-## Client
-Vanilla Javascript + Leaflet

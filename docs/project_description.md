@@ -1,4 +1,15 @@
-# Flats - detecting undervalued real estate offers
+---
+# Compile with `pandoc project_description.md -o Flats.pdf --highlight-style zenburn`
+title: IleToMieszkanie?
+subtitle: Valuate rent & sale offers and preview them on a map - From HTML to PostGIS project
+geometry: margin=2.5cm
+link: http://flats.antoniszczepanik.com
+author:
+  - Antoni Szczepanik
+date: 22-01-2021
+---
+
+# IleToMieszkanie?
 
 The general idea behind this project is as follows:
 
@@ -6,43 +17,10 @@ The general idea behind this project is as follows:
 2. Offer price is compared with valuations.
 3. You can filter & preview most interesting offers on map.
 
-It works in context of polish market, but could be easily extended by addding new scraper.
 
-![Screenshot of the page](docs/webpage.png)
+![Screenshot of the page](webpage.png)
 
-# How to run it?
-
-All components in this project are packaged as docker containers.
-In order to run it you have to have `docker` and `docker-comspose` installed.
-
-The first step is to run MinIO container - it serves as static data storage. It mimics S3, which would be used in production.
-
-```txt
-cd scraper && ./setup_minio.sh && cd ..
-```
-
-After that run server and database containers. This is where scraped data will be finally uploaded.
-
-```txt
-cd server && docker-compose up -d && cd ..
-```
-Now, you have to train the model. Scrape the data with:
-
-Train the model:
-
-Now you can scrape & process first offers.
-
-```txt
-./run.sh scrape sale && ./run.sh process sale
-```
-
-And you just scraped and valuated first batch of offers :) 
-
-`./run.sh` is used to run all on-demand task in this project. To learn more try:
-
-```txt
-./run.sh --help
-```
+\pagebreak
 
 # Architecture Overview
 
@@ -54,7 +32,7 @@ The project is structured as 3 components.
 
 The interaction between the components is presented in the chart below.
 
-![Architecture overview](docs/architecture_overview.png)
+![Architecture overview](architecture_overview.png)
 
 ## Scraper
 
@@ -81,7 +59,7 @@ Webservers role is to allow querying all scraped & valuated offers.
 It offers REST API (with Postgres in the backend) allowing to add and retrieve offers.
 The endpoint available are presented below.
 
-![Available endpoints](docs/available_endpoints.png)
+![Available endpoints](available_endpoints.png)
 
 More complete Swagger documentation is availabe at `{server_url}{server_port}/docs`.
 
@@ -96,3 +74,36 @@ You can filter & preview most interesting ones on map. It is possible to query t
 - offer price
 - size
 - difference between valuation and offer price
+
+# How to run it?
+
+All components in this project are packaged as docker containers.
+In order to run it you have to have `docker` and `docker-comspose` installed.
+
+The first step is to run MinIO container - it serves as static data storage. It mimics S3 key-value storage, which is used in production.
+
+```txt
+cd scraper && ./setup_minio.sh && cd ..
+```
+
+After that run server and database containers. This is where scraped data will be finally uploaded.
+
+```txt
+cd server && docker-compose up -d && cd ..
+```
+
+TODO: Generate coord map and train model
+
+Now you can scrape & process first offers.
+
+```txt
+./run.sh scrape sale && ./run.sh process sale
+```
+
+And you just scraped and valuated first batch of offers :) 
+
+`./run.sh` is used to run all on-demand task in this project. To learn more try:
+
+```txt
+./run.sh --help
+```

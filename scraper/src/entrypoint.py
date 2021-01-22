@@ -13,9 +13,9 @@ Arguments:
     OFFER_TYPE for which offer type processing should be executed (rent/sale)
 
 Examples:
-    run.sh clean sale
-    run.sh clean sale --user-remote
-    run.sh clean sale --from-date="2020-01-01"
+    run.sh scrape sale
+    run.sh process sale --use-remote
+    run.sh scrape rent --from-date="2020-01-01"
 
 Tasks available:
 {tasks}
@@ -66,11 +66,10 @@ if __name__ == "__main__":
 
     from_date_str = args.get('--from-date')
     if from_date_str:
-        os.environ["PROCESS_RAW_FILES_FROM"] = from_date_str
+        if task == "scrape":
+            os.environ["SCRAPE_OFFERS_FROM"] = from_date_str
+        elif task == "process":
+            os.environ["PROCESS_RAW_FILES_FROM"] = from_date_str
 
-    if task == "all":
-        for task_fn in ALL_TASKS:
-            run_command(task_fn, offer_type=offer_type)
-    else:
-        task_fn = TASK_FUNCTIONS[task]
-        run_command(task_fn, offer_type=offer_type)
+    task_fn = TASK_FUNCTIONS[task]
+    run_command(task_fn, offer_type=offer_type)

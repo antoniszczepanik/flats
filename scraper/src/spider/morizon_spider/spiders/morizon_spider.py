@@ -6,7 +6,12 @@ import scrapy
 from scrapy.utils.log import configure_logging
 
 from morizon_spider.items import MorizonSpiderItem
-from common import S3_RAW_DATA_PATH, select_newest_date, logs_conf
+from common import (
+    S3_RAW_DATA_PATH,
+    get_process_from_date,
+    logs_conf,
+    select_newest_date,
+)
 import columns
 from s3_client import s3_client
 
@@ -302,6 +307,4 @@ class MorizonSpider(scrapy.Spider):
         return date
 
     def _read_last_scraping_date(self):
-        raw_s3_dir = S3_RAW_DATA_PATH.format(data_type=self.name)
-        scraped_files = s3_client.list_s3_dir(raw_s3_dir)
-        return select_newest_date(scraped_files)
+        return get_process_from_date("sale", last_date_of="raw")

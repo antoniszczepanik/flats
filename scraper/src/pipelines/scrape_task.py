@@ -22,24 +22,23 @@ spiders = {
 }
 
 # If previously scraped package is less than SKIP_SCRAPING_BUFFER skip scraping
-# mainly for development purposes (working with airflow)
-SKIP_SCRAPING_BUFFER = 12
+# mainly for development purposes & not to overwhelm morizon
+SKIP_SCRAPING_BUFFER = 1
 
 log = logging.getLogger(__name__)
 
 s3_client = s3_client()
 
 def task(data_type):
-    if is_needed(data_type):
-        # use project settings
-        settings_file_path = 'spider.morizon_spider.settings' # The path seen from root, ie. from main.py
-        os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_file_path)
-        spider = spiders[data_type]
-        process = CrawlerProcess(get_project_settings())
-        process.crawl(spider)
-        process.start()
+    # use project settings
+    settings_file_path = 'spider.morizon_spider.settings' # The path seen from root, ie. from main.py
+    os.environ.setdefault('SCRAPY_SETTINGS_MODULE', settings_file_path)
+    spider = spiders[data_type]
+    process = CrawlerProcess(get_project_settings())
+    process.crawl(spider)
+    process.start()
 
-        upload_scraped_file_to_s3(data_type)
+    upload_scraped_file_to_s3(data_type)
 
 
 def upload_scraped_file_to_s3(data_type):
@@ -50,15 +49,3 @@ def upload_scraped_file_to_s3(data_type):
     os.remove(output_path)
     log.info(f'Removed temporary scraping dump file {output_path}.')
     return is_success
-
-
-def is_needed(data_type):
-    raw_paths = s3_client.list_s3_dir(S3_RAW_DATA_PATH.format(data_type=data_type))
-    newest_date = select_newest_date(raw_paths)
-    if not newest_date:
-        return True
-    if datetime.now() - newest_date > timedelta(hours=SKIP_SCRAPING_BUFFER):
-        return True
-    else:
-        log.info(f"Previous scraping was done {datetime.now() - newest_date} ago. (less than {SKIP_SCRAPING_BUFFER} hours)")
-        return False

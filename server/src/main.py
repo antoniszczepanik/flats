@@ -90,7 +90,7 @@ def get_prediction(
     lat: float,
 ):
     coords_factor = get_coords_factor(lon, lat)
-    return {"prediction": model.predict([[
+    return {"prediction": size * model.predict([[
         coords_factor,
         floor_n,
         size,

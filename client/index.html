@@ -84,6 +84,48 @@
   </form>
 
   <div id="mapid"></div>
+  </br>
+  <h2>Wycena</h2>
+  <form>
+    <div class="input-group">
+      <div class="form-group">
+        <label for="valuate_size"> Rozmiar </label>
+        <input id="valuate_size" type="number" class="form-control" placeholder="m2" />
+      </div>
+
+      <div class="form-group">
+        <label for="valuate_floor"> Piętro </label>
+        <input id="valuate_floor" type="number" class="form-control" placeholder="" />
+      </div>
+
+      <div class="form-group">
+        <label for="valuate_floor_n"> Liczba pięter w budynku </label>
+        <input id="valuate_floor_n" type="number" class="form-control" placeholder="4" />
+      </div>
+
+      <div class="form-group">
+        <label for="valuate_year"> Rok budowy </label>
+        <input id="valuate_year" type="number" class="form-control" placeholder="2010" />
+      </div>
+
+      <div class="form-group">
+        <label for="valuate_lat">Lokalizacja</label>
+        <div class="input-group">
+          <input id="valuate_location" type="text" class="form-control" placeholder="Warszawa" />
+          <div class="input-group-append">
+            <button type="button" onclick="Valuate()" class="btn btn-secondary">Wyceń</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </br> 
+    <h2 id=value></h2>
+  </form>
+</br>
+</br>
+</br>
+
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
     crossorigin="anonymous"></script>

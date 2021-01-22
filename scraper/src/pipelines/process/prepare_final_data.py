@@ -7,9 +7,9 @@ from unidecode import unidecode
 import pandas as pd
 
 import columns
-from common import S3_FINAL_PATH, LOCAL_ROOT
+from common import S3_FINAL_PATH, LOCAL_ROOT, get_process_from_date
 from s3_client import s3_client
-from pipelines.utils import get_process_from_date, read_df
+from pipelines.utils import read_df
 from pipelines.process.cleaning_task import get_df_to_process
 
 log = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def prepare_final(dtype):
 def read_and_merge_required_dfs(dtype):
     predicted_df = read_df(LOCAL_ROOT, keyword='predicted', dtype=dtype)
     log.info(f'Predicted shape {predicted_df.shape}')
-    from_date = get_process_from_date(dtype)
+    from_date = get_process_from_date(dtype, last_date_of="final")
     concated_df = get_df_to_process(dtype, from_date)
     log.info(f'Concated shape {concated_df.shape}')
 

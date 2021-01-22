@@ -75,6 +75,9 @@ class s3_client:
         """Returns a list of filenames"""
         bucket, path = self.split_bucket_path(s3_dir)
         response = self.client.list_objects_v2(Bucket=bucket, Prefix=path)
+        if not response.get("Contents"):
+            log.info("Did not find any files in {s3_dir}.")
+            return None
         file_list = [f"{bucket}/{f['Key']}" for f in response["Contents"]]
         # do not list directories
         file_list = [f for f in file_list if f[-1] != "/"]

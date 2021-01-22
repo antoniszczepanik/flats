@@ -12,9 +12,11 @@ from common import (
     S3_RAW_DATA_PATH,
     LOCAL_ROOT,
     select_newest_date,
+    get_process_from_date,
 )
 from pipelines.process.cleaning_utils import MorizonCleaner
-from pipelines.utils import save_df, get_process_from_date
+from pipelines.utils import save_df
+
 from s3_client import s3_client
 
 log = logging.getLogger(__name__)
@@ -38,7 +40,7 @@ def clean_morizon_data(data_type):
     Clean most current file from in_path directory
     for each spider. Save the output to out_path directory.
     """
-    from_date = get_process_from_date(data_type)
+    from_date = get_process_from_date(data_type, last_date_of="final")
     log.info(f'Will concat raw files newer than {from_date}')
     df = get_df_to_process(data_type, from_date)
     batches = [df[i:i+CHUNK_SIZE] for i in range(0, df.shape[0],CHUNK_SIZE)]

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import logging
+import os
 import tempfile
 
 import columns
@@ -28,9 +29,6 @@ COORDS_MAP_MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/coords_encoding"
 MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/models"
 
 SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
-
-# website paths
-S3_WEBSITE_BUCKET = 'flats.antoniszczepanik.com'
 
 CLEANING_REQUIRED_COLUMNS = [
     columns.BALCONY,
@@ -114,10 +112,36 @@ def get_date_from_filename(filename):
         return None
     return datetime.strptime(date_numbers, "%Y%m%d%H%M%S")
 
+def get_process_from_date(data_type, last_date_of="raw"):
+    if last_date_of == "final":
+        from_date_str = os.environ.get("PROCESS_RAW_FILES_FROM")
+    elif last_date_of == "raw":
+        from_date_str = os.environ.get("SCRAPE_OFFERS_FROM")
+    else:
+        raise Exception(f"What is {last_date_of}? Cannot know which files to check")
+    if not from_date_str:
+        from_date = get_last_processing_date(data_type, last_date_of=last_date_of)
+    else:
+        from_date = datetime.strptime(from_date_str, '%Y-%m-%d')
+    return from_date
 
-def get_current_dt():
-    return datetime.now().strftime("%Y_%m_%dT%H_%M_%S")
+
+def get_last_processing_date(data_type, last_date_of):
+    from s3_client import s3_client
+    s3_client = s3_client()
+    if last_date_of == "raw":
+        paths = s3_client.list_s3_dir(S3_FINAL_PATH.format(data_type=data_type))
+    elif last_date_of == "final":
+        paths = s3_client.list_s3_dir(S3_RAW_DATA_PATH.format(data_type=data_type))
+
+    if not paths:
+        return datetime(2000, 1, 1)
+    else:
+        return select_newest_date(paths)
 
 
 class InvalidExtensionException(Exception):
     pass
+
+def get_current_dt():
+    return datetime.now().strftime("%Y_%m_%dT%H_%M_%S")

@@ -13,20 +13,6 @@ s3_client = s3_client()
 
 log = logging.getLogger(__name__)
 
-def get_process_from_date(data_type):
-    from_date_str = os.environ.get("PROCESS_RAW_FILES_FROM")
-    if not from_date_str:
-        from_date = get_last_processing_date(data_type)
-    else:
-        from_date = datetime.strptime(from_date_str, '%Y-%m-%d')
-    return from_date
-
-def get_last_processing_date(data_type):
-    final_paths = s3_client.list_s3_dir(S3_FINAL_PATH.format(data_type=data_type))
-    if not final_paths:
-        return datetime(2000, 1, 1)
-    else:
-        return select_newest_date(final_paths)
 
 
 def update_txt_list(path_list, path):

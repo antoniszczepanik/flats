@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000/api/v1/offers/";
+const API_URL = "http://localhost:8000/api/v1";
 
 var map = L.map("mapid", { preferCanvas: true }).setView(
   [51.9189046, 19.1343786],
@@ -62,11 +62,15 @@ function getOfferHtml(offer) {
       </tr>
       <tr>
         <td>Warte:</td>
-        <td><strong>${roundLargeToThousands( (offer.estimate / 50) * 50)} zł</strong></td>
+        <td><strong>${roundLargeToThousands(
+          (offer.estimate / 50) * 50
+        )} zł</strong></td>
       </tr>
       <tr>
         <td>Różnica:</td>
-        <td><strong class="${color_class}">${roundLargeToThousands( price_pred_diff)} zł </strong></td>
+        <td><strong class="${color_class}">${roundLargeToThousands(
+    price_pred_diff
+  )} zł </strong></td>
       </tr>
       <tr>
         <td>Powierzchnia:</td>
@@ -140,12 +144,39 @@ async function refreshOffers() {
       .value,
   };
   query = filterNullQueryParams(query);
-  var url = new URL(API_URL);
+  var url = new URL(API_URL + "/offers/");
   url.search = new URLSearchParams(query);
   const data = await getData(url.toString());
   updateOfferCount(data.length);
   data.forEach(renderOffer);
   markers.addTo(map);
 }
+
+async function Valuate() {
+  // get location text
+  var location = document.getElementById("valuate_location").value;
+  var url =
+    "https://api.geoapify.com/v1/geocode/search?text=" +
+    location +
+    "&lang=fr&limit=1&&filter=countrycode:pl&apiKey=3892daa71d7a4906adfd9c39696f8b35";
+  var data = await getData(url);
+  let coords = data.features[0].geometry.coordinates;
+  query = {
+    floor_n: document.getElementById("valuate_floor_n").value,
+    floor: document.getElementById("valuate_floor").value,
+    size: document.getElementById("valuate_size").value,
+    building_year: document.getElementById("valuate_year").value,
+    lon: coords[0],
+    lat: coords[1]
+  };
+
+  query = filterNullQueryParams(query);
+  var url = new URL(API_URL + "/predict/");
+  url.search = new URLSearchParams(query);
+  var prediction = await getData(url.toString());
+  var price = roundLargeToThousands(parseFloat(prediction["prediction"]));
+  document.getElementById("value").innerHTML = "To mieszkanie jest warte " + price + "zł";
+}
+
 
 refreshOffers();

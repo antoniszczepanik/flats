@@ -17,6 +17,7 @@ def upload(dtype):
         dtype=dtype,
     )
     size = len(df)
+    log.info(f"Final dataframe shape: {df.shape}")
     url = "http://server:8000/api/v1/offers/"
     headers = {'Content-type': 'application/json'}
     already_uploaded = 0

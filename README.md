@@ -1,5 +1,5 @@
 # Flats
-The purpose of this project is to make process of searching for a new apartment in Poland more pleasent.
+The purpose of this project is to make process of searching for a new apartment in Poland more pleasant.
 
 The general idea is as follows:
 

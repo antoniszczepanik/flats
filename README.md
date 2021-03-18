@@ -1,12 +1,13 @@
-# Flats - detecting undervalued real estate offers
+# Flats
+The purpose of this project is to make process of searching for a new apartment in Poland more pleasant.
 
-The general idea behind this project is as follows:
+The general idea is as follows:
 
 1. Rent & sale offers are scraped and valuated.
 2. Offer price is compared with valuations.
 3. You can filter & preview most interesting offers on map.
 
-It works in context of polish market, but could be easily extended by addding new scraper.
+It could easily be extended to other countries by addding new scrapers.
 
 ![Screenshot of the page](docs/webpage.png)
 

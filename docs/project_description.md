@@ -92,8 +92,6 @@ After that run server and database containers. This is where scraped data will b
 cd server && docker-compose up -d && cd ..
 ```
 
-TODO: Generate coord map and train model
-
 Now you can scrape & process first offers.
 
 ```txt

@@ -166,8 +166,8 @@ async function Valuate() {
     floor: document.getElementById("valuate_floor").value,
     size: document.getElementById("valuate_size").value,
     building_year: document.getElementById("valuate_year").value,
-    lon: coords[0],
-    lat: coords[1]
+    lat: coords[0],
+    lon: coords[1]
   };
 
   query = filterNullQueryParams(query);

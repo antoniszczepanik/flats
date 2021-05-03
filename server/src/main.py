@@ -12,12 +12,11 @@ import columns as c
 import models
 import schemas
 from database import SessionLocal, engine
-from s3_client import S3Client
+from fs_client import FsClient
 
 models.Base.metadata.create_all(bind=engine)
-s3 = S3Client()
-# models s3 paths
-model = s3.read_newest_model_from_s3("flats-models/{data_type}/models", dtype="sale")
+fs = FsClient()
+model = fs.read_newest_model("flats-models/{data_type}/models", dtype="sale")
 app = FastAPI()
 
 origins = [

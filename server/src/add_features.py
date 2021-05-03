@@ -8,11 +8,11 @@ from geopy.distance import great_circle
 from shapely.geometry import MultiPoint, Point
 from shapely.ops import nearest_points
 
-from s3_client import S3Client
+from fs_client import FsClient
 import columns as c
 
-s3_client = S3Client()
-coords_map = s3_client.read_newest_df_from_s3(
+fs = FsClient()
+coords_map = fs.read_newest_df(
     "flats-models/{data_type}/coords_encoding",
     dtype="sale"
 )

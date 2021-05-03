@@ -9,12 +9,10 @@ services:
       - "8000:8000"
     volumes:
       - ./src:/src
+      - ../data:/data
       - /home/antoni/.aws/credentials:/root/.aws/credentials:ro
     networks:
       - flats
-
-    environment:
-      USE_MINIO: "true"
     depends_on:
       - postgres
 

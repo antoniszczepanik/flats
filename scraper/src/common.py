@@ -6,6 +6,7 @@ import tempfile
 import columns
 import pandas as pd
 from scipy.spatial.distance import cdist
+from fs_client import FsClient
 
 logs_conf = {
     "level": logging.INFO,
@@ -16,17 +17,17 @@ logging.basicConfig(**logs_conf)
 logger = logging.getLogger('deps')
 logger.setLevel(logging.INFO)
 
-# data pipelines s3 paths
-S3_DATA_BUCKET = "flats-data"
-DATA_TYPES = ("sale", "rent")
-S3_RAW_DATA_PATH = S3_DATA_BUCKET + "/{data_type}/raw"
-LOCAL_ROOT = "/data"
-S3_FINAL_PATH = S3_DATA_BUCKET + "/{data_type}/final"
+fs = FsClient()
 
-# models s3 paths
-S3_MODELS_BUCKET = "flats-models"
-COORDS_MAP_MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/coords_encoding"
-MODELS_PATH = S3_MODELS_BUCKET + "/{data_type}/models"
+DATA_BUCKET = "flats-data"
+DATA_TYPES = ("sale", "rent")
+RAW_DATA_PATH = DATA_BUCKET + "/{data_type}/raw"
+FINAL_PATH = DATA_BUCKET + "/{data_type}/final"
+LOCAL_ROOT="/data"
+
+MODELS_BUCKET = "flats-models"
+COORDS_MAP_MODELS_PATH = MODELS_BUCKET + "/{data_type}/coords_encoding"
+MODELS_PATH = MODELS_BUCKET + "/{data_type}/models"
 
 SCRAPING_TEMPDIR_PATH = "/tmp/{data_type}_dump.csv"
 
@@ -127,12 +128,12 @@ def get_process_from_date(data_type, last_date_of="raw"):
 
 
 def get_last_processing_date(data_type, last_date_of):
-    from s3_client import s3_client
-    s3_client = s3_client()
+    from fs_client import FsClient
+    fs = FsClient()
     if last_date_of == "raw":
-        paths = s3_client.list_s3_dir(S3_FINAL_PATH.format(data_type=data_type))
+        paths = fs.list_dir(FINAL_PATH.format(data_type=data_type))
     elif last_date_of == "final":
-        paths = s3_client.list_s3_dir(S3_RAW_DATA_PATH.format(data_type=data_type))
+        paths = fs.list_dir(RAW_DATA_PATH.format(data_type=data_type))
 
     if not paths:
         return datetime(2000, 1, 1)

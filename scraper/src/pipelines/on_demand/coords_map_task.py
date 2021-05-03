@@ -20,14 +20,13 @@ from common import (
     DATA_TYPES,
     CLEAN_DATA_PATH,
     COORDS_MAP_MODELS_PATH,
+    fs
 )
 from pipelines.utils import (
     closest_point,
     unzip_coord_series_to_lon_and_lat,
     add_zipped_coords_column,
 )
-from s3_client import s3_client
-
 # max distance (in km) between coordinates to get "clustered"
 EPSILON = 3
 # min samples per cluster
@@ -36,11 +35,9 @@ KMS_PER_RADIAN = 6371.0088
 
 log = logging.getLogger(__name__)
 
-s3_client = s3_client()
-
 def coords_map_task(data_type):
     log.info(f"Starting coords encoding map task for {data_type} data.")
-    newest_df = s3_client.read_newest_df_from_s3(CLEAN_DATA_PATH, dtype=data_type)
+    newest_df = fs.read_newest_df(CLEAN_DATA_PATH, dtype=data_type)
     cols = newest_df.columns
     if columns.LON not in cols or columns.LAT not in cols:
         log.warning("Missing coordinates. Skipping.")
@@ -48,11 +45,11 @@ def coords_map_task(data_type):
 
     coords_map = get_coords_map(newest_df, data_type)
 
-    s3_client.upload_df_to_s3_with_timestamp(coords_map,
-                                             s3_path=COORDS_MAP_MODELS_PATH,
-                                             keyword='coords_map',
-                                             dtype=data_type,
-                                             )
+    fs.save_df_with_timestamp(coords_map,
+                              COORDS_MAP_MODELS_PATH,
+                              keyword='coords_map',
+                              dtype=data_type,
+                              )
     log.info(f"Finished coords encoding map task for {data_type} data.")
 
 

@@ -1,13 +1,10 @@
 import logging
 
-from s3_client import s3_client
 import columns
 import common
 
 
 log = logging.getLogger(__name__)
-
-s3_client = s3_client()
 
 def monitor(dtype: str):
     """
@@ -22,7 +19,7 @@ def monitor(dtype: str):
     }
     for name, path in data_to_monitor.items():
         log.info(f"Stats of {name} {dtype} data:")
-        df = s3_client.read_newest_df_from_s3(path, dtype)
+        df = common.fs.read_newest_df(path, dtype)
         log_dataframe_stats(df)
         print()
 

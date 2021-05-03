@@ -14,18 +14,16 @@ from common import (
     DATA_TYPES,
     LOCAL_ROOT,
     COORDS_MAP_MODELS_PATH,
+    fs,
 )
 from pipelines.utils import add_point_col, unzip_point_to_lon_and_lat, read_df, save_df
-from s3_client import s3_client
 
 log = logging.getLogger(__name__)
-
-s3_client = s3_client()
 
 
 def features(data_type):
     log.info("Starting add features task...")
-    coords_map = s3_client.read_newest_df_from_s3(COORDS_MAP_MODELS_PATH, dtype=data_type)
+    coords_map = fs.read_newest_df(COORDS_MAP_MODELS_PATH, dtype=data_type)
     df = read_df(LOCAL_ROOT, keyword='clean', dtype=data_type)
     log.info(f'Shape of input dataframe: {df.shape}')
     log.info(f'Shape of center coords map: {coords_map.shape}')

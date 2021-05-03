@@ -11,21 +11,19 @@ from common import (
     MODELS_PATH,
     RENT_MODEL_INPUTS,
     SALE_MODEL_INPUTS,
+    fs,
 )
 import columns
-from s3_client import s3_client
 from pipelines.utils import read_df, save_df
 
 
 log = logging.getLogger(__name__)
 
-s3_client = s3_client()
-
 CHUNK_SIZE = 1000
 
 def model_apply(data_type):
     log.info("Starting apply model pipeline...")
-    model = s3_client.read_newest_model_from_s3(MODELS_PATH, dtype=data_type)
+    model = fs.read_newest_model(MODELS_PATH, dtype=data_type)
     if model is None:
         log.warning(f'Did not find any model for {data_type}')
         return

@@ -7,22 +7,20 @@ from unidecode import unidecode
 import pandas as pd
 
 import columns
-from common import S3_FINAL_PATH, LOCAL_ROOT, get_process_from_date
-from s3_client import s3_client
+from common import FINAL_PATH, LOCAL_ROOT, get_process_from_date, fs
 from pipelines.utils import read_df
 from pipelines.process.cleaning_task import get_df_to_process
 
 log = logging.getLogger(__name__)
-s3_client = s3_client()
 
 def prepare_final(dtype):
     log.info("Starting prepare data task ...")
     df = read_and_merge_required_dfs(dtype)
     top = prepare_offers(df, dtype)
     log.info(f'Final shape {top.shape}')
-    s3_client.upload_df_to_s3_with_timestamp(
+    fs.save_df_with_timestamp(
          top,
-         S3_FINAL_PATH,
+         FINAL_PATH,
          keyword='final',
          dtype=dtype,
     )

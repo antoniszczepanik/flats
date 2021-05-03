@@ -9,15 +9,14 @@ import pandas as pd
 
 import columns
 from common import (
-    S3_RAW_DATA_PATH,
+    RAW_DATA_PATH,
     LOCAL_ROOT,
     select_newest_date,
     get_process_from_date,
+    fs,
 )
 from pipelines.process.cleaning_utils import MorizonCleaner
 from pipelines.utils import save_df
-
-from s3_client import s3_client
 
 log = logging.getLogger(__name__)
 
@@ -25,8 +24,6 @@ log = logging.getLogger(__name__)
 CHUNK_SIZE = 1000
 # skip concating memory heavy columns
 COLUMNS_TO_SKIP = (columns.DESC, columns.IMAGE_LINK)
-
-s3_client = s3_client()
 
 def clean(data_type):
     log.info("Starting data cleaning pipeline...")
@@ -59,9 +56,9 @@ def clean_morizon_data(data_type):
 
 
 def get_df_to_process(data_type, from_date):
-    raw_paths = s3_client.list_s3_dir(S3_RAW_DATA_PATH.format(data_type=data_type))
-    raw_paths = [r for r in raw_paths if s3_client.get_date_from_filename(r) is not None]
-    raw_paths = [r for r in raw_paths if s3_client.get_date_from_filename(r) > from_date]
+    raw_paths = fs.list_dir(RAW_DATA_PATH.format(data_type=data_type))
+    raw_paths = [r for r in raw_paths if fs.get_date_from_filename(r) is not None]
+    raw_paths = [r for r in raw_paths if fs.get_date_from_filename(r) > from_date]
     log.info(f'Found {len(raw_paths)} raw files newer than {from_date}')
     return concat_dfs(raw_paths)
 
@@ -71,8 +68,8 @@ def concat_dfs(paths):
     Concat all files and drop all duplicates.
     """
     dfs = []
-    for s3_path in paths:
-        df = s3_client.read_df_from_s3(s3_path, columns_to_skip=COLUMNS_TO_SKIP)
+    for path in paths:
+        df = fs.read_df(path, columns_to_skip=COLUMNS_TO_SKIP)
         dfs.append(df)
     concatinated_df = pd.concat(dfs, sort=True).drop_duplicates(keep="last")
     log.info("Successfully concatinated raw dfs.")

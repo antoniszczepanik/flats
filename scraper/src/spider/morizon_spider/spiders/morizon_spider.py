@@ -7,20 +7,20 @@ from scrapy.utils.log import configure_logging
 
 from morizon_spider.items import MorizonSpiderItem
 from common import (
-    S3_RAW_DATA_PATH,
+    RAW_DATA_PATH,
     get_process_from_date,
     logs_conf,
     select_newest_date,
 )
 import columns
-from s3_client import s3_client
+from fs_client import FsClient
 
 # otherwise DEBUG gets logged into container
 root_logger = log.getLogger()
 for handler in root_logger.handlers:
     root_logger.removeHandler(handler)
 
-s3_client = s3_client()
+fs = FsClient()
 
 
 class MorizonSpider(scrapy.Spider):

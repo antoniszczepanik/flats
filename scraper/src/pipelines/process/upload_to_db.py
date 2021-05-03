@@ -4,16 +4,14 @@ import requests
 
 import pandas as pd
 
-from common import S3_FINAL_PATH
-from s3_client import s3_client
+from common import FINAL_PATH, fs
 
 log = logging.getLogger(__name__)
-s3_client = s3_client()
 
 def upload(dtype):
     log.info("Started uploading data to database...")
-    df = s3_client.read_newest_df_from_s3(
-        S3_FINAL_PATH,
+    df = fs.read_newest_df(
+        FINAL_PATH,
         dtype=dtype,
     )
     size = len(df)

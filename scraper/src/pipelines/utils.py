@@ -6,13 +6,8 @@ import pandas as pd
 from shapely.geometry import MultiPoint, Point
 
 import columns as c
-from common import S3_FINAL_PATH, select_newest_date
-from s3_client import s3_client
-
-s3_client = s3_client()
 
 log = logging.getLogger(__name__)
-
 
 
 def update_txt_list(path_list, path):

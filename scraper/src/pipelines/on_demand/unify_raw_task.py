@@ -3,12 +3,10 @@ import logging
 import pandas as pd
 
 import columns
-from common import RAW_DATA_PATH
-from s3_client import s3_client
+from common import RAW_DATA_PATH, fs
 
 log = logging.getLogger(__name__)
 
-s3_client = s3_client()
 
 # Columns that are required in raw files (in this order as well)
 RAW_COLUMNS = [
@@ -47,7 +45,7 @@ RAW_COLUMNS = [
 
 def unify_raw_data_task(data_type):
     log.info(f"Starting raw files unification for {data_type} data.")
-    raw_paths = s3_client.list_s3_dir(RAW_DATA_PATH.format(data_type=data_type))
+    raw_paths = fs.list_dir(RAW_DATA_PATH.format(data_type=data_type))
     if len(raw_paths) == 0:
         log.info("No files to unify. Skipping")
         return None
@@ -63,7 +61,7 @@ def unify_and_reupload(raw_file_path):
     Check if file structure is as expected. If not convert it to
     consistent format (eg. all necessary columns) and reupload.
     """
-    raw_df = s3_client.read_df_from_s3(raw_file_path)
+    raw_df = fs.read_df(raw_file_path)
     if not is_structure_correct(raw_df):
         log.info(f"Fixing file with invalid stucture: {raw_file_path} ...")
         fixed_raw_df = fix_raw_df(raw_df)
@@ -71,7 +69,7 @@ def unify_and_reupload(raw_file_path):
         print(f"Shape: {fixed_raw_df.shape}")
         print("Nans %")
         print(fixed_raw_df.isna().sum()/len(fixed_raw_df))
-        s3_client.upload_df_to_s3(fixed_raw_df, raw_file_path)
+        fs.save_df(fixed_raw_df, raw_file_path)
 
 def is_structure_correct(raw_df):
     if len(raw_df.columns) != len(RAW_COLUMNS):

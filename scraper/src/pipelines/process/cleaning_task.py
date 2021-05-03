@@ -1,5 +1,5 @@
 """
-Load concated data and output clean parquets (categorical variables mapped to
+Load concated data and output clean data (categorical variables mapped to
 numerical format). Does not drop any rows.
 """
 import datetime

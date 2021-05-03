@@ -48,6 +48,7 @@ class FsClient:
 
     def read_df(self, path, columns_to_skip=None):
         ext =path.split(".")[-1]
+        log.info(f"Reading {path}")
         if ext == "csv":
             if columns_to_skip:
                 # try to sample

@@ -115,11 +115,12 @@ def get_date_from_filename(filename):
 
 def get_process_from_date(data_type, last_date_of="raw"):
     if last_date_of == "final":
-        from_date_str = os.environ.get("PROCESS_RAW_FILES_FROM")
+        from_date_str = os.environ.get("LAST_FINAL_DATE")
     elif last_date_of == "raw":
-        from_date_str = os.environ.get("SCRAPE_OFFERS_FROM")
+        from_date_str = os.environ.get("LAST_RAW_DATE")
     else:
         raise Exception(f"What is {last_date_of}? Cannot know which files to check")
+    log.warning(f"from_date_str: {from_date_str}")
     if not from_date_str:
         from_date = get_last_processing_date(data_type, last_date_of=last_date_of)
     else:

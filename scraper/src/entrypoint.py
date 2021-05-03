@@ -67,9 +67,9 @@ if __name__ == "__main__":
     from_date_str = args.get('--from-date')
     if from_date_str:
         if task == "scrape":
-            os.environ["SCRAPE_OFFERS_FROM"] = from_date_str
+            os.environ["LAST_RAW_DATE"] = from_date_str
         elif task == "process":
-            os.environ["PROCESS_RAW_FILES_FROM"] = from_date_str
+            os.environ["LAST_FINAL_DATE"] = from_date_str
 
     task_fn = TASK_FUNCTIONS[task]
     run_command(task_fn, offer_type=offer_type)

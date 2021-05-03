@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000/api/v1";
+const API_URL = "http://flats.antoniszczepanik.com/api/v1";
 
 var map = L.map("mapid", { preferCanvas: true }).setView(
   [51.9189046, 19.1343786],

@@ -8,7 +8,7 @@ chardet==4.0.0
 click==7.1.2
 dnspython==2.1.0
 email-validator==1.1.2
-fastapi==0.63.0
+fastapi==0.65.2
 geographiclib==1.50
 geopy==2.1.0
 graphene==2.1.8
